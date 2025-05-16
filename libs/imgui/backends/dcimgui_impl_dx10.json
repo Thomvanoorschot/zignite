@@ -1,0 +1,353 @@
+{
+    "defines": [],
+    "enums": [],
+    "typedefs": [
+        {
+            "name": "ImDrawIdx",
+            "type": {
+                "declaration": "unsigned short",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "unsigned_short"
+                }
+            },
+            "comments": {
+                "attached": "// Default: 16-bit (for maximum compatibility with renderer backends)"
+            },
+            "conditionals": [
+                {
+                    "condition": "ifndef",
+                    "expression": "ImDrawIdx"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h"
+            }
+        }
+    ],
+    "structs": [
+        {
+            "name": "ID3D10Device",
+            "original_fully_qualified_name": "ID3D10Device",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h",
+                "line": 21
+            }
+        },
+        {
+            "name": "ID3D10SamplerState",
+            "original_fully_qualified_name": "ID3D10SamplerState",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h",
+                "line": 22
+            }
+        },
+        {
+            "name": "ID3D10Buffer",
+            "original_fully_qualified_name": "ID3D10Buffer",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h",
+                "line": 23
+            }
+        },
+        {
+            "name": "ImDrawData",
+            "original_fully_qualified_name": "ImDrawData",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h",
+                "line": 1
+            }
+        },
+        {
+            "name": "ImGui_ImplDX10_RenderState",
+            "original_fully_qualified_name": "ImGui_ImplDX10_RenderState",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": false,
+            "is_anonymous": false,
+            "fields": [
+                {
+                    "name": "Device",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ID3D10Device*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D10Device"
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx10.h",
+                        "line": 40
+                    }
+                },
+                {
+                    "name": "SamplerDefault",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ID3D10SamplerState*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D10SamplerState"
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx10.h",
+                        "line": 41
+                    }
+                },
+                {
+                    "name": "VertexConstantBuffer",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ID3D10Buffer*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D10Buffer"
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx10.h",
+                        "line": 42
+                    }
+                }
+            ],
+            "comments": {
+                "preceding": [
+                    "// [BETA] Selected render state data shared with callbacks.",
+                    "// This is temporarily stored in GetPlatformIO().Renderer_RenderState during the ImGui_ImplDX10_RenderDrawData() call.",
+                    "// (Please open an issue if you feel you need access to more data)"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h",
+                "line": 38
+            }
+        }
+    ],
+    "functions": [
+        {
+            "name": "cImGui_ImplDX10_Init",
+            "original_fully_qualified_name": "ImGui_ImplDX10_Init",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "device",
+                    "type": {
+                        "declaration": "ID3D10Device*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D10Device"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Follow \"Getting Started\" link and check examples/ folder to learn about using backends!"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h",
+                "line": 26
+            }
+        },
+        {
+            "name": "cImGui_ImplDX10_Shutdown",
+            "original_fully_qualified_name": "ImGui_ImplDX10_Shutdown",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h",
+                "line": 27
+            }
+        },
+        {
+            "name": "cImGui_ImplDX10_NewFrame",
+            "original_fully_qualified_name": "ImGui_ImplDX10_NewFrame",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h",
+                "line": 28
+            }
+        },
+        {
+            "name": "cImGui_ImplDX10_RenderDrawData",
+            "original_fully_qualified_name": "ImGui_ImplDX10_RenderDrawData",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "draw_data",
+                    "type": {
+                        "declaration": "ImDrawData*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImDrawData"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h",
+                "line": 29
+            }
+        },
+        {
+            "name": "cImGui_ImplDX10_CreateDeviceObjects",
+            "original_fully_qualified_name": "ImGui_ImplDX10_CreateDeviceObjects",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Use if you want to reset your rendering device without losing Dear ImGui state."
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h",
+                "line": 32
+            }
+        },
+        {
+            "name": "cImGui_ImplDX10_InvalidateDeviceObjects",
+            "original_fully_qualified_name": "ImGui_ImplDX10_InvalidateDeviceObjects",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx10.h",
+                "line": 33
+            }
+        }
+    ]
+}

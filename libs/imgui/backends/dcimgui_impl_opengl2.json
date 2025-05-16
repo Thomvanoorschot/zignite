@@ -1,0 +1,258 @@
+{
+    "defines": [],
+    "enums": [],
+    "typedefs": [
+        {
+            "name": "ImDrawIdx",
+            "type": {
+                "declaration": "unsigned short",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "unsigned_short"
+                }
+            },
+            "comments": {
+                "attached": "// Default: 16-bit (for maximum compatibility with renderer backends)"
+            },
+            "conditionals": [
+                {
+                    "condition": "ifndef",
+                    "expression": "ImDrawIdx"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl2.h"
+            }
+        }
+    ],
+    "structs": [
+        {
+            "name": "ImDrawData",
+            "original_fully_qualified_name": "ImDrawData",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl2.h",
+                "line": 1
+            }
+        }
+    ],
+    "functions": [
+        {
+            "name": "cImGui_ImplOpenGL2_Init",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL2_Init",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Follow \"Getting Started\" link and check examples/ folder to learn about using backends!"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl2.h",
+                "line": 31
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL2_Shutdown",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL2_Shutdown",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl2.h",
+                "line": 32
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL2_NewFrame",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL2_NewFrame",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl2.h",
+                "line": 33
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL2_RenderDrawData",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL2_RenderDrawData",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "draw_data",
+                    "type": {
+                        "declaration": "ImDrawData*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImDrawData"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl2.h",
+                "line": 34
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL2_CreateFontsTexture",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL2_CreateFontsTexture",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Called by Init/NewFrame/Shutdown"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl2.h",
+                "line": 37
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL2_DestroyFontsTexture",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL2_DestroyFontsTexture",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl2.h",
+                "line": 38
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL2_CreateDeviceObjects",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL2_CreateDeviceObjects",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl2.h",
+                "line": 39
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL2_DestroyDeviceObjects",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL2_DestroyDeviceObjects",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl2.h",
+                "line": 40
+            }
+        }
+    ]
+}

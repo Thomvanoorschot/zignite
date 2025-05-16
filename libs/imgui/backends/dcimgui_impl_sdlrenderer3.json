@@ -1,0 +1,347 @@
+{
+    "defines": [],
+    "enums": [],
+    "typedefs": [
+        {
+            "name": "ImDrawIdx",
+            "type": {
+                "declaration": "unsigned short",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "unsigned_short"
+                }
+            },
+            "comments": {
+                "attached": "// Default: 16-bit (for maximum compatibility with renderer backends)"
+            },
+            "conditionals": [
+                {
+                    "condition": "ifndef",
+                    "expression": "ImDrawIdx"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h"
+            }
+        }
+    ],
+    "structs": [
+        {
+            "name": "SDL_Renderer",
+            "original_fully_qualified_name": "SDL_Renderer",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h",
+                "line": 31
+            }
+        },
+        {
+            "name": "ImDrawData",
+            "original_fully_qualified_name": "ImDrawData",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h",
+                "line": 1
+            }
+        },
+        {
+            "name": "ImGui_ImplSDLRenderer3_RenderState",
+            "original_fully_qualified_name": "ImGui_ImplSDLRenderer3_RenderState",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": false,
+            "is_anonymous": false,
+            "fields": [
+                {
+                    "name": "Renderer",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "SDL_Renderer*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Renderer"
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_sdlrenderer3.h",
+                        "line": 50
+                    }
+                }
+            ],
+            "comments": {
+                "preceding": [
+                    "// [BETA] Selected render state data shared with callbacks.",
+                    "// This is temporarily stored in GetPlatformIO().Renderer_RenderState during the ImGui_ImplSDLRenderer3_RenderDrawData() call.",
+                    "// (Please open an issue if you feel you need access to more data)"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h",
+                "line": 48
+            }
+        }
+    ],
+    "functions": [
+        {
+            "name": "cImGui_ImplSDLRenderer3_Init",
+            "original_fully_qualified_name": "ImGui_ImplSDLRenderer3_Init",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "renderer",
+                    "type": {
+                        "declaration": "SDL_Renderer*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Renderer"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Follow \"Getting Started\" link and check examples/ folder to learn about using backends!"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h",
+                "line": 34
+            }
+        },
+        {
+            "name": "cImGui_ImplSDLRenderer3_Shutdown",
+            "original_fully_qualified_name": "ImGui_ImplSDLRenderer3_Shutdown",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h",
+                "line": 35
+            }
+        },
+        {
+            "name": "cImGui_ImplSDLRenderer3_NewFrame",
+            "original_fully_qualified_name": "ImGui_ImplSDLRenderer3_NewFrame",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h",
+                "line": 36
+            }
+        },
+        {
+            "name": "cImGui_ImplSDLRenderer3_RenderDrawData",
+            "original_fully_qualified_name": "ImGui_ImplSDLRenderer3_RenderDrawData",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "draw_data",
+                    "type": {
+                        "declaration": "ImDrawData*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImDrawData"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "renderer",
+                    "type": {
+                        "declaration": "SDL_Renderer*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Renderer"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h",
+                "line": 37
+            }
+        },
+        {
+            "name": "cImGui_ImplSDLRenderer3_CreateFontsTexture",
+            "original_fully_qualified_name": "ImGui_ImplSDLRenderer3_CreateFontsTexture",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Called by Init/NewFrame/Shutdown"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h",
+                "line": 40
+            }
+        },
+        {
+            "name": "cImGui_ImplSDLRenderer3_DestroyFontsTexture",
+            "original_fully_qualified_name": "ImGui_ImplSDLRenderer3_DestroyFontsTexture",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h",
+                "line": 41
+            }
+        },
+        {
+            "name": "cImGui_ImplSDLRenderer3_CreateDeviceObjects",
+            "original_fully_qualified_name": "ImGui_ImplSDLRenderer3_CreateDeviceObjects",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h",
+                "line": 42
+            }
+        },
+        {
+            "name": "cImGui_ImplSDLRenderer3_DestroyDeviceObjects",
+            "original_fully_qualified_name": "ImGui_ImplSDLRenderer3_DestroyDeviceObjects",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdlrenderer3.h",
+                "line": 43
+            }
+        }
+    ]
+}

@@ -1,0 +1,2472 @@
+{
+    "defines": [
+        {
+            "name": "VK_NO_PROTOTYPES",
+            "conditionals": [
+                {
+                    "condition": "if",
+                    "expression": "defined(IMGUI_IMPL_VULKAN_NO_PROTOTYPES)&&!defined(VK_NO_PROTOTYPES)"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 49
+            }
+        },
+        {
+            "name": "NOMINMAX",
+            "conditionals": [
+                {
+                    "condition": "if",
+                    "expression": "defined(VK_USE_PLATFORM_WIN32_KHR)&&!defined(NOMINMAX)"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 52
+            }
+        },
+        {
+            "name": "IMGUI_IMPL_VULKAN_HAS_DYNAMIC_RENDERING",
+            "conditionals": [
+                {
+                    "condition": "if",
+                    "expression": "defined(VK_VERSION_1_3)|| defined(VK_KHR_dynamic_rendering)"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 62
+            }
+        },
+        {
+            "name": "IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE",
+            "content": "1",
+            "comments": {
+                "attached": "// Minimum per atlas"
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 67
+            }
+        }
+    ],
+    "enums": [],
+    "typedefs": [
+        {
+            "name": "ImDrawIdx",
+            "type": {
+                "declaration": "unsigned short",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "unsigned_short"
+                }
+            },
+            "comments": {
+                "attached": "// Default: 16-bit (for maximum compatibility with renderer backends)"
+            },
+            "conditionals": [
+                {
+                    "condition": "ifndef",
+                    "expression": "ImDrawIdx"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h"
+            }
+        }
+    ],
+    "structs": [
+        {
+            "name": "ImGui_ImplVulkan_InitInfo",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_InitInfo",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": false,
+            "is_anonymous": false,
+            "fields": [
+                {
+                    "name": "ApiVersion",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// Fill with API version of Instance, e.g. VK_API_VERSION_1_3 or your value of VkApplicationInfo::apiVersion. May be lower than header version (VK_HEADER_VERSION_COMPLETE)"
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 79
+                    }
+                },
+                {
+                    "name": "Instance",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkInstance",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkInstance"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 80
+                    }
+                },
+                {
+                    "name": "PhysicalDevice",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkPhysicalDevice",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPhysicalDevice"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 81
+                    }
+                },
+                {
+                    "name": "Device",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkDevice",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkDevice"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 82
+                    }
+                },
+                {
+                    "name": "QueueFamily",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 83
+                    }
+                },
+                {
+                    "name": "Queue",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkQueue",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkQueue"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 84
+                    }
+                },
+                {
+                    "name": "DescriptorPool",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkDescriptorPool",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkDescriptorPool"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// See requirements in note above; ignored if using DescriptorPoolSize > 0"
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 85
+                    }
+                },
+                {
+                    "name": "RenderPass",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkRenderPass",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkRenderPass"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// Ignored if using dynamic rendering"
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 86
+                    }
+                },
+                {
+                    "name": "MinImageCount",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// >= 2"
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 87
+                    }
+                },
+                {
+                    "name": "ImageCount",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// >= MinImageCount"
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 88
+                    }
+                },
+                {
+                    "name": "MSAASamples",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkSampleCountFlagBits",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkSampleCountFlagBits"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// 0 defaults to VK_SAMPLE_COUNT_1_BIT"
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 89
+                    }
+                },
+                {
+                    "name": "PipelineCache",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkPipelineCache",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPipelineCache"
+                        }
+                    },
+                    "comments": {
+                        "preceding": [
+                            "// (Optional)"
+                        ]
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 92
+                    }
+                },
+                {
+                    "name": "Subpass",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 93
+                    }
+                },
+                {
+                    "name": "DescriptorPoolSize",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "comments": {
+                        "preceding": [
+                            "// (Optional) Set to create internal descriptor pool instead of using DescriptorPool"
+                        ]
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 96
+                    }
+                },
+                {
+                    "name": "UseDynamicRendering",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "bool",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "bool"
+                        }
+                    },
+                    "comments": {
+                        "preceding": [
+                            "// (Optional) Dynamic Rendering",
+                            "// Need to explicitly enable VK_KHR_dynamic_rendering extension to use this, even for Vulkan 1.3."
+                        ]
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 100
+                    }
+                },
+                {
+                    "name": "PipelineRenderingCreateInfo",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkPipelineRenderingCreateInfoKHR",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPipelineRenderingCreateInfoKHR"
+                        }
+                    },
+                    "conditionals": [
+                        {
+                            "condition": "ifdef",
+                            "expression": "IMGUI_IMPL_VULKAN_HAS_DYNAMIC_RENDERING"
+                        }
+                    ],
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 102
+                    }
+                },
+                {
+                    "name": "Allocator",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "const VkAllocationCallbacks*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "VkAllocationCallbacks",
+                                "storage_classes": [
+                                    "const"
+                                ]
+                            }
+                        }
+                    },
+                    "comments": {
+                        "preceding": [
+                            "// (Optional) Allocation, Debugging"
+                        ]
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 106
+                    }
+                },
+                {
+                    "name": "CheckVkResultFn",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "void (*CheckVkResultFn)(VkResult err)",
+                        "type_details": {
+                            "flavour": "function_pointer",
+                            "return_type": {
+                                "declaration": "void",
+                                "description": {
+                                    "kind": "Builtin",
+                                    "builtin_type": "void"
+                                }
+                            },
+                            "arguments": [
+                                {
+                                    "name": "err",
+                                    "type": {
+                                        "declaration": "VkResult",
+                                        "description": {
+                                            "kind": "User",
+                                            "name": "VkResult"
+                                        }
+                                    },
+                                    "is_array": false,
+                                    "is_varargs": false,
+                                    "is_instance_pointer": false
+                                }
+                            ]
+                        },
+                        "description": {
+                            "kind": "Type",
+                            "name": "CheckVkResultFn",
+                            "inner_type": {
+                                "kind": "Pointer",
+                                "inner_type": {
+                                    "kind": "Function",
+                                    "return_type": {
+                                        "kind": "Builtin",
+                                        "builtin_type": "void"
+                                    },
+                                    "parameters": [
+                                        {
+                                            "kind": "Type",
+                                            "name": "err",
+                                            "inner_type": {
+                                                "kind": "User",
+                                                "name": "VkResult"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h"
+                    }
+                },
+                {
+                    "name": "MinAllocationSize",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkDeviceSize",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkDeviceSize"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// Minimum allocation size. Set to 1024*1024 to satisfy zealous best practices validation layer and waste a little memory."
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 108
+                    }
+                }
+            ],
+            "comments": {
+                "preceding": [
+                    "// Initialization data, for ImGui_ImplVulkan_Init()",
+                    "// [Please zero-clear before use!]",
+                    "// - About descriptor pool:",
+                    "//   - A VkDescriptorPool should be created with VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,",
+                    "//     and must contain a pool size large enough to hold a small number of VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER descriptors.",
+                    "//   - As an convenience, by setting DescriptorPoolSize > 0 the backend will create one for you.",
+                    "// - About dynamic rendering:",
+                    "//   - When using dynamic rendering, set UseDynamicRendering=true and fill PipelineRenderingCreateInfo structure."
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 77
+            }
+        },
+        {
+            "name": "ImDrawData",
+            "original_fully_qualified_name": "ImDrawData",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 1
+            }
+        },
+        {
+            "name": "ImGui_ImplVulkan_RenderState",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_RenderState",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": false,
+            "is_anonymous": false,
+            "fields": [
+                {
+                    "name": "CommandBuffer",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkCommandBuffer",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkCommandBuffer"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 135
+                    }
+                },
+                {
+                    "name": "Pipeline",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkPipeline",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPipeline"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 136
+                    }
+                },
+                {
+                    "name": "PipelineLayout",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkPipelineLayout",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPipelineLayout"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 137
+                    }
+                }
+            ],
+            "comments": {
+                "preceding": [
+                    "// [BETA] Selected render state data shared with callbacks.",
+                    "// This is temporarily stored in GetPlatformIO().Renderer_RenderState during the ImGui_ImplVulkan_RenderDrawData() call.",
+                    "// (Please open an issue if you feel you need access to more data)"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 133
+            }
+        },
+        {
+            "name": "ImVector_ImGui_ImplVulkanH_Frame",
+            "original_fully_qualified_name": "ImVector<ImGui_ImplVulkanH_Frame>",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": false,
+            "is_anonymous": false,
+            "fields": [
+                {
+                    "name": "Size",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 2162
+                    }
+                },
+                {
+                    "name": "Capacity",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 2163
+                    }
+                },
+                {
+                    "name": "Data",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ImGui_ImplVulkanH_Frame*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImGui_ImplVulkanH_Frame"
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 2164
+                    }
+                }
+            ],
+            "comments": {
+                "attached": "// Instantiation of ImVector<ImGui_ImplVulkanH_Frame>"
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 2160
+            }
+        },
+        {
+            "name": "ImGui_ImplVulkanH_Frame",
+            "original_fully_qualified_name": "ImGui_ImplVulkanH_Frame",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": false,
+            "is_anonymous": false,
+            "fields": [
+                {
+                    "name": "CommandPool",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkCommandPool",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkCommandPool"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 179
+                    }
+                },
+                {
+                    "name": "CommandBuffer",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkCommandBuffer",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkCommandBuffer"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 180
+                    }
+                },
+                {
+                    "name": "Fence",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkFence",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkFence"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 181
+                    }
+                },
+                {
+                    "name": "Backbuffer",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkImage",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkImage"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 182
+                    }
+                },
+                {
+                    "name": "BackbufferView",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkImageView",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkImageView"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 183
+                    }
+                },
+                {
+                    "name": "Framebuffer",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkFramebuffer",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkFramebuffer"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 184
+                    }
+                }
+            ],
+            "comments": {
+                "preceding": [
+                    "// Helper structure to hold the data needed by one rendering frame",
+                    "// (Used by example's main.cpp. Used by multi-viewport features. Probably NOT used by your own engine/app.)",
+                    "// [Please zero-clear before use!]"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 177
+            }
+        },
+        {
+            "name": "ImGui_ImplVulkanH_FrameSemaphores",
+            "original_fully_qualified_name": "ImGui_ImplVulkanH_FrameSemaphores",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": false,
+            "is_anonymous": false,
+            "fields": [
+                {
+                    "name": "ImageAcquiredSemaphore",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkSemaphore",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkSemaphore"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 189
+                    }
+                },
+                {
+                    "name": "RenderCompleteSemaphore",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkSemaphore",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkSemaphore"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 190
+                    }
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 187
+            }
+        },
+        {
+            "name": "ImVector_ImGui_ImplVulkanH_FrameSemaphores",
+            "original_fully_qualified_name": "ImVector<ImGui_ImplVulkanH_FrameSemaphores>",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": false,
+            "is_anonymous": false,
+            "fields": [
+                {
+                    "name": "Size",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 2162
+                    }
+                },
+                {
+                    "name": "Capacity",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 2163
+                    }
+                },
+                {
+                    "name": "Data",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ImGui_ImplVulkanH_FrameSemaphores*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImGui_ImplVulkanH_FrameSemaphores"
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 2164
+                    }
+                }
+            ],
+            "comments": {
+                "attached": "// Instantiation of ImVector<ImGui_ImplVulkanH_FrameSemaphores>"
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 2160
+            }
+        },
+        {
+            "name": "ImGui_ImplVulkanH_Window",
+            "original_fully_qualified_name": "ImGui_ImplVulkanH_Window",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": false,
+            "is_anonymous": false,
+            "fields": [
+                {
+                    "name": "Width",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 197
+                    }
+                },
+                {
+                    "name": "Height",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 198
+                    }
+                },
+                {
+                    "name": "Swapchain",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkSwapchainKHR",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkSwapchainKHR"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 199
+                    }
+                },
+                {
+                    "name": "Surface",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkSurfaceKHR",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkSurfaceKHR"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 200
+                    }
+                },
+                {
+                    "name": "SurfaceFormat",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkSurfaceFormatKHR",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkSurfaceFormatKHR"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 201
+                    }
+                },
+                {
+                    "name": "PresentMode",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkPresentModeKHR",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPresentModeKHR"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 202
+                    }
+                },
+                {
+                    "name": "RenderPass",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkRenderPass",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkRenderPass"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 203
+                    }
+                },
+                {
+                    "name": "UseDynamicRendering",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "bool",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "bool"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 204
+                    }
+                },
+                {
+                    "name": "ClearEnable",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "bool",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "bool"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 205
+                    }
+                },
+                {
+                    "name": "ClearValue",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "VkClearValue",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkClearValue"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 206
+                    }
+                },
+                {
+                    "name": "FrameIndex",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// Current frame being rendered to (0 <= FrameIndex < FrameInFlightCount)"
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 207
+                    }
+                },
+                {
+                    "name": "ImageCount",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// Number of simultaneous in-flight frames (returned by vkGetSwapchainImagesKHR, usually derived from min_image_count)"
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 208
+                    }
+                },
+                {
+                    "name": "SemaphoreCount",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// Number of simultaneous in-flight frames + 1, to be able to use it in vkAcquireNextImageKHR"
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 209
+                    }
+                },
+                {
+                    "name": "SemaphoreIndex",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// Current set of swapchain wait semaphores we're using (needs to be distinct from per frame data)"
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 210
+                    }
+                },
+                {
+                    "name": "Frames",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ImVector_ImGui_ImplVulkanH_Frame",
+                        "description": {
+                            "kind": "User",
+                            "name": "ImVector_ImGui_ImplVulkanH_Frame"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 211
+                    }
+                },
+                {
+                    "name": "FrameSemaphores",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ImVector_ImGui_ImplVulkanH_FrameSemaphores",
+                        "description": {
+                            "kind": "User",
+                            "name": "ImVector_ImGui_ImplVulkanH_FrameSemaphores"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_vulkan.h",
+                        "line": 212
+                    }
+                }
+            ],
+            "comments": {
+                "preceding": [
+                    "// Helper structure to hold the data needed by one rendering context into one OS window",
+                    "// (Used by example's main.cpp. Used by multi-viewport features. Probably NOT used by your own engine/app.)"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 195
+            }
+        }
+    ],
+    "functions": [
+        {
+            "name": "cImGui_ImplVulkan_Init",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_Init",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "info",
+                    "type": {
+                        "declaration": "ImGui_ImplVulkan_InitInfo*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImGui_ImplVulkan_InitInfo"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Follow \"Getting Started\" link and check examples/ folder to learn about using backends!"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 112
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkan_Shutdown",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_Shutdown",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 113
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkan_NewFrame",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_NewFrame",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 114
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkan_RenderDrawData",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_RenderDrawData",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "draw_data",
+                    "type": {
+                        "declaration": "ImDrawData*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImDrawData"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "command_buffer",
+                    "type": {
+                        "declaration": "VkCommandBuffer",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkCommandBuffer"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": true,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "attached": "// Implied pipeline = VK_NULL_HANDLE"
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 115
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkan_RenderDrawDataEx",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_RenderDrawData",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "draw_data",
+                    "type": {
+                        "declaration": "ImDrawData*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImDrawData"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "command_buffer",
+                    "type": {
+                        "declaration": "VkCommandBuffer",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkCommandBuffer"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "pipeline",
+                    "type": {
+                        "declaration": "VkPipeline",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPipeline"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "default_value": "VK_NULL_HANDLE",
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 115
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkan_CreateFontsTexture",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_CreateFontsTexture",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 116
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkan_DestroyFontsTexture",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_DestroyFontsTexture",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 117
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkan_SetMinImageCount",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_SetMinImageCount",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "min_image_count",
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "attached": "// To override MinImageCount after initialization (e.g. if swap chain is recreated)"
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 118
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkan_AddTexture",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_AddTexture",
+            "return_type": {
+                "declaration": "VkDescriptorSet",
+                "description": {
+                    "kind": "User",
+                    "name": "VkDescriptorSet"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "sampler",
+                    "type": {
+                        "declaration": "VkSampler",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkSampler"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "image_view",
+                    "type": {
+                        "declaration": "VkImageView",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkImageView"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "image_layout",
+                    "type": {
+                        "declaration": "VkImageLayout",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkImageLayout"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Register a texture (VkDescriptorSet == ImTextureID)",
+                    "// FIXME: This is experimental in the sense that we are unsure how to best design/tackle this problem",
+                    "// Please post to https://github.com/ocornut/imgui/pull/914 if you have suggestions."
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 123
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkan_RemoveTexture",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_RemoveTexture",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "descriptor_set",
+                    "type": {
+                        "declaration": "VkDescriptorSet",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkDescriptorSet"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 124
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkan_LoadFunctions",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_LoadFunctions",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "api_version",
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "loader_func",
+                    "type": {
+                        "declaration": "PFN_vkVoidFunction (*loader_func)(const char* function_name, void* user_data)",
+                        "type_details": {
+                            "flavour": "function_pointer",
+                            "return_type": {
+                                "declaration": "PFN_vkVoidFunction",
+                                "description": {
+                                    "kind": "User",
+                                    "name": "PFN_vkVoidFunction"
+                                }
+                            },
+                            "arguments": [
+                                {
+                                    "name": "function_name",
+                                    "type": {
+                                        "declaration": "const char*",
+                                        "description": {
+                                            "kind": "Pointer",
+                                            "inner_type": {
+                                                "kind": "Builtin",
+                                                "builtin_type": "char",
+                                                "storage_classes": [
+                                                    "const"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "is_array": false,
+                                    "is_varargs": false,
+                                    "is_instance_pointer": false
+                                },
+                                {
+                                    "name": "user_data",
+                                    "type": {
+                                        "declaration": "void*",
+                                        "description": {
+                                            "kind": "Pointer",
+                                            "inner_type": {
+                                                "kind": "Builtin",
+                                                "builtin_type": "void"
+                                            }
+                                        }
+                                    },
+                                    "is_array": false,
+                                    "is_varargs": false,
+                                    "is_instance_pointer": false
+                                }
+                            ]
+                        },
+                        "description": {
+                            "kind": "Type",
+                            "name": "loader_func",
+                            "inner_type": {
+                                "kind": "Pointer",
+                                "inner_type": {
+                                    "kind": "Function",
+                                    "return_type": {
+                                        "kind": "User",
+                                        "name": "PFN_vkVoidFunction"
+                                    },
+                                    "parameters": [
+                                        {
+                                            "kind": "Type",
+                                            "name": "function_name",
+                                            "inner_type": {
+                                                "kind": "Pointer",
+                                                "inner_type": {
+                                                    "kind": "Builtin",
+                                                    "builtin_type": "char",
+                                                    "storage_classes": [
+                                                        "const"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "kind": "Type",
+                                            "name": "user_data",
+                                            "inner_type": {
+                                                "kind": "Pointer",
+                                                "inner_type": {
+                                                    "kind": "Builtin",
+                                                    "builtin_type": "void"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": true,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Optional: load Vulkan functions with a custom function loader",
+                    "// This is only useful with IMGUI_IMPL_VULKAN_NO_PROTOTYPES / VK_NO_PROTOTYPES"
+                ],
+                "attached": "// Implied user_data = nullptr"
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 128
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkan_LoadFunctionsEx",
+            "original_fully_qualified_name": "ImGui_ImplVulkan_LoadFunctions",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "api_version",
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "loader_func",
+                    "type": {
+                        "declaration": "PFN_vkVoidFunction (*loader_func)(const char* function_name, void* user_data)",
+                        "type_details": {
+                            "flavour": "function_pointer",
+                            "return_type": {
+                                "declaration": "PFN_vkVoidFunction",
+                                "description": {
+                                    "kind": "User",
+                                    "name": "PFN_vkVoidFunction"
+                                }
+                            },
+                            "arguments": [
+                                {
+                                    "name": "function_name",
+                                    "type": {
+                                        "declaration": "const char*",
+                                        "description": {
+                                            "kind": "Pointer",
+                                            "inner_type": {
+                                                "kind": "Builtin",
+                                                "builtin_type": "char",
+                                                "storage_classes": [
+                                                    "const"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "is_array": false,
+                                    "is_varargs": false,
+                                    "is_instance_pointer": false
+                                },
+                                {
+                                    "name": "user_data",
+                                    "type": {
+                                        "declaration": "void*",
+                                        "description": {
+                                            "kind": "Pointer",
+                                            "inner_type": {
+                                                "kind": "Builtin",
+                                                "builtin_type": "void"
+                                            }
+                                        }
+                                    },
+                                    "is_array": false,
+                                    "is_varargs": false,
+                                    "is_instance_pointer": false
+                                }
+                            ]
+                        },
+                        "description": {
+                            "kind": "Type",
+                            "name": "loader_func",
+                            "inner_type": {
+                                "kind": "Pointer",
+                                "inner_type": {
+                                    "kind": "Function",
+                                    "return_type": {
+                                        "kind": "User",
+                                        "name": "PFN_vkVoidFunction"
+                                    },
+                                    "parameters": [
+                                        {
+                                            "kind": "Type",
+                                            "name": "function_name",
+                                            "inner_type": {
+                                                "kind": "Pointer",
+                                                "inner_type": {
+                                                    "kind": "Builtin",
+                                                    "builtin_type": "char",
+                                                    "storage_classes": [
+                                                        "const"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "kind": "Type",
+                                            "name": "user_data",
+                                            "inner_type": {
+                                                "kind": "Pointer",
+                                                "inner_type": {
+                                                    "kind": "Builtin",
+                                                    "builtin_type": "void"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "user_data",
+                    "type": {
+                        "declaration": "void*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "Builtin",
+                                "builtin_type": "void"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "default_value": "nullptr",
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 128
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkanH_CreateOrResizeWindow",
+            "original_fully_qualified_name": "ImGui_ImplVulkanH_CreateOrResizeWindow",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "instance",
+                    "type": {
+                        "declaration": "VkInstance",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkInstance"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "physical_device",
+                    "type": {
+                        "declaration": "VkPhysicalDevice",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPhysicalDevice"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "device",
+                    "type": {
+                        "declaration": "VkDevice",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkDevice"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "wd",
+                    "type": {
+                        "declaration": "ImGui_ImplVulkanH_Window*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImGui_ImplVulkanH_Window"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "queue_family",
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "allocator",
+                    "type": {
+                        "declaration": "const VkAllocationCallbacks*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "VkAllocationCallbacks",
+                                "storage_classes": [
+                                    "const"
+                                ]
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "w",
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "h",
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "min_image_count",
+                    "type": {
+                        "declaration": "uint32_t",
+                        "description": {
+                            "kind": "User",
+                            "name": "uint32_t"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Helpers"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 166
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkanH_DestroyWindow",
+            "original_fully_qualified_name": "ImGui_ImplVulkanH_DestroyWindow",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "instance",
+                    "type": {
+                        "declaration": "VkInstance",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkInstance"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "device",
+                    "type": {
+                        "declaration": "VkDevice",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkDevice"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "wd",
+                    "type": {
+                        "declaration": "ImGui_ImplVulkanH_Window*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImGui_ImplVulkanH_Window"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "allocator",
+                    "type": {
+                        "declaration": "const VkAllocationCallbacks*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "VkAllocationCallbacks",
+                                "storage_classes": [
+                                    "const"
+                                ]
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 167
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkanH_SelectSurfaceFormat",
+            "original_fully_qualified_name": "ImGui_ImplVulkanH_SelectSurfaceFormat",
+            "return_type": {
+                "declaration": "VkSurfaceFormatKHR",
+                "description": {
+                    "kind": "User",
+                    "name": "VkSurfaceFormatKHR"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "physical_device",
+                    "type": {
+                        "declaration": "VkPhysicalDevice",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPhysicalDevice"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "surface",
+                    "type": {
+                        "declaration": "VkSurfaceKHR",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkSurfaceKHR"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "request_formats",
+                    "type": {
+                        "declaration": "const VkFormat*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "VkFormat",
+                                "storage_classes": [
+                                    "const"
+                                ]
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "request_formats_count",
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "request_color_space",
+                    "type": {
+                        "declaration": "VkColorSpaceKHR",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkColorSpaceKHR"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 168
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkanH_SelectPresentMode",
+            "original_fully_qualified_name": "ImGui_ImplVulkanH_SelectPresentMode",
+            "return_type": {
+                "declaration": "VkPresentModeKHR",
+                "description": {
+                    "kind": "User",
+                    "name": "VkPresentModeKHR"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "physical_device",
+                    "type": {
+                        "declaration": "VkPhysicalDevice",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPhysicalDevice"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "surface",
+                    "type": {
+                        "declaration": "VkSurfaceKHR",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkSurfaceKHR"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "request_modes",
+                    "type": {
+                        "declaration": "const VkPresentModeKHR*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "VkPresentModeKHR",
+                                "storage_classes": [
+                                    "const"
+                                ]
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "request_modes_count",
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 169
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkanH_SelectPhysicalDevice",
+            "original_fully_qualified_name": "ImGui_ImplVulkanH_SelectPhysicalDevice",
+            "return_type": {
+                "declaration": "VkPhysicalDevice",
+                "description": {
+                    "kind": "User",
+                    "name": "VkPhysicalDevice"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "instance",
+                    "type": {
+                        "declaration": "VkInstance",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkInstance"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 170
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkanH_SelectQueueFamilyIndex",
+            "original_fully_qualified_name": "ImGui_ImplVulkanH_SelectQueueFamilyIndex",
+            "return_type": {
+                "declaration": "uint32_t",
+                "description": {
+                    "kind": "User",
+                    "name": "uint32_t"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "physical_device",
+                    "type": {
+                        "declaration": "VkPhysicalDevice",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPhysicalDevice"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 171
+            }
+        },
+        {
+            "name": "cImGui_ImplVulkanH_GetMinImageCountFromPresentMode",
+            "original_fully_qualified_name": "ImGui_ImplVulkanH_GetMinImageCountFromPresentMode",
+            "return_type": {
+                "declaration": "int",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "int"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "present_mode",
+                    "type": {
+                        "declaration": "VkPresentModeKHR",
+                        "description": {
+                            "kind": "User",
+                            "name": "VkPresentModeKHR"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_vulkan.h",
+                "line": 172
+            }
+        }
+    ]
+}

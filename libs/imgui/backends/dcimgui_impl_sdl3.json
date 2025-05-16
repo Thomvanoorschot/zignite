@@ -1,0 +1,669 @@
+{
+    "defines": [],
+    "enums": [
+        {
+            "name": "ImGui_ImplSDL3_GamepadMode",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_GamepadMode",
+            "is_flags_enum": false,
+            "elements": [
+                {
+                    "name": "ImGui_ImplSDL3_GamepadMode_AutoFirst",
+                    "value": 0,
+                    "is_count": false,
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_sdl3.h",
+                        "line": 47
+                    }
+                },
+                {
+                    "name": "ImGui_ImplSDL3_GamepadMode_AutoAll",
+                    "value": 1,
+                    "is_count": false,
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_sdl3.h",
+                        "line": 47
+                    }
+                },
+                {
+                    "name": "ImGui_ImplSDL3_GamepadMode_Manual",
+                    "value": 2,
+                    "is_count": false,
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_sdl3.h",
+                        "line": 47
+                    }
+                }
+            ],
+            "comments": {
+                "preceding": [
+                    "// Gamepad selection automatically starts in AutoFirst mode, picking first available SDL_Gamepad. You may override this.",
+                    "// When using manual mode, caller is responsible for opening/closing gamepad."
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 47
+            }
+        }
+    ],
+    "typedefs": [
+        {
+            "name": "ImDrawIdx",
+            "type": {
+                "declaration": "unsigned short",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "unsigned_short"
+                }
+            },
+            "comments": {
+                "attached": "// Default: 16-bit (for maximum compatibility with renderer backends)"
+            },
+            "conditionals": [
+                {
+                    "condition": "ifndef",
+                    "expression": "ImDrawIdx"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h"
+            }
+        },
+        {
+            "name": "SDL_Event",
+            "type": {
+                "declaration": "SDL_Event",
+                "description": {
+                    "kind": "User",
+                    "name": "SDL_Event"
+                }
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h"
+            }
+        }
+    ],
+    "structs": [
+        {
+            "name": "SDL_Window",
+            "original_fully_qualified_name": "SDL_Window",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 28
+            }
+        },
+        {
+            "name": "SDL_Renderer",
+            "original_fully_qualified_name": "SDL_Renderer",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 29
+            }
+        },
+        {
+            "name": "SDL_Gamepad",
+            "original_fully_qualified_name": "SDL_Gamepad",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 30
+            }
+        },
+        {
+            "name": "ImDrawData",
+            "original_fully_qualified_name": "ImDrawData",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 1
+            }
+        }
+    ],
+    "functions": [
+        {
+            "name": "cImGui_ImplSDL3_InitForOpenGL",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_InitForOpenGL",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "window",
+                    "type": {
+                        "declaration": "SDL_Window*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Window"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "sdl_gl_context",
+                    "type": {
+                        "declaration": "void*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "Builtin",
+                                "builtin_type": "void"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Follow \"Getting Started\" link and check examples/ folder to learn about using backends!"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 34
+            }
+        },
+        {
+            "name": "cImGui_ImplSDL3_InitForVulkan",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_InitForVulkan",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "window",
+                    "type": {
+                        "declaration": "SDL_Window*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Window"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 35
+            }
+        },
+        {
+            "name": "cImGui_ImplSDL3_InitForD3D",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_InitForD3D",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "window",
+                    "type": {
+                        "declaration": "SDL_Window*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Window"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 36
+            }
+        },
+        {
+            "name": "cImGui_ImplSDL3_InitForMetal",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_InitForMetal",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "window",
+                    "type": {
+                        "declaration": "SDL_Window*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Window"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 37
+            }
+        },
+        {
+            "name": "cImGui_ImplSDL3_InitForSDLRenderer",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_InitForSDLRenderer",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "window",
+                    "type": {
+                        "declaration": "SDL_Window*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Window"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "renderer",
+                    "type": {
+                        "declaration": "SDL_Renderer*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Renderer"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 38
+            }
+        },
+        {
+            "name": "cImGui_ImplSDL3_InitForSDLGPU",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_InitForSDLGPU",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "window",
+                    "type": {
+                        "declaration": "SDL_Window*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Window"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 39
+            }
+        },
+        {
+            "name": "cImGui_ImplSDL3_InitForOther",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_InitForOther",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "window",
+                    "type": {
+                        "declaration": "SDL_Window*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Window"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 40
+            }
+        },
+        {
+            "name": "cImGui_ImplSDL3_Shutdown",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_Shutdown",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 41
+            }
+        },
+        {
+            "name": "cImGui_ImplSDL3_NewFrame",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_NewFrame",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 42
+            }
+        },
+        {
+            "name": "cImGui_ImplSDL3_ProcessEvent",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_ProcessEvent",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "event",
+                    "type": {
+                        "declaration": "const SDL_Event*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "SDL_Event",
+                                "storage_classes": [
+                                    "const"
+                                ]
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 43
+            }
+        },
+        {
+            "name": "cImGui_ImplSDL3_SetGamepadMode",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_SetGamepadMode",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "mode",
+                    "type": {
+                        "declaration": "ImGui_ImplSDL3_GamepadMode",
+                        "description": {
+                            "kind": "User",
+                            "name": "ImGui_ImplSDL3_GamepadMode"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": true,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "attached": "// Implied manual_gamepads_array = nullptr, manual_gamepads_count = -1"
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 48
+            }
+        },
+        {
+            "name": "cImGui_ImplSDL3_SetGamepadModeEx",
+            "original_fully_qualified_name": "ImGui_ImplSDL3_SetGamepadMode",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "mode",
+                    "type": {
+                        "declaration": "ImGui_ImplSDL3_GamepadMode",
+                        "description": {
+                            "kind": "User",
+                            "name": "ImGui_ImplSDL3_GamepadMode"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "manual_gamepads_array",
+                    "type": {
+                        "declaration": "SDL_Gamepad**",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "Pointer",
+                                "inner_type": {
+                                    "kind": "User",
+                                    "name": "SDL_Gamepad"
+                                }
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "default_value": "nullptr",
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "manual_gamepads_count",
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "default_value": "-1",
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_sdl3.h",
+                "line": 48
+            }
+        }
+    ]
+}

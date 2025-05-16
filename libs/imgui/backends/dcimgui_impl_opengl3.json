@@ -1,0 +1,350 @@
+{
+    "defines": [
+        {
+            "name": "IMGUI_IMPL_OPENGL_ES3",
+            "comments": {
+                "attached": "// iOS, Android  -> GL ES 3, \"#version 300 es\""
+            },
+            "conditionals": [
+                {
+                    "condition": "if",
+                    "expression": "!defined(IMGUI_IMPL_OPENGL_ES2)\\\n &&!defined(IMGUI_IMPL_OPENGL_ES3)"
+                },
+                {
+                    "condition": "if",
+                    "expression": "(defined(__APPLE__)&&(TARGET_OS_IOS || TARGET_OS_TV))||(defined(__ANDROID__))"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 58
+            }
+        },
+        {
+            "name": "IMGUI_IMPL_OPENGL_ES2",
+            "comments": {
+                "attached": "// Emscripten    -> GL ES 2, \"#version 100\""
+            },
+            "conditionals": [
+                {
+                    "condition": "if",
+                    "expression": "!defined(IMGUI_IMPL_OPENGL_ES2)\\\n &&!defined(IMGUI_IMPL_OPENGL_ES3)"
+                },
+                {
+                    "condition": "ifnot",
+                    "expression": "(defined(__APPLE__)&&(TARGET_OS_IOS || TARGET_OS_TV))||(defined(__ANDROID__))"
+                },
+                {
+                    "condition": "if",
+                    "expression": "defined(__EMSCRIPTEN__)|| defined(__amigaos4__)"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 60
+            }
+        }
+    ],
+    "enums": [],
+    "typedefs": [
+        {
+            "name": "ImDrawIdx",
+            "type": {
+                "declaration": "unsigned short",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "unsigned_short"
+                }
+            },
+            "comments": {
+                "attached": "// Default: 16-bit (for maximum compatibility with renderer backends)"
+            },
+            "conditionals": [
+                {
+                    "condition": "ifndef",
+                    "expression": "ImDrawIdx"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h"
+            }
+        }
+    ],
+    "structs": [
+        {
+            "name": "ImDrawData",
+            "original_fully_qualified_name": "ImDrawData",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 1
+            }
+        }
+    ],
+    "functions": [
+        {
+            "name": "cImGui_ImplOpenGL3_Init",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL3_Init",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": true,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Follow \"Getting Started\" link and check examples/ folder to learn about using backends!"
+                ],
+                "attached": "// Implied glsl_version = nullptr"
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 34
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL3_InitEx",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL3_Init",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "glsl_version",
+                    "type": {
+                        "declaration": "const char*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "Builtin",
+                                "builtin_type": "char",
+                                "storage_classes": [
+                                    "const"
+                                ]
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "default_value": "nullptr",
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 34
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL3_Shutdown",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL3_Shutdown",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 35
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL3_NewFrame",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL3_NewFrame",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 36
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL3_RenderDrawData",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL3_RenderDrawData",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "draw_data",
+                    "type": {
+                        "declaration": "ImDrawData*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImDrawData"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 37
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL3_CreateFontsTexture",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL3_CreateFontsTexture",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// (Optional) Called by Init/NewFrame/Shutdown"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 40
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL3_DestroyFontsTexture",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL3_DestroyFontsTexture",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 41
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL3_CreateDeviceObjects",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL3_CreateDeviceObjects",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 42
+            }
+        },
+        {
+            "name": "cImGui_ImplOpenGL3_DestroyDeviceObjects",
+            "original_fully_qualified_name": "ImGui_ImplOpenGL3_DestroyDeviceObjects",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_opengl3.h",
+                "line": 43
+            }
+        }
+    ]
+}

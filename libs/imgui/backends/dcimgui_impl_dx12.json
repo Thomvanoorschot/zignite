@@ -1,0 +1,873 @@
+{
+    "defines": [],
+    "enums": [],
+    "typedefs": [
+        {
+            "name": "ImDrawIdx",
+            "type": {
+                "declaration": "unsigned short",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "unsigned_short"
+                }
+            },
+            "comments": {
+                "attached": "// Default: 16-bit (for maximum compatibility with renderer backends)"
+            },
+            "conditionals": [
+                {
+                    "condition": "ifndef",
+                    "expression": "ImDrawIdx"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx12.h"
+            }
+        }
+    ],
+    "structs": [
+        {
+            "name": "ImGui_ImplDX12_InitInfo_ImDrawData",
+            "original_fully_qualified_name": "ImGui_ImplDX12_InitInfo_ImDrawData",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx12.h",
+                "line": 1
+            }
+        },
+        {
+            "name": "ImGui_ImplDX12_InitInfo",
+            "original_fully_qualified_name": "ImGui_ImplDX12_InitInfo",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": false,
+            "is_anonymous": false,
+            "fields": [
+                {
+                    "name": "Device",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ID3D12Device*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D12Device"
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h",
+                        "line": 30
+                    }
+                },
+                {
+                    "name": "CommandQueue",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ID3D12CommandQueue*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D12CommandQueue"
+                            }
+                        }
+                    },
+                    "comments": {
+                        "attached": "// Command queue used for queuing texture uploads."
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h",
+                        "line": 31
+                    }
+                },
+                {
+                    "name": "NumFramesInFlight",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h",
+                        "line": 32
+                    }
+                },
+                {
+                    "name": "RTVFormat",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "DXGI_FORMAT",
+                        "description": {
+                            "kind": "User",
+                            "name": "DXGI_FORMAT"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// RenderTarget format."
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h",
+                        "line": 33
+                    }
+                },
+                {
+                    "name": "DSVFormat",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "DXGI_FORMAT",
+                        "description": {
+                            "kind": "User",
+                            "name": "DXGI_FORMAT"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// DepthStencilView format."
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h",
+                        "line": 34
+                    }
+                },
+                {
+                    "name": "UserData",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "void*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "Builtin",
+                                "builtin_type": "void"
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h",
+                        "line": 35
+                    }
+                },
+                {
+                    "name": "SrvDescriptorHeap",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ID3D12DescriptorHeap*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D12DescriptorHeap"
+                            }
+                        }
+                    },
+                    "comments": {
+                        "preceding": [
+                            "// Allocating SRV descriptors for textures is up to the application, so we provide callbacks.",
+                            "// (current version of the backend will only allocate one descriptor, from 1.92 the backend will need to allocate more)"
+                        ]
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h",
+                        "line": 39
+                    }
+                },
+                {
+                    "name": "SrvDescriptorAllocFn",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "void (*SrvDescriptorAllocFn)(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu_desc_handle, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu_desc_handle)",
+                        "type_details": {
+                            "flavour": "function_pointer",
+                            "return_type": {
+                                "declaration": "void",
+                                "description": {
+                                    "kind": "Builtin",
+                                    "builtin_type": "void"
+                                }
+                            },
+                            "arguments": [
+                                {
+                                    "name": "info",
+                                    "type": {
+                                        "declaration": "ImGui_ImplDX12_InitInfo*",
+                                        "description": {
+                                            "kind": "Pointer",
+                                            "inner_type": {
+                                                "kind": "User",
+                                                "name": "ImGui_ImplDX12_InitInfo"
+                                            }
+                                        }
+                                    },
+                                    "is_array": false,
+                                    "is_varargs": false,
+                                    "is_instance_pointer": false
+                                },
+                                {
+                                    "name": "out_cpu_desc_handle",
+                                    "type": {
+                                        "declaration": "D3D12_CPU_DESCRIPTOR_HANDLE*",
+                                        "description": {
+                                            "kind": "Pointer",
+                                            "inner_type": {
+                                                "kind": "User",
+                                                "name": "D3D12_CPU_DESCRIPTOR_HANDLE"
+                                            }
+                                        }
+                                    },
+                                    "is_array": false,
+                                    "is_varargs": false,
+                                    "is_instance_pointer": false
+                                },
+                                {
+                                    "name": "out_gpu_desc_handle",
+                                    "type": {
+                                        "declaration": "D3D12_GPU_DESCRIPTOR_HANDLE*",
+                                        "description": {
+                                            "kind": "Pointer",
+                                            "inner_type": {
+                                                "kind": "User",
+                                                "name": "D3D12_GPU_DESCRIPTOR_HANDLE"
+                                            }
+                                        }
+                                    },
+                                    "is_array": false,
+                                    "is_varargs": false,
+                                    "is_instance_pointer": false
+                                }
+                            ]
+                        },
+                        "description": {
+                            "kind": "Type",
+                            "name": "SrvDescriptorAllocFn",
+                            "inner_type": {
+                                "kind": "Pointer",
+                                "inner_type": {
+                                    "kind": "Function",
+                                    "return_type": {
+                                        "kind": "Builtin",
+                                        "builtin_type": "void"
+                                    },
+                                    "parameters": [
+                                        {
+                                            "kind": "Type",
+                                            "name": "info",
+                                            "inner_type": {
+                                                "kind": "Pointer",
+                                                "inner_type": {
+                                                    "kind": "User",
+                                                    "name": "ImGui_ImplDX12_InitInfo"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "kind": "Type",
+                                            "name": "out_cpu_desc_handle",
+                                            "inner_type": {
+                                                "kind": "Pointer",
+                                                "inner_type": {
+                                                    "kind": "User",
+                                                    "name": "D3D12_CPU_DESCRIPTOR_HANDLE"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "kind": "Type",
+                                            "name": "out_gpu_desc_handle",
+                                            "inner_type": {
+                                                "kind": "Pointer",
+                                                "inner_type": {
+                                                    "kind": "User",
+                                                    "name": "D3D12_GPU_DESCRIPTOR_HANDLE"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h"
+                    }
+                },
+                {
+                    "name": "SrvDescriptorFreeFn",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "void (*SrvDescriptorFreeFn)(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE cpu_desc_handle, D3D12_GPU_DESCRIPTOR_HANDLE gpu_desc_handle)",
+                        "type_details": {
+                            "flavour": "function_pointer",
+                            "return_type": {
+                                "declaration": "void",
+                                "description": {
+                                    "kind": "Builtin",
+                                    "builtin_type": "void"
+                                }
+                            },
+                            "arguments": [
+                                {
+                                    "name": "info",
+                                    "type": {
+                                        "declaration": "ImGui_ImplDX12_InitInfo*",
+                                        "description": {
+                                            "kind": "Pointer",
+                                            "inner_type": {
+                                                "kind": "User",
+                                                "name": "ImGui_ImplDX12_InitInfo"
+                                            }
+                                        }
+                                    },
+                                    "is_array": false,
+                                    "is_varargs": false,
+                                    "is_instance_pointer": false
+                                },
+                                {
+                                    "name": "cpu_desc_handle",
+                                    "type": {
+                                        "declaration": "D3D12_CPU_DESCRIPTOR_HANDLE",
+                                        "description": {
+                                            "kind": "User",
+                                            "name": "D3D12_CPU_DESCRIPTOR_HANDLE"
+                                        }
+                                    },
+                                    "is_array": false,
+                                    "is_varargs": false,
+                                    "is_instance_pointer": false
+                                },
+                                {
+                                    "name": "gpu_desc_handle",
+                                    "type": {
+                                        "declaration": "D3D12_GPU_DESCRIPTOR_HANDLE",
+                                        "description": {
+                                            "kind": "User",
+                                            "name": "D3D12_GPU_DESCRIPTOR_HANDLE"
+                                        }
+                                    },
+                                    "is_array": false,
+                                    "is_varargs": false,
+                                    "is_instance_pointer": false
+                                }
+                            ]
+                        },
+                        "description": {
+                            "kind": "Type",
+                            "name": "SrvDescriptorFreeFn",
+                            "inner_type": {
+                                "kind": "Pointer",
+                                "inner_type": {
+                                    "kind": "Function",
+                                    "return_type": {
+                                        "kind": "Builtin",
+                                        "builtin_type": "void"
+                                    },
+                                    "parameters": [
+                                        {
+                                            "kind": "Type",
+                                            "name": "info",
+                                            "inner_type": {
+                                                "kind": "Pointer",
+                                                "inner_type": {
+                                                    "kind": "User",
+                                                    "name": "ImGui_ImplDX12_InitInfo"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "kind": "Type",
+                                            "name": "cpu_desc_handle",
+                                            "inner_type": {
+                                                "kind": "User",
+                                                "name": "D3D12_CPU_DESCRIPTOR_HANDLE"
+                                            }
+                                        },
+                                        {
+                                            "kind": "Type",
+                                            "name": "gpu_desc_handle",
+                                            "inner_type": {
+                                                "kind": "User",
+                                                "name": "D3D12_GPU_DESCRIPTOR_HANDLE"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h"
+                    }
+                },
+                {
+                    "name": "LegacySingleSrvCpuDescriptor",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "D3D12_CPU_DESCRIPTOR_HANDLE",
+                        "description": {
+                            "kind": "User",
+                            "name": "D3D12_CPU_DESCRIPTOR_HANDLE"
+                        }
+                    },
+                    "comments": {
+                        "attached": "// To facilitate transition from single descriptor to allocator callback, you may use those."
+                    },
+                    "conditionals": [
+                        {
+                            "condition": "ifndef",
+                            "expression": "IMGUI_DISABLE_OBSOLETE_FUNCTIONS"
+                        }
+                    ],
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h",
+                        "line": 43
+                    }
+                },
+                {
+                    "name": "LegacySingleSrvGpuDescriptor",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "D3D12_GPU_DESCRIPTOR_HANDLE",
+                        "description": {
+                            "kind": "User",
+                            "name": "D3D12_GPU_DESCRIPTOR_HANDLE"
+                        }
+                    },
+                    "conditionals": [
+                        {
+                            "condition": "ifndef",
+                            "expression": "IMGUI_DISABLE_OBSOLETE_FUNCTIONS"
+                        }
+                    ],
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h",
+                        "line": 44
+                    }
+                }
+            ],
+            "comments": {
+                "preceding": [
+                    "// Initialization data, for ImGui_ImplDX12_Init()"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx12.h",
+                "line": 28
+            }
+        },
+        {
+            "name": "ImGui_ImplDX12_RenderState",
+            "original_fully_qualified_name": "ImGui_ImplDX12_RenderState",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": false,
+            "is_anonymous": false,
+            "fields": [
+                {
+                    "name": "Device",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ID3D12Device*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D12Device"
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h",
+                        "line": 72
+                    }
+                },
+                {
+                    "name": "CommandList",
+                    "is_array": false,
+                    "is_anonymous": false,
+                    "type": {
+                        "declaration": "ID3D12GraphicsCommandList*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D12GraphicsCommandList"
+                            }
+                        }
+                    },
+                    "is_internal": false,
+                    "source_location": {
+                        "filename": "imgui_impl_dx12.h",
+                        "line": 73
+                    }
+                }
+            ],
+            "comments": {
+                "preceding": [
+                    "// [BETA] Selected render state data shared with callbacks.",
+                    "// This is temporarily stored in GetPlatformIO().Renderer_RenderState during the ImGui_ImplDX12_RenderDrawData() call.",
+                    "// (Please open an issue if you feel you need access to more data)"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx12.h",
+                "line": 70
+            }
+        }
+    ],
+    "functions": [
+        {
+            "name": "cImGui_ImplDX12_Init",
+            "original_fully_qualified_name": "ImGui_ImplDX12_Init",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "info",
+                    "type": {
+                        "declaration": "ImGui_ImplDX12_InitInfo*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImGui_ImplDX12_InitInfo"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Follow \"Getting Started\" link and check examples/ folder to learn about using backends!"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx12.h",
+                "line": 51
+            }
+        },
+        {
+            "name": "cImGui_ImplDX12_Shutdown",
+            "original_fully_qualified_name": "ImGui_ImplDX12_Shutdown",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx12.h",
+                "line": 52
+            }
+        },
+        {
+            "name": "cImGui_ImplDX12_NewFrame",
+            "original_fully_qualified_name": "ImGui_ImplDX12_NewFrame",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx12.h",
+                "line": 53
+            }
+        },
+        {
+            "name": "cImGui_ImplDX12_RenderDrawData",
+            "original_fully_qualified_name": "ImGui_ImplDX12_RenderDrawData",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "draw_data",
+                    "type": {
+                        "declaration": "ImDrawData*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ImDrawData"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "graphics_command_list",
+                    "type": {
+                        "declaration": "ID3D12GraphicsCommandList*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D12GraphicsCommandList"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx12.h",
+                "line": 54
+            }
+        },
+        {
+            "name": "cImGui_ImplDX12_InitID3D12DevicePtr",
+            "original_fully_qualified_name": "ImGui_ImplDX12_Init",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "device",
+                    "type": {
+                        "declaration": "ID3D12Device*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D12Device"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "num_frames_in_flight",
+                    "type": {
+                        "declaration": "int",
+                        "description": {
+                            "kind": "Builtin",
+                            "builtin_type": "int"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "rtv_format",
+                    "type": {
+                        "declaration": "DXGI_FORMAT",
+                        "description": {
+                            "kind": "User",
+                            "name": "DXGI_FORMAT"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "srv_descriptor_heap",
+                    "type": {
+                        "declaration": "ID3D12DescriptorHeap*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "User",
+                                "name": "ID3D12DescriptorHeap"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "font_srv_cpu_desc_handle",
+                    "type": {
+                        "declaration": "D3D12_CPU_DESCRIPTOR_HANDLE",
+                        "description": {
+                            "kind": "User",
+                            "name": "D3D12_CPU_DESCRIPTOR_HANDLE"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "font_srv_gpu_desc_handle",
+                    "type": {
+                        "declaration": "D3D12_GPU_DESCRIPTOR_HANDLE",
+                        "description": {
+                            "kind": "User",
+                            "name": "D3D12_GPU_DESCRIPTOR_HANDLE"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Legacy initialization API Obsoleted in 1.91.5",
+                    "// - font_srv_cpu_desc_handle and font_srv_gpu_desc_handle are handles to a single SRV descriptor to use for the internal font texture, they must be in 'srv_descriptor_heap'",
+                    "// - When we introduced the ImGui_ImplDX12_InitInfo struct we also added a 'ID3D12CommandQueue* CommandQueue' field."
+                ]
+            },
+            "conditionals": [
+                {
+                    "condition": "ifndef",
+                    "expression": "IMGUI_DISABLE_OBSOLETE_FUNCTIONS"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx12.h",
+                "line": 60
+            }
+        },
+        {
+            "name": "cImGui_ImplDX12_CreateDeviceObjects",
+            "original_fully_qualified_name": "ImGui_ImplDX12_CreateDeviceObjects",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Use if you want to reset your rendering device without losing Dear ImGui state."
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx12.h",
+                "line": 64
+            }
+        },
+        {
+            "name": "cImGui_ImplDX12_InvalidateDeviceObjects",
+            "original_fully_qualified_name": "ImGui_ImplDX12_InvalidateDeviceObjects",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_dx12.h",
+                "line": 65
+            }
+        }
+    ]
+}

@@ -1,0 +1,427 @@
+{
+    "defines": [],
+    "enums": [],
+    "typedefs": [
+        {
+            "name": "ImDrawIdx",
+            "type": {
+                "declaration": "unsigned short",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "unsigned_short"
+                }
+            },
+            "comments": {
+                "attached": "// Default: 16-bit (for maximum compatibility with renderer backends)"
+            },
+            "conditionals": [
+                {
+                    "condition": "ifndef",
+                    "expression": "ImDrawIdx"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_win32.h"
+            }
+        }
+    ],
+    "structs": [
+        {
+            "name": "ImDrawData",
+            "original_fully_qualified_name": "ImDrawData",
+            "kind": "struct",
+            "by_value": false,
+            "forward_declaration": true,
+            "is_anonymous": false,
+            "fields": [],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_win32.h",
+                "line": 1
+            }
+        }
+    ],
+    "functions": [
+        {
+            "name": "cImGui_ImplWin32_Init",
+            "original_fully_qualified_name": "ImGui_ImplWin32_Init",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "hwnd",
+                    "type": {
+                        "declaration": "void*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "Builtin",
+                                "builtin_type": "void"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Follow \"Getting Started\" link and check examples/ folder to learn about using backends!"
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_win32.h",
+                "line": 25
+            }
+        },
+        {
+            "name": "cImGui_ImplWin32_InitForOpenGL",
+            "original_fully_qualified_name": "ImGui_ImplWin32_InitForOpenGL",
+            "return_type": {
+                "declaration": "bool",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "bool"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "hwnd",
+                    "type": {
+                        "declaration": "void*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "Builtin",
+                                "builtin_type": "void"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_win32.h",
+                "line": 26
+            }
+        },
+        {
+            "name": "cImGui_ImplWin32_Shutdown",
+            "original_fully_qualified_name": "ImGui_ImplWin32_Shutdown",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_win32.h",
+                "line": 27
+            }
+        },
+        {
+            "name": "cImGui_ImplWin32_NewFrame",
+            "original_fully_qualified_name": "ImGui_ImplWin32_NewFrame",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_win32.h",
+                "line": 28
+            }
+        },
+        {
+            "name": "cImGui_ImplWin32_WndProcHandler",
+            "original_fully_qualified_name": "ImGui_ImplWin32_WndProcHandler",
+            "return_type": {
+                "declaration": "LRESULT",
+                "description": {
+                    "kind": "User",
+                    "name": "LRESULT"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "hWnd",
+                    "type": {
+                        "declaration": "HWND",
+                        "description": {
+                            "kind": "User",
+                            "name": "HWND"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "msg",
+                    "type": {
+                        "declaration": "UINT",
+                        "description": {
+                            "kind": "User",
+                            "name": "UINT"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "wParam",
+                    "type": {
+                        "declaration": "WPARAM",
+                        "description": {
+                            "kind": "User",
+                            "name": "WPARAM"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                },
+                {
+                    "name": "lParam",
+                    "type": {
+                        "declaration": "LPARAM",
+                        "description": {
+                            "kind": "User",
+                            "name": "LPARAM"
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "conditionals": [
+                {
+                    "condition": "ifdef",
+                    "expression": "IMGUI_BACKEND_HAS_WINDOWS_H"
+                }
+            ],
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_win32.h",
+                "line": 36
+            }
+        },
+        {
+            "name": "cImGui_ImplWin32_EnableDpiAwareness",
+            "original_fully_qualified_name": "ImGui_ImplWin32_EnableDpiAwareness",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// DPI-related helpers (optional)",
+                    "// - Use to enable DPI awareness without having to create an application manifest.",
+                    "// - Your own app may already do this via a manifest or explicit calls. This is mostly useful for our examples/ apps.",
+                    "// - In theory we could call simple functions from Windows SDK such as SetProcessDPIAware(), SetProcessDpiAwareness(), etc.",
+                    "//   but most of the functions provided by Microsoft require Windows 8.1/10+ SDK at compile time and Windows 8/10+ at runtime,",
+                    "//   neither we want to require the user to have. So we dynamically select and load those functions to avoid dependencies."
+                ]
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_win32.h",
+                "line": 45
+            }
+        },
+        {
+            "name": "cImGui_ImplWin32_GetDpiScaleForHwnd",
+            "original_fully_qualified_name": "ImGui_ImplWin32_GetDpiScaleForHwnd",
+            "return_type": {
+                "declaration": "float",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "float"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "hwnd",
+                    "type": {
+                        "declaration": "void*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "Builtin",
+                                "builtin_type": "void"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "attached": "// HWND hwnd"
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_win32.h",
+                "line": 46
+            }
+        },
+        {
+            "name": "cImGui_ImplWin32_GetDpiScaleForMonitor",
+            "original_fully_qualified_name": "ImGui_ImplWin32_GetDpiScaleForMonitor",
+            "return_type": {
+                "declaration": "float",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "float"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "monitor",
+                    "type": {
+                        "declaration": "void*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "Builtin",
+                                "builtin_type": "void"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "attached": "// HMONITOR monitor"
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_win32.h",
+                "line": 47
+            }
+        },
+        {
+            "name": "cImGui_ImplWin32_EnableAlphaCompositing",
+            "original_fully_qualified_name": "ImGui_ImplWin32_EnableAlphaCompositing",
+            "return_type": {
+                "declaration": "void",
+                "description": {
+                    "kind": "Builtin",
+                    "builtin_type": "void"
+                }
+            },
+            "arguments": [
+                {
+                    "name": "hwnd",
+                    "type": {
+                        "declaration": "void*",
+                        "description": {
+                            "kind": "Pointer",
+                            "inner_type": {
+                                "kind": "Builtin",
+                                "builtin_type": "void"
+                            }
+                        }
+                    },
+                    "is_array": false,
+                    "is_varargs": false,
+                    "is_instance_pointer": false
+                }
+            ],
+            "is_default_argument_helper": false,
+            "is_manual_helper": false,
+            "is_imstr_helper": false,
+            "has_imstr_helper": false,
+            "is_unformatted_helper": false,
+            "is_static": false,
+            "comments": {
+                "preceding": [
+                    "// Transparency related helpers (optional) [experimental]",
+                    "// - Use to enable alpha compositing transparency with the desktop.",
+                    "// - Use together with e.g. clearing your framebuffer with zero-alpha."
+                ],
+                "attached": "// HWND hwnd"
+            },
+            "is_internal": false,
+            "source_location": {
+                "filename": "imgui_impl_win32.h",
+                "line": 52
+            }
+        }
+    ]
+}
