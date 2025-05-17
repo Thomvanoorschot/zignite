@@ -17,11 +17,6 @@ pub const Backend = enum {
     sdl3_opengl3,
 };
 
-// const IMGUI_C_DEFINES: []const [2][]const u8 = &.{
-//     .{ "IMGUI_IMPL_API", "extern \"C\"" },
-//     .{ "IMGUI_IMPL_WEBGPU_BACKEND_WGPU", "1" },
-// };
-
 const Options = struct {
     backend: Backend,
 };
@@ -45,23 +40,22 @@ pub fn build(
         .root_module = zimgui_mod,
         .linkage = .static,
     });
+
     zimgui.linkLibCpp();
     zimgui.linkLibC();
-
-    b.installArtifact(zimgui);
 
     const options = Options{
         .backend = b.option(Backend, "backend", "") orelse .no_backend,
     };
 
-    zimgui.addIncludePath(.{ .cwd_relative = "libs/imgui" });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui.cpp"), .flags = &.{""} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_widgets.cpp"), .flags = &.{""} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_tables.cpp"), .flags = &.{""} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_draw.cpp"), .flags = &.{""} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_demo.cpp"), .flags = &.{""} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui.cpp"), .flags = &.{""} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_internal.cpp"), .flags = &.{""} });
+    zimgui.addIncludePath(b.path("libs/imgui"));
+    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_widgets.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_tables.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_draw.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_demo.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_internal.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
 
     const emscripten = target.result.os.tag == .emscripten;
 
@@ -86,6 +80,7 @@ pub fn build(
         },
         else => unreachable,
     }
+    b.installArtifact(zimgui);
 }
 
 fn emSdkSetupStep(b: *Build, emsdk: *Build.Dependency) !?*Build.Step.Run {
@@ -108,6 +103,95 @@ fn createEmsdkStep(b: *Build, emsdk: *Build.Dependency) *Build.Step.Run {
     step.addArg(emSdkLazyPath(b, emsdk, &.{"emsdk"}).getPath(b));
     return step;
 }
+
 fn emSdkLazyPath(b: *Build, emsdk: *Build.Dependency, subPaths: []const []const u8) Build.LazyPath {
     return emsdk.path(b.pathJoin(subPaths));
+}
+
+pub const EmLinkOptions = struct {
+    target: Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+    lib_main: *Build.Step.Compile,
+    emsdk: *Build.Dependency,
+    release_use_closure: bool = true,
+    release_use_lto: bool = true,
+    use_webgpu: bool = true,
+    use_webgl2: bool = false,
+    use_emmalloc: bool = false,
+    use_offset_converter: bool = false,
+    use_filesystem: bool = true,
+    shell_file_path: ?Build.LazyPath,
+    extra_args: []const []const u8 = &.{},
+};
+
+pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
+    const emcc_path = emSdkLazyPath(b, options.emsdk, &.{ "upstream", "emscripten", "emcc" }).getPath(b);
+    const emcc = b.addSystemCommand(&.{emcc_path});
+    emcc.setName("emcc"); // hide emcc path
+    if (options.optimize == .Debug) {
+        emcc.addArgs(&.{ "-Og", "-sSAFE_HEAP=1", "-sSTACK_OVERFLOW_CHECK=1" });
+    } else {
+        emcc.addArg("-sASSERTIONS=0");
+        if (options.optimize == .ReleaseSmall) {
+            emcc.addArg("-Oz");
+        } else {
+            emcc.addArg("-O3");
+        }
+        if (options.release_use_lto) {
+            emcc.addArg("-flto");
+        }
+        if (options.release_use_closure) {
+            emcc.addArgs(&.{ "--closure", "1" });
+        }
+    }
+    if (options.use_webgpu) {
+        emcc.addArg("-sUSE_WEBGPU=1");
+    }
+    if (options.use_webgl2) {
+        emcc.addArg("-sUSE_WEBGL2=1");
+    }
+    if (!options.use_filesystem) {
+        emcc.addArg("-sNO_FILESYSTEM=1");
+    }
+    if (options.use_emmalloc) {
+        emcc.addArg("-sMALLOC='emmalloc'");
+    }
+    if (options.use_offset_converter) {
+        emcc.addArg("-sUSE_OFFSET_CONVERTER");
+    }
+    if (options.shell_file_path) |shell_file_path| {
+        emcc.addPrefixedFileArg("--shell-file=", shell_file_path);
+    }
+    for (options.extra_args) |arg| {
+        emcc.addArg(arg);
+    }
+
+    // add the main lib, and then scan for library dependencies and add those too
+    emcc.addArtifactArg(options.lib_main);
+    for (options.lib_main.getCompileDependencies(false)) |item| {
+        if (item.kind == .lib) {
+            emcc.addArtifactArg(item);
+        }
+    }
+    emcc.addArg("-o");
+    const out_file = emcc.addOutputFileArg(b.fmt("{s}.html", .{options.lib_main.name}));
+
+    // the emcc linker creates 3 output files (.html, .wasm and .js)
+    const install = b.addInstallDirectory(.{
+        .source_dir = out_file.dirname(),
+        .install_dir = .prefix,
+        .install_subdir = "web",
+    });
+    install.step.dependOn(&emcc.step);
+    return install;
+}
+
+pub const EmRunOptions = struct {
+    name: []const u8,
+    emsdk: *Build.Dependency,
+};
+pub fn emRunStep(b: *Build, options: EmRunOptions) *Build.Step.Run {
+    const emrun_path = b.findProgram(&.{"emrun"}, &.{}) catch emSdkLazyPath(b, options.emsdk, &.{ "upstream", "emscripten", "emrun" }).getPath(b);
+    const emrun = b.addSystemCommand(&.{ emrun_path, b.fmt("{s}/web/{s}.html", .{ b.install_path, options.name }) });
+    return emrun;
 }
