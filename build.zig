@@ -68,10 +68,12 @@ pub fn build(
 
     switch (options.backend) {
         .glfw_wgpu => {
-            zimgui.addIncludePath(.{ .cwd_relative = "libs/wgpu" });
+            if (!emscripten) {
+                // zimgui.addIncludePath(.{ .cwd_relative = "libs/wgpu" });
 
-            zimgui.addCSourceFile(.{ .file = b.path("libs/wgpu/lib_webgpu_cpp20.cpp"), .flags = &.{""} });
-            zimgui.addCSourceFile(.{ .file = b.path("libs/wgpu/lib_webgpu.cpp"), .flags = &.{""} });
+                // zimgui.addCSourceFile(.{ .file = b.path("libs/wgpu/lib_webgpu_cpp20.cpp"), .flags = &.{""} });
+                // zimgui.addCSourceFile(.{ .file = b.path("libs/wgpu/lib_webgpu.cpp"), .flags = &.{""} });
+            }
 
             zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_glfw.cpp"), .flags = &.{""} });
             zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_wgpu.cpp"), .flags = &.{""} });
@@ -115,21 +117,18 @@ pub const EmLinkOptions = struct {
     emsdk: *Build.Dependency,
     release_use_closure: bool = true,
     release_use_lto: bool = true,
-    use_webgpu: bool = true,
-    use_webgl2: bool = false,
-    use_emmalloc: bool = false,
-    use_offset_converter: bool = false,
+    use_webgpu: bool = false,
+    use_glfw: bool = false,
     use_filesystem: bool = true,
     shell_file_path: ?Build.LazyPath,
     extra_args: []const []const u8 = &.{},
 };
-
 pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
     const emcc_path = emSdkLazyPath(b, options.emsdk, &.{ "upstream", "emscripten", "emcc" }).getPath(b);
     const emcc = b.addSystemCommand(&.{emcc_path});
     emcc.setName("emcc"); // hide emcc path
     if (options.optimize == .Debug) {
-        emcc.addArgs(&.{ "-Og", "-sSAFE_HEAP=1", "-sSTACK_OVERFLOW_CHECK=1" });
+        emcc.addArgs(&.{ "-Og", "-sSAFE_HEAP=1", "-sSTACK_OVERFLOW_CHECK=1", "-sASSERTIONS=1" });
     } else {
         emcc.addArg("-sASSERTIONS=0");
         if (options.optimize == .ReleaseSmall) {
@@ -147,17 +146,11 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
     if (options.use_webgpu) {
         emcc.addArg("-sUSE_WEBGPU=1");
     }
-    if (options.use_webgl2) {
-        emcc.addArg("-sUSE_WEBGL2=1");
+    if (options.use_glfw) {
+        emcc.addArg("-sUSE_GLFW=3");
     }
     if (!options.use_filesystem) {
         emcc.addArg("-sNO_FILESYSTEM=1");
-    }
-    if (options.use_emmalloc) {
-        emcc.addArg("-sMALLOC='emmalloc'");
-    }
-    if (options.use_offset_converter) {
-        emcc.addArg("-sUSE_OFFSET_CONVERTER");
     }
     if (options.shell_file_path) |shell_file_path| {
         emcc.addPrefixedFileArg("--shell-file=", shell_file_path);
@@ -166,7 +159,6 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
         emcc.addArg(arg);
     }
 
-    // add the main lib, and then scan for library dependencies and add those too
     emcc.addArtifactArg(options.lib_main);
     for (options.lib_main.getCompileDependencies(false)) |item| {
         if (item.kind == .lib) {
@@ -176,7 +168,6 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
     emcc.addArg("-o");
     const out_file = emcc.addOutputFileArg(b.fmt("{s}.html", .{options.lib_main.name}));
 
-    // the emcc linker creates 3 output files (.html, .wasm and .js)
     const install = b.addInstallDirectory(.{
         .source_dir = out_file.dirname(),
         .install_dir = .prefix,
