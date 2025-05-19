@@ -1,4 +1,6 @@
 const imgui_glfw = @import("imgui_glfw.zig");
+const imgui = @import("imgui.zig");
+
 pub fn init(
     window: *const anyopaque, // zglfw.Window
     wgpu_device: *const anyopaque, // wgpu.Device
@@ -29,15 +31,16 @@ pub fn newFrame(fb_width: u32, fb_height: u32) void {
     cImGui_ImplWGPU_NewFrame();
     imgui_glfw.newFrame();
 
-    gui.io.setDisplaySize(@floatFromInt(fb_width), @floatFromInt(fb_height));
+    imgui.ImGui_GetIO().*.DisplaySize = .{ .x = @floatFromInt(fb_width), .y = @floatFromInt(fb_height) };
     // gui.io.setDisplayFramebufferScale(1.0, 1.0);
 
-    gui.newFrame();
+    imgui.ImGui_NewFrame();
 }
 
 pub fn draw(wgpu_render_pass: *const anyopaque) void {
-    gui.render();
-    ImGui_ImplWGPU_RenderDrawData(gui.getDrawData(), wgpu_render_pass);
+    imgui.ImGui_Render();
+
+    cImGui_ImplWGPU_RenderDrawData(imgui.ImGui_GetDrawData(), wgpu_render_pass);
 }
 
 pub const __builtin_bswap16 = @import("std").zig.c_builtins.__builtin_bswap16;

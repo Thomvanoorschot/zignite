@@ -1,3 +1,47 @@
+const c = @cImport({
+    @cInclude("emscripten.h");
+    @cInclude("emscripten/html5.h");
+    @cInclude("emscripten/html5_webgpu.h");
+    @cInclude("webgpu/webgpu.h");
+});
+
+pub const Context = struct {
+    instance: WGPUInstance = null,
+    device: WGPUDevice = null,
+    queue: WGPUQueue = null,
+    swapchain: WGPUSwapChain = null,
+    pipeline: WGPURenderPipeline = null,
+
+    const Self = @This();
+
+    pub fn init() Self {
+        const self = Self{};
+        self.instance = wgpuCreateInstance(null);
+        self.device = c.emscripten_webgpu_get_device();
+        self.queue = wgpuDeviceGetQueue(self.device);
+
+        const swapchain_descriptor = WGPUSwapChainDescriptor{
+            .label = "zig-gamedev-gctx-swapchain",
+            .usage = .{ .render_attachment = true },
+            .format = swapchain_format,
+            .width = @intCast(framebuffer_size[0]),
+            .height = @intCast(framebuffer_size[1]),
+            .present_mode = options.present_mode,
+        };
+        const surface = WGPUSurfaceDescriptor{
+            .canvas_html = .{
+                .label = "basic surface",
+                .selector = "#canvas", 
+            },
+        };
+        const swapchain = device.createSwapChain(surface, swapchain_descriptor);
+        errdefer swapchain.release();
+
+        self.swapchain = swapchain;
+        return self;
+    }
+};
+
 pub const __builtin_bswap16 = @import("std").zig.c_builtins.__builtin_bswap16;
 pub const __builtin_bswap32 = @import("std").zig.c_builtins.__builtin_bswap32;
 pub const __builtin_bswap64 = @import("std").zig.c_builtins.__builtin_bswap64;
