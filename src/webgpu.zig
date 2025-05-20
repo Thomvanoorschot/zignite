@@ -1,4 +1,4 @@
-const c = @cImport({
+const cc = @cImport({
     @cInclude("emscripten.h");
     @cInclude("emscripten/html5.h");
     @cInclude("emscripten/html5_webgpu.h");
@@ -14,27 +14,25 @@ pub const Context = struct {
 
     const Self = @This();
 
-    pub fn init() Self {
-        const self = Self{};
+    pub fn init(framebuffer_size: [2]u32) Self {
+        var self = Self{};
         self.instance = wgpuCreateInstance(null);
-        self.device = c.emscripten_webgpu_get_device();
+        self.device = @ptrCast(cc.emscripten_webgpu_get_device());
         self.queue = wgpuDeviceGetQueue(self.device);
 
         const swapchain_descriptor = WGPUSwapChainDescriptor{
             .label = "zig-gamedev-gctx-swapchain",
-            .usage = .{ .render_attachment = true },
-            .format = swapchain_format,
+            // .usage = .{ .render_attachment = true },
+            .format = WGPUTextureFormat_BGRA8Unorm,
             .width = @intCast(framebuffer_size[0]),
             .height = @intCast(framebuffer_size[1]),
-            .present_mode = options.present_mode,
+            .presentMode = WGPUPresentMode_Fifo,
         };
-        const surface = WGPUSurfaceDescriptor{
-            .canvas_html = .{
-                .label = "basic surface",
-                .selector = "#canvas", 
-            },
+        const surface = struct_WGPUSurfaceDescriptorFromCanvasHTMLSelector{
+            // .label = "basic surface",
+            .selector = "#canvas",
         };
-        const swapchain = device.createSwapChain(surface, swapchain_descriptor);
+        const swapchain = wgpuDeviceCreateSwapChain(self.device, @ptrCast(@constCast(&surface)), @ptrCast(@constCast(&swapchain_descriptor)));
         errdefer swapchain.release();
 
         self.swapchain = swapchain;

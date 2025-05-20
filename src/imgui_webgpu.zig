@@ -1,25 +1,27 @@
 const imgui_glfw = @import("imgui_glfw.zig");
 const imgui = @import("imgui.zig");
-
+const zglfw = @import("imgui_glfw.zig");
 pub fn init(
-    window: *const anyopaque, // zglfw.Window
+    window: *zglfw.GLFWwindow, // zglfw.Window
     wgpu_device: *const anyopaque, // wgpu.Device
     wgpu_swap_chain_format: u32, // wgpu.TextureFormat
-    wgpu_depth_format: u32, // wgpu.TextureFormat
+    // wgpu_depth_format: u32, // wgpu.TextureFormat
 ) void {
     _ = imgui_glfw.cImGui_ImplGlfw_InitForOther(window, true);
 
-    var info = ImGui_ImplWGPU_InitInfo{
-        .device = wgpu_device,
-        .num_frames_in_flight = 1,
-        .rt_format = wgpu_swap_chain_format,
-        .depth_format = wgpu_depth_format,
-        .pipeline_multisample_state = .{},
-    };
+    _ = wgpu_device;
+    _ = wgpu_swap_chain_format;
+    // var info = ImGui_ImplWGPU_InitInfo{
+    //     .Device = @ptrCast(@constCast(wgpu_device)),
+    //     .NumFramesInFlight = 1,
+    //     .RenderTargetFormat = wgpu_swap_chain_format,
+    //     // .depth_format = wgpu_depth_format,
+    //     .PipelineMultisampleState = .{},
+    // };
 
-    if (!cImGui_ImplWGPU_Init(&info)) {
-        unreachable;
-    }
+    // if (!cImGui_ImplWGPU_Init(&info)) {
+    //     unreachable;
+    // }
 }
 
 pub fn deinit() void {
@@ -29,7 +31,7 @@ pub fn deinit() void {
 
 pub fn newFrame(fb_width: u32, fb_height: u32) void {
     cImGui_ImplWGPU_NewFrame();
-    imgui_glfw.newFrame();
+    imgui_glfw.ImGui_NewFrame();
 
     imgui.ImGui_GetIO().*.DisplaySize = .{ .x = @floatFromInt(fb_width), .y = @floatFromInt(fb_height) };
     // gui.io.setDisplayFramebufferScale(1.0, 1.0);
