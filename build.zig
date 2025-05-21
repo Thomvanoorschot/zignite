@@ -143,6 +143,9 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
             emcc.addArgs(&.{ "--closure", "1" });
         }
     }
+    emcc.addArg("-sALLOW_MEMORY_GROWTH=1");
+    // emcc.addArg("-sINITIAL_MEMORY=67108864");
+    emcc.addArg("-sASYNCIFY");
     if (options.use_webgpu) {
         emcc.addArg("-sUSE_WEBGPU=1");
     }
@@ -165,6 +168,13 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
             emcc.addArtifactArg(item);
         }
     }
+    if (options.optimize == .Debug or options.optimize == .ReleaseSafe) {
+        emcc.addArgs(&[_][]const u8{
+            "-sUSE_OFFSET_CONVERTER",
+            "-sASSERTIONS",
+        });
+    }
+
     emcc.addArg("-o");
     const out_file = emcc.addOutputFileArg(b.fmt("{s}.html", .{options.lib_main.name}));
 

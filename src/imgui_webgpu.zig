@@ -9,19 +9,17 @@ pub fn init(
 ) void {
     _ = imgui_glfw.cImGui_ImplGlfw_InitForOther(window, true);
 
-    _ = wgpu_device;
-    _ = wgpu_swap_chain_format;
-    // var info = ImGui_ImplWGPU_InitInfo{
-    //     .Device = @ptrCast(@constCast(wgpu_device)),
-    //     .NumFramesInFlight = 1,
-    //     .RenderTargetFormat = wgpu_swap_chain_format,
-    //     // .depth_format = wgpu_depth_format,
-    //     .PipelineMultisampleState = .{},
-    // };
+    var info = ImGui_ImplWGPU_InitInfo{
+        .Device = @ptrCast(@constCast(wgpu_device)),
+        .NumFramesInFlight = 1,
+        .RenderTargetFormat = wgpu_swap_chain_format,
+        // .depth_format = wgpu_depth_format,
+        .PipelineMultisampleState = .{},
+    };
 
-    // if (!cImGui_ImplWGPU_Init(&info)) {
-    //     unreachable;
-    // }
+    if (!cImGui_ImplWGPU_Init(&info)) {
+        unreachable;
+    }
 }
 
 pub fn deinit() void {
