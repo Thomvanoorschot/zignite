@@ -4,6 +4,8 @@ const cc = @cImport({
     @cInclude("emscripten/html5.h");
     @cInclude("emscripten/html5_webgpu.h");
     @cInclude("webgpu/webgpu.h");
+    @cInclude("GLFW/glfw3.h");
+    @cInclude("contrib.glfw3/GLFW/emscripten_glfw3.h");
 });
 // extern fn emscripten_sleep(ms: u32) void;
 
@@ -275,7 +277,7 @@ pub const Context = struct {
 
         const canvas_name: []const u8 = "canvas";
         var swapchain_descriptor = WGPUSwapChainDescriptor{
-            .label = "zig-gamedev-gctx-swapchain",
+            // .label = "zig-gamedev-gctx-swapchain",
             .usage = WGPUTextureUsage_RenderAttachment,
             .format = WGPUTextureFormat_BGRA8Unorm,
             .width = @intCast(framebuffer_size[0]),
@@ -284,10 +286,17 @@ pub const Context = struct {
         };
 
         std.debug.print("BBBBBBBBBBBBBBBBBBBBBBB\n", .{});
+        var w: f64 = 0;
+        var h: f64 = 0;
+        _ = cc.emscripten_get_element_css_size(canvas_name.ptr, &w, &h);
+        std.debug.print("w: {}\n", .{w});
+        std.debug.print("h: {}\n", .{h});
+
         const surface = wgpuInstanceCreateSurface(instance, &WGPUSurfaceDescriptor{
             .nextInChain = @ptrCast(&WGPUSurfaceDescriptorFromCanvasHTMLSelector{
                 .chain = .{ .sType = WGPUSType_SurfaceDescriptorFromCanvasHTMLSelector },
-                .selector = canvas_name.ptr,
+                // .selector = canvas_name.ptr,
+                .selector = "#canvas",
             }),
         });
 
@@ -300,6 +309,7 @@ pub const Context = struct {
         );
         errdefer swapchain.release();
 
+        _ = cc.emscripten_set_canvas_element_size(canvas_name.ptr, @intCast(framebuffer_size[0]), @intCast(framebuffer_size[1]));
         self.* = .{
             .instance = instance,
             .device = @ptrCast(device),

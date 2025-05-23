@@ -60,7 +60,12 @@ pub fn build(
     const emscripten = target.result.os.tag == .emscripten;
 
     if (emscripten) {
-        zimgui.addSystemIncludePath(emsdk.path(b.pathJoin(&.{ "upstream", "emscripten", "cache", "sysroot", "include" })));
+        // const emsdk_include_path = emsdk.path(b.pathJoin(&.{ "upstream", "emscripten", "cache", "sysroot", "include" }));
+        // print emsdk_incldue_path as string
+
+        // zimgui.addSystemIncludePath(emsdk_include_path);
+        const emcc_include = b.pathJoin(&.{ b.sysroot.?, "include" });
+        zimgui.addSystemIncludePath(.{ .cwd_relative = emcc_include }); // isystem
         if (try emSdkSetupStep(b, emsdk)) |emsdk_setup| {
             zimgui.step.dependOn(&emsdk_setup.step);
         }
@@ -123,51 +128,33 @@ pub const EmLinkOptions = struct {
     shell_file_path: ?Build.LazyPath,
     extra_args: []const []const u8 = &.{},
 };
-pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
-    const emcc_path = emSdkLazyPath(b, options.emsdk, &.{ "upstream", "emscripten", "emcc" }).getPath(b);
-    const emcc = b.addSystemCommand(&.{emcc_path});
-    emcc.setName("emcc"); // hide emcc path
-    if (options.optimize == .Debug) {
-        emcc.addArgs(&.{ "-Og", "-sSAFE_HEAP=1", "-sSTACK_OVERFLOW_CHECK=1", "-sASSERTIONS=1" });
-    } else {
-        emcc.addArg("-sASSERTIONS=0");
-        if (options.optimize == .ReleaseSmall) {
-            emcc.addArg("-Oz");
-        } else {
-            emcc.addArg("-O3");
-        }
-        if (options.release_use_lto) {
-            emcc.addArg("-flto");
-        }
-        if (options.release_use_closure) {
-            emcc.addArgs(&.{ "--closure", "1" });
-        }
-    }
-    emcc.addArg("-sALLOW_MEMORY_GROWTH=1");
-    // emcc.addArg("-sINITIAL_MEMORY=67108864");
-    emcc.addArg("-sASYNCIFY");
-    if (options.use_webgpu) {
-        emcc.addArg("-sUSE_WEBGPU=1");
-    }
-    if (options.use_glfw) {
-        emcc.addArg("-sUSE_GLFW=3");
-    }
-    if (!options.use_filesystem) {
-        emcc.addArg("-sNO_FILESYSTEM=1");
-    }
-    if (options.shell_file_path) |shell_file_path| {
-        emcc.addPrefixedFileArg("--shell-file=", shell_file_path);
-    }
-    for (options.extra_args) |arg| {
-        emcc.addArg(arg);
-    }
-
+pub fn emLinkStep(b: *Build, options: EmLinkOptions) !void {
+    // const emcc_path = emSdkLazyPath(b, options.emsdk, &.{ "upstream", "emscripten", "emcc" }).getPath(b);
+    const emcc = b.addSystemCommand(&[_][]const u8{"emcc"});
+    // emcc.setName("emcc"); // hide emcc path
     emcc.addArtifactArg(options.lib_main);
     for (options.lib_main.getCompileDependencies(false)) |item| {
         if (item.kind == .lib) {
             emcc.addArtifactArg(item);
         }
     }
+    emcc.addArgs(&[_][]const u8{
+        "-o",
+        "test.html",
+        "-Oz",
+    });
+
+    emcc.addPrefixedFileArg("--shell-file=", options.shell_file_path.?);
+
+    emcc.addArg("-sASYNCIFY");
+    emcc.addArg("-sUSE_WEBGPU=1");
+    emcc.addArg("--use-port=contrib.glfw3");
+
+    // emcc.addArg("-sNO_FILESYSTEM=1");
+
+    emcc.step.dependOn(&options.lib_main.step);
+
+    // `emcc` flags necessary for debug builds
     if (options.optimize == .Debug or options.optimize == .ReleaseSafe) {
         emcc.addArgs(&[_][]const u8{
             "-sUSE_OFFSET_CONVERTER",
@@ -175,16 +162,66 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
         });
     }
 
-    emcc.addArg("-o");
-    const out_file = emcc.addOutputFileArg(b.fmt("{s}.html", .{options.lib_main.name}));
+    b.getInstallStep().dependOn(&emcc.step);
 
-    const install = b.addInstallDirectory(.{
-        .source_dir = out_file.dirname(),
-        .install_dir = .prefix,
-        .install_subdir = "web",
-    });
-    install.step.dependOn(&emcc.step);
-    return install;
+    // if (options.optimize == .Debug) {
+    //     emcc.addArgs(&.{ "-Og", "-sSAFE_HEAP=1", "-sSTACK_OVERFLOW_CHECK=1", "-sASSERTIONS=1" });
+    // } else {
+    //     emcc.addArg("-sASSERTIONS=0");
+    //     if (options.optimize == .ReleaseSmall) {
+    //         emcc.addArg("-Oz");
+    //     } else {
+    //         emcc.addArg("-O3");
+    //     }
+    //     if (options.release_use_lto) {
+    //         emcc.addArg("-flto");
+    //     }
+    //     if (options.release_use_closure) {
+    //         emcc.addArgs(&.{ "--closure", "1" });
+    //     }
+    // }
+    // emcc.addArg("-sALLOW_MEMORY_GROWTH=1");
+    // // emcc.addArg("-sINITIAL_MEMORY=67108864");
+    // emcc.addArg("-sASYNCIFY");
+    // if (options.use_webgpu) {
+    //     emcc.addArg("-sUSE_WEBGPU=1");
+    // }
+    // if (options.use_glfw) {
+    //     emcc.addArg("-sUSE_GLFW=3");
+    // }
+    // if (!options.use_filesystem) {
+    //     emcc.addArg("-sNO_FILESYSTEM=1");
+    // }
+    // if (options.shell_file_path) |shell_file_path| {
+    //     emcc.addPrefixedFileArg("--shell-file=", shell_file_path);
+    // }
+    // for (options.extra_args) |arg| {
+    //     emcc.addArg(arg);
+    // }
+
+    // emcc.addArtifactArg(options.lib_main);
+    // for (options.lib_main.getCompileDependencies(false)) |item| {
+    //     if (item.kind == .lib) {
+    //         emcc.addArtifactArg(item);
+    //     }
+    // }
+    // if (options.optimize == .Debug or options.optimize == .ReleaseSafe) {
+    //     emcc.addArgs(&[_][]const u8{
+    //         "-sUSE_OFFSET_CONVERTER",
+    //         "-sASSERTIONS",
+    //     });
+    // }
+
+    // emcc.addArg("-o");
+    // const out_file = emcc.addOutputFileArg(b.fmt("{s}.html", .{options.lib_main.name}));
+
+    // const install = b.addInstallDirectory(.{
+    //     .source_dir = out_file.dirname(),
+    //     .install_dir = .prefix,
+    //     .install_subdir = "web",
+    // });
+    // install.step.dependOn(&emcc.step);
+    // return install;
 }
 
 pub const EmRunOptions = struct {

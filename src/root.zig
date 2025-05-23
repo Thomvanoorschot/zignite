@@ -2,6 +2,7 @@ pub const webgpu = @import("webgpu.zig");
 pub const imgui = @import("imgui.zig");
 pub const imgui_webgpu = @import("imgui_webgpu.zig");
 pub const glfw = @import("glfw.zig");
+pub const imgui_glfw = @import("imgui_glfw.zig");
 
 // zig translate-c \
 //   -target wasm32-emscripten \

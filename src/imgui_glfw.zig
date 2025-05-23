@@ -1,3 +1,12 @@
+const cc = @cImport({
+    @cInclude("GLFW/glfw3.h");
+    @cInclude("contrib.glfw3/GLFW/emscripten_glfw3.h");
+});
+
+pub fn SetNextWindowCanvasSelector(canvasSelector: []const u8) void {
+    _ = cc.emscripten_glfw_set_next_window_canvas_selector(canvasSelector.ptr);
+}
+
 pub const __builtin_bswap16 = @import("std").zig.c_builtins.__builtin_bswap16;
 pub const __builtin_bswap32 = @import("std").zig.c_builtins.__builtin_bswap32;
 pub const __builtin_bswap64 = @import("std").zig.c_builtins.__builtin_bswap64;
