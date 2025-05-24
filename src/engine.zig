@@ -101,6 +101,11 @@ pub const Engine = struct {
         if (context == null) {
             return error.FailedToCreateImGuiContext;
         }
+
+        // TODO: Move this to some other place
+        const io = imgui.igGetIO_Nil();
+        io.*.ConfigFlags |= imgui.ImGuiConfigFlags_DockingEnable;
+
         return context;
     }
     fn initImgGuiBackend(self: *Self, webgpu_context: *WebGPUContext) void {
@@ -125,6 +130,7 @@ pub const Engine = struct {
                 self.webgpu_context.swapchain_descriptor.height,
             );
 
+            _ = imgui.igDockSpaceOverViewport(0, null, imgui.ImGuiDockNodeFlags_PassthruCentralNode, null);
             imgui.igShowDemoWindow(null);
             implot.ImPlot_ShowDemoWindow(null);
 
