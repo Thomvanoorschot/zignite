@@ -4,6 +4,7 @@ const imgui_glfw = @import("imgui_glfw.zig");
 const imgui = @import("imgui.zig");
 const webgpu = @import("webgpu.zig");
 const imgui_webgpu = @import("imgui_webgpu.zig");
+const implot = @import("implot.zig");
 
 const GLFWWindow = glfw.GLFWwindow;
 const WebGPUContext = webgpu.Context;
@@ -15,6 +16,7 @@ const ErrWriter = @TypeOf(std.io.getStdOut().writer());
 const EngineOptions = struct {
     title: []const u8 = "Zignite",
     with_imgui: bool = true,
+    with_implot: bool = false,
     width: u32 = 1024,
     height: u32 = 768,
 };
@@ -38,6 +40,7 @@ pub const Engine = struct {
         self.imgui_context = try self.initImGuiContext();
         self.webgpu_context = try self.initWebGPUContext();
         self.initImgGuiBackend(self.webgpu_context);
+        try self.initImPlotContext();
 
         return self;
     }
@@ -74,6 +77,17 @@ pub const Engine = struct {
         return window.?;
     }
 
+    fn initImPlotContext(self: *Self) !void {
+        if (!self.options.with_implot) {
+            return;
+        }
+
+        const context = implot.ImPlot_CreateContext();
+        if (context == null) {
+            return error.FailedToCreateImPlotContext;
+        }
+        return;
+    }
     fn initImGuiContext(self: *Self) !?*ImGuiContext {
         if (!self.options.with_imgui) {
             return null;

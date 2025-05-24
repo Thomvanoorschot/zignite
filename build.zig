@@ -17,8 +17,12 @@ pub const Backend = enum {
     sdl3_opengl3,
 };
 
+const no_sanitize = "-fno-sanitize=undefined";
+
 const Options = struct {
     backend: Backend,
+    with_imgui: bool,
+    with_implot: bool,
 };
 
 pub fn build(
@@ -46,16 +50,27 @@ pub fn build(
 
     const options = Options{
         .backend = b.option(Backend, "backend", "") orelse .glfw_wgpu,
+        .with_imgui = b.option(bool, "with_imgui", "") orelse true,
+        .with_implot = b.option(bool, "with_implot", "") orelse false,
     };
+    if (options.with_imgui) {
+        zignite.addIncludePath(b.path("libs/imgui"));
+        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui.cpp"), .flags = &.{no_sanitize} });
+        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_widgets.cpp"), .flags = &.{no_sanitize} });
+        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_tables.cpp"), .flags = &.{no_sanitize} });
+        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_draw.cpp"), .flags = &.{no_sanitize} });
+        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_demo.cpp"), .flags = &.{no_sanitize} });
+        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui.cpp"), .flags = &.{no_sanitize} });
+        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_internal.cpp"), .flags = &.{no_sanitize} });
+    }
 
-    zignite.addIncludePath(b.path("libs/imgui"));
-    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_widgets.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_tables.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_draw.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_demo.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_internal.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    if (options.with_implot) {
+        zignite.addIncludePath(b.path("libs/implot"));
+        zignite.addCSourceFile(.{ .file = b.path("libs/implot/implot.cpp"), .flags = &.{no_sanitize} });
+        zignite.addCSourceFile(.{ .file = b.path("libs/implot/implot_demo.cpp"), .flags = &.{no_sanitize} });
+        zignite.addCSourceFile(.{ .file = b.path("libs/implot/implot_items.cpp"), .flags = &.{no_sanitize} });
+        zignite.addCSourceFile(.{ .file = b.path("libs/implot/cimplot.cpp"), .flags = &.{no_sanitize} });
+    }
 
     const emscripten = target.result.os.tag == .emscripten;
 
@@ -77,10 +92,12 @@ pub fn build(
                 // zignite.addCSourceFile(.{ .file = b.path("libs/wgpu/lib_webgpu.cpp"), .flags = &.{""} });
             }
 
-            zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_glfw.cpp"), .flags = &.{""} });
-            zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_wgpu.cpp"), .flags = &.{""} });
-            zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_impl_glfw.cpp"), .flags = &.{""} });
-            zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_impl_wgpu.cpp"), .flags = &.{""} });
+            if (options.with_imgui) {
+                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_glfw.cpp"), .flags = &.{""} });
+                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_wgpu.cpp"), .flags = &.{""} });
+                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_impl_glfw.cpp"), .flags = &.{""} });
+                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_impl_wgpu.cpp"), .flags = &.{""} });
+            }
         },
         else => unreachable,
     }
@@ -198,6 +215,7 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
             emcc.addArgs(&.{ "--closure", "1" });
         }
     }
+    emcc.addArg("-sERROR_ON_UNDEFINED_SYMBOLS=0");
     emcc.addArg("-sALLOW_MEMORY_GROWTH=1");
     emcc.addArg("-sASYNCIFY");
     if (options.use_webgpu) {
