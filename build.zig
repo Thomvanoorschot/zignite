@@ -60,12 +60,9 @@ pub fn build(
     const emscripten = target.result.os.tag == .emscripten;
 
     if (emscripten) {
-        // const emsdk_include_path = emsdk.path(b.pathJoin(&.{ "upstream", "emscripten", "cache", "sysroot", "include" }));
-        // print emsdk_incldue_path as string
+        const emsdk_include_path = emsdk.path(b.pathJoin(&.{ "upstream", "emscripten", "cache", "sysroot", "include" }));
 
-        // zimgui.addSystemIncludePath(emsdk_include_path);
-        const emcc_include = b.pathJoin(&.{ b.sysroot.?, "include" });
-        zimgui.addSystemIncludePath(.{ .cwd_relative = emcc_include }); // isystem
+        zimgui.addSystemIncludePath(emsdk_include_path);
         if (try emSdkSetupStep(b, emsdk)) |emsdk_setup| {
             zimgui.step.dependOn(&emsdk_setup.step);
         }
@@ -150,14 +147,11 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
         }
     }
     emcc.addArg("-sALLOW_MEMORY_GROWTH=1");
-    // emcc.addArg("-sINITIAL_MEMORY=67108864");
     emcc.addArg("-sASYNCIFY");
     if (options.use_webgpu) {
         emcc.addArg("-sUSE_WEBGPU=1");
-        // emcc.addArg("--use-port=contrib.emdawn");
     }
     if (options.use_glfw) {
-        // emcc.addArg("-sUSE_GLFW=3");
         emcc.addArg("--use-port=contrib.glfw3");
     }
     if (!options.use_filesystem) {

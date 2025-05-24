@@ -4,6 +4,8 @@ pub const imgui_webgpu = @import("imgui_webgpu.zig");
 pub const glfw = @import("glfw.zig");
 pub const imgui_glfw = @import("imgui_glfw.zig");
 
+pub const engine = @import("engine.zig");
+
 // zig translate-c \
 //   -target wasm32-emscripten \
 //   -isystem "/Users/thomvanoorschot/Development/emsdk/upstream/emscripten/cache/sysroot/include" \
