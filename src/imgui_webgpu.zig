@@ -1,3 +1,4 @@
+const std = @import("std");
 const imgui_glfw = @import("imgui_glfw.zig");
 const imgui = @import("imgui.zig");
 const zglfw = @import("imgui_glfw.zig");
@@ -28,10 +29,10 @@ pub fn deinit() void {
 }
 
 pub fn newFrame(fb_width: u32, fb_height: u32) void {
-    cImGui_ImplWGPU_NewFrame();
-    imgui_glfw.ImGui_NewFrame();
-
     imgui.ImGui_GetIO().*.DisplaySize = .{ .x = @floatFromInt(fb_width), .y = @floatFromInt(fb_height) };
+    cImGui_ImplWGPU_NewFrame();
+    imgui_glfw.cImGui_ImplGlfw_NewFrame();
+
     // gui.io.setDisplayFramebufferScale(1.0, 1.0);
 
     imgui.ImGui_NewFrame();
