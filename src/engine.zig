@@ -65,6 +65,7 @@ pub const Engine = struct {
         imgui_glfw.SetNextWindowCanvasSelector("#canvas");
         glfw.glfwWindowHint(glfw.GLFW_CLIENT_API, glfw.GLFW_NO_API);
         const window = glfw.glfwCreateWindow(@intCast(width), @intCast(height), "#canvas", null, null);
+        imgui_glfw.MakeCanvasResizable(@ptrCast(window));
         if (window == null) {
             return error.FailedToCreateGLFWWindow;
         }

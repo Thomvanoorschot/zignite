@@ -1,7 +1,11 @@
 const cc = @cImport({
-    @cInclude("GLFW/glfw3.h");
+    @cInclude("contrib.glfw3/GLFW/glfw3.h");
     @cInclude("contrib.glfw3/GLFW/emscripten_glfw3.h");
 });
+
+pub fn MakeCanvasResizable(window: *cc.GLFWwindow) void {
+    _ = cc.emscripten_glfw_make_canvas_resizable(window, "window", null);
+}
 
 pub fn SetNextWindowCanvasSelector(canvasSelector: []const u8) void {
     _ = cc.emscripten_glfw_set_next_window_canvas_selector(canvasSelector.ptr);
