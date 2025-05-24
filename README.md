@@ -29,6 +29,33 @@ Zignite is built around modern graphics APIs and cross-platform libraries: \
 • Type-safe graphics API bindings \
 • Minimal dependencies and fast compilation times
 
+## Running Examples
+
+The project includes several examples demonstrating engine capabilities:
+
+### Web/WASM Examples
+
+To build and run examples in the browser using WebAssembly:
+
+```bash
+# Run the simple ImGui example
+zig build run-simple_imgui -Dtarget=wasm32-emscripten
+
+# The example will automatically open in Chrome browser
+```
+
+### Available Examples
+
+- **simple_imgui** - Basic ImGui integration with rendering loop
+
+### Prerequisites
+
+- Zig compiler (latest stable version)
+- Emscripten SDK (automatically handled by the build system)
+- Chrome browser (for running web examples)
+
+The build system will automatically download and configure Emscripten if it's not already installed.
+
 ## Learning Outcomes
 
 This project provides hands-on experience with: \
