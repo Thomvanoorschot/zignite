@@ -82,12 +82,10 @@ pub const Engine = struct {
     }
 
     fn initImPlotContext(self: *Self) !void {
-        try self.stdout.print("Initializing ImPlot context {}\n", .{self.options.with_implot});
         if (!self.options.with_implot) {
             return;
         }
 
-        try self.stdout.print("ImPlot context created\n", .{});
         const context = implot.ImPlot_CreateContext();
         if (context == null) {
             return error.FailedToCreateImPlotContext;
@@ -128,6 +126,7 @@ pub const Engine = struct {
             );
 
             imgui.igShowDemoWindow(null);
+            implot.ImPlot_ShowDemoWindow(null);
 
             const swapchain_texv = webgpu.wgpuSwapChainGetCurrentTextureView(@ptrCast(self.webgpu_context.swapchain));
             defer webgpu.wgpuTextureViewRelease(swapchain_texv);

@@ -8,7 +8,7 @@ Zignite is a modern graphics engine built with the Zig programming language, des
 • Build a lightweight, high-performance graphics engine using modern APIs \
 • Explore Zig's compile-time features and manual memory management capabilities \
 • Create seamless cross-platform deployment (native + WebAssembly) \
-• Integrate immediate-mode GUI capabilities with Dear ImGui \
+• Integrate immediate-mode GUI capabilities with Dear ImGui and Dear ImPlot \
 • Provide a clean, type-safe API for graphics programming \
 
 ## Architecture 
@@ -17,6 +17,7 @@ Zignite is built around modern graphics APIs and cross-platform libraries: \
 • **WebGPU Backend** – Cross-platform graphics API for native and web targets \
 • **GLFW Integration** – Window management, input handling, and context creation \
 • **Dear ImGui** – Immediate-mode GUI system for developer tools and interfaces \
+• **Dear ImPlot** – Advanced plotting library for data visualization and analysis \
 • **Engine Core** – Unified rendering loop and resource management \
 • **Emscripten Support** – WebAssembly compilation for browser deployment
 
@@ -25,6 +26,7 @@ Zignite is built around modern graphics APIs and cross-platform libraries: \
 • Cross-platform rendering with WebGPU (native + web) \
 • Memory-efficient implementation with Zig's allocator system \
 • Integrated Dear ImGui for rapid UI development \
+• Integrated Dear ImPlot for advanced plotting and data visualization \
 • WebAssembly compilation for browser deployment \
 • Type-safe graphics API bindings \
 • Minimal dependencies and fast compilation times
@@ -51,6 +53,11 @@ zig build run-simple_imgui -Dtarget=wasm32-emscripten
   <img src="examples/simple_imgui.png" alt="Project Logo" width="500" />
 </p>
 
+- **simple_implot** - Basic ImPlot integration with rendering loop
+<p align="center">
+  <img src="examples/simple_implot.png" alt="Project Logo" width="500" />
+</p>
+
 ### Prerequisites
 
 - Zig compiler (latest stable version)
@@ -65,10 +72,10 @@ This project provides hands-on experience with: \
 • Zig's comptime features and build system \
 • Manual memory management with custom allocators \
 • Cross-platform graphics programming with WebGPU \
-• C interoperability and binding generation \
+• C interoperability and binding generation with ImGui/ImPlot \
 • WebAssembly deployment strategies \
 • Modern graphics pipeline architecture
 
 ## Project Status
 
-🚧 **Active Development** – Core engine functionality is implemented with WebGPU + ImGui integration. WebAssembly deployment is supported via Emscripten.
+🚧 **Active Development** – Core engine functionality is implemented with WebGPU + ImGui + ImPlot integration. WebAssembly deployment is supported via Emscripten.
