@@ -45,7 +45,7 @@ pub fn build(
     zignite.linkLibC();
 
     const options = Options{
-        .backend = b.option(Backend, "backend", "") orelse .no_backend,
+        .backend = b.option(Backend, "backend", "") orelse .glfw_wgpu,
     };
 
     zignite.addIncludePath(b.path("libs/imgui"));
@@ -85,6 +85,58 @@ pub fn build(
         else => unreachable,
     }
     b.installArtifact(zignite);
+
+    const examples = .{
+        "simple_imgui",
+    };
+
+    inline for (examples) |example| {
+        buildExample(b, example, .{
+            .target = target,
+            .optimize = optimize,
+            .zignite_mod = zignite_mod,
+        });
+    }
+}
+
+const ExampleOptions = struct {
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.Mode,
+    zignite_mod: *std.Build.Module,
+};
+
+fn buildExample(b: *std.Build, comptime exampleName: []const u8, options: ExampleOptions) void {
+    const example_mod = b.addModule(exampleName, .{
+        .target = options.target,
+        .optimize = options.optimize,
+        .root_source_file = b.path("examples/" ++ exampleName ++ ".zig"),
+    });
+    example_mod.addImport("zignite", options.zignite_mod);
+
+    const example = b.addStaticLibrary(.{
+        .name = exampleName,
+        .root_module = example_mod,
+    });
+    example.linkLibC();
+    example.root_module.addImport("zignite", options.zignite_mod);
+
+    const emsdk = b.dependency("emsdk", .{});
+    const link_step = try emLinkStep(b, .{
+        .lib_main = example,
+        .target = options.target,
+        .optimize = options.optimize,
+        .emsdk = emsdk,
+        .use_webgpu = true,
+        .use_glfw = true,
+        .shell_file_path = b.path("web/shell.html"),
+        .extra_args = &.{"-fsanitize=undefined"},
+    });
+
+    b.getInstallStep().dependOn(&link_step.step);
+
+    const run = emRunStep(b, .{ .name = exampleName, .emsdk = emsdk });
+    run.step.dependOn(&link_step.step);
+    b.step("run-" ++ exampleName, "Run example " ++ exampleName).dependOn(&run.step);
 }
 
 fn emSdkSetupStep(b: *Build, emsdk: *Build.Dependency) !?*Build.Step.Run {
@@ -192,9 +244,22 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
 pub const EmRunOptions = struct {
     name: []const u8,
     emsdk: *Build.Dependency,
+    browser: ?[]const u8 = "chrome",
 };
 pub fn emRunStep(b: *Build, options: EmRunOptions) *Build.Step.Run {
-    const emrun_path = b.findProgram(&.{"emrun"}, &.{}) catch emSdkLazyPath(b, options.emsdk, &.{ "upstream", "emscripten", "emrun" }).getPath(b);
-    const emrun = b.addSystemCommand(&.{ emrun_path, b.fmt("{s}/web/{s}.html", .{ b.install_path, options.name }) });
+    const emrun_path = b.findProgram(&.{"emrun"}, &.{}) catch emSdkLazyPath(
+        b,
+        options.emsdk,
+        &.{ "upstream", "emscripten", "emrun" },
+    ).getPath(b);
+
+    const emrun = b.addSystemCommand(&.{emrun_path});
+
+    if (options.browser) |browser| {
+        emrun.addArgs(&.{ "--browser", browser });
+    }
+
+    emrun.addArg(b.fmt("{s}/web/{s}.html", .{ b.install_path, options.name }));
+
     return emrun;
 }
