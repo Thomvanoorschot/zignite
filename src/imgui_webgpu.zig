@@ -6,7 +6,7 @@ pub fn init(
     window: *zglfw.GLFWwindow, // zglfw.Window
     wgpu_device: *const anyopaque, // wgpu.Device
     wgpu_swap_chain_format: u32, // wgpu.TextureFormat
-    // wgpu_depth_format: u32, // wgpu.TextureFormat
+    wgpu_depth_format: u32, // wgpu.TextureFormat
 ) void {
     _ = imgui_glfw.cImGui_ImplGlfw_InitForOther(window, true);
 
@@ -14,8 +14,12 @@ pub fn init(
         .Device = @ptrCast(@constCast(wgpu_device)),
         .NumFramesInFlight = 1,
         .RenderTargetFormat = wgpu_swap_chain_format,
-        // .depth_format = wgpu_depth_format,
-        .PipelineMultisampleState = .{},
+        .DepthStencilFormat = wgpu_depth_format,
+        .PipelineMultisampleState = .{
+            .count = 1,
+            .mask = 0xFFFFFFFF,
+            .alphaToCoverageEnabled = 0,
+        },
     };
 
     if (!cImGui_ImplWGPU_Init(&info)) {
@@ -29,19 +33,20 @@ pub fn deinit() void {
 }
 
 pub fn newFrame(fb_width: u32, fb_height: u32) void {
-    imgui.ImGui_GetIO().*.DisplaySize = .{ .x = @floatFromInt(fb_width), .y = @floatFromInt(fb_height) };
+    const io = imgui.ImGui_GetIO();
+    io.*.DisplaySize = .{ .x = @floatFromInt(fb_width), .y = @floatFromInt(fb_height) };
+    io.*.DisplayFramebufferScale = .{ .x = 1.0, .y = 1.0 };
     cImGui_ImplWGPU_NewFrame();
     imgui_glfw.cImGui_ImplGlfw_NewFrame();
-
     // gui.io.setDisplayFramebufferScale(1.0, 1.0);
 
     imgui.ImGui_NewFrame();
 }
 
-pub fn draw(wgpu_render_pass: *const anyopaque) void {
+pub fn draw(wgpu_render_pass: WGPURenderPassEncoder) void {
     imgui.ImGui_Render();
 
-    cImGui_ImplWGPU_RenderDrawData(imgui.ImGui_GetDrawData(), wgpu_render_pass);
+    cImGui_ImplWGPU_RenderDrawData(@ptrCast(imgui.ImGui_GetDrawData()), wgpu_render_pass);
 }
 
 pub const __builtin_bswap16 = @import("std").zig.c_builtins.__builtin_bswap16;

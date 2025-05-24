@@ -4,268 +4,16 @@ const cc = @cImport({
     @cInclude("emscripten/html5.h");
     @cInclude("emscripten/html5_webgpu.h");
     @cInclude("webgpu/webgpu.h");
-    // @cInclude("GLFW/glfw3.h");
-    // @cInclude("contrib.glfw3/GLFW/emscripten_glfw3.h");
 });
 pub extern fn emscripten_sleep(ms: u32) void;
 
-// pub const Context = struct {
-//     pub const swapchain_format = WGPUTextureFormat_BGRA8Unorm;
-
-//     // window_provider: WindowProvider,
-
-//     // stats: FrameStats = .{},
-
-//     // native_instance: DawnNativeInstance,
-//     instance: WGPUInstance,
-//     device: WGPUDevice,
-//     queue: WGPUQueue,
-//     surface: WGPUSurface,
-//     swapchain: WGPUSwapChain,
-//     swapchain_descriptor: WGPUSwapChainDescriptor,
-
-//     const Self = @This();
-//     // buffer_pool: BufferPool,
-//     // texture_pool: TexturePool,
-//     // texture_view_pool: TextureViewPool,
-//     // sampler_pool: SamplerPool,
-//     // render_pipeline_pool: RenderPipelinePool,
-//     // compute_pipeline_pool: ComputePipelinePool,
-//     // bind_group_pool: BindGroupPool,
-//     // bind_group_layout_pool: BindGroupLayoutPool,
-//     // pipeline_layout_pool: PipelineLayoutPool,
-
-//     // mipgens: std.AutoHashMap(wgpu.TextureFormat, MipgenResources),
-
-//     // uniforms: struct {
-//     //     offset: u32 = 0,
-//     //     buffer: BufferHandle = .{},
-//     //     stage: struct {
-//     //         num: u32 = 0,
-//     //         current: u32 = 0,
-//     //         buffers: [uniforms_staging_pipeline_len]UniformsStagingBuffer =
-//     //             [_]UniformsStagingBuffer{.{}} ** uniforms_staging_pipeline_len,
-//     //     } = .{},
-//     // } = .{},
-
-//     pub fn init(
-//         allocator: std.mem.Allocator,
-//         // window_provider: WindowProvider,
-//         // options: GraphicsContextOptions,
-//     ) !*Self {
-//         // if (!emscripten) dawnProcSetProcs(dnGetProcs());
-
-//         // const native_instance = if (!emscripten) dniCreate();
-//         // errdefer if (!emscripten) dniDestroy(native_instance);
-
-//         const instance = wgpuCreateInstance(null);
-
-//         // const adapter = adapter: {
-//         //     const Response = struct {
-//         //         status: WGPURequestAdapterStatus = WGPURequestAdapterStatus_Unknown,
-//         //         adapter: WGPUAdapter = undefined,
-//         //     };
-
-//         //     const callback = (struct {
-//         //         fn callback(
-//         //             status: WGPURequestAdapterStatus,
-//         //             adapter: WGPUAdapter,
-//         //             message: ?[*:0]const u8,
-//         //             userdata: ?*anyopaque,
-//         //         ) callconv(.C) void {
-//         //             _ = message;
-//         //             const response = @as(*Response, @ptrCast(@alignCast(userdata)));
-//         //             response.status = status;
-//         //             response.adapter = adapter;
-//         //         }
-//         //     }).callback;
-
-//         //     var response = Response{};
-//         //     wgpuInstanceRequestAdapter(
-//         //         instance,
-//         //         .{ .powerPreference = .high_performance },
-//         //         callback,
-//         //         @ptrCast(&response),
-//         //     );
-
-//         //     // if (emscripten) {
-//         //     // wait for response. requires emscripten `-sASYNC` flag
-//         //     // otherwise whole api would need to be changed in a way that allows whole program to return from main and wait to js to call back
-//         //     std.log.debug("wait for instance.requestAdapter...", .{});
-//         //     while (response.status == .unknown) emscripten_sleep(5);
-//         //     std.log.debug("{}", .{response.status});
-//         //     // }
-
-//         //     if (response.status != .success) {
-//         //         std.log.err("Failed to request GPU adapter (status: {s}).", .{@tagName(response.status)});
-//         //         return error.NoGraphicsAdapter;
-//         //     }
-//         //     break :adapter response.adapter;
-//         // };
-//         errdefer adapter.release();
-
-//         var properties: WGPUAdapterProperties = undefined;
-//         properties.nextInChain = null;
-//         adapter.getProperties(&properties);
-
-//         // if (emscripten) {
-//         properties.name = "emscripten";
-//         properties.driverDescription = "emscripten";
-//         properties.adapterType = .unknown;
-//         properties.backendType = .undef;
-//         // }
-//         std.log.info("[zgpu] High-performance device has been selected:", .{});
-//         std.log.info("[zgpu]   Name: {s}", .{properties.name});
-//         std.log.info("[zgpu]   Driver: {s}", .{properties.driver_description});
-//         std.log.info("[zgpu]   Adapter type: {s}", .{@tagName(properties.adapter_type)});
-//         std.log.info("[zgpu]   Backend type: {s}", .{@tagName(properties.backend_type)});
-
-//         const device = device: {
-//             const Response = struct {
-//                 status: WGPURequestDeviceStatus = .unknown,
-//                 device: WGPUDevice = undefined,
-//             };
-
-//             const callback = (struct {
-//                 fn callback(
-//                     status: WGPURequestDeviceStatus,
-//                     device: WGPUDevice,
-//                     message: ?[*:0]const u8,
-//                     userdata: ?*anyopaque,
-//                 ) callconv(.C) void {
-//                     _ = message;
-//                     const response = @as(*Response, @ptrCast(@alignCast(userdata)));
-//                     response.status = status;
-//                     response.device = device;
-//                 }
-//             }).callback;
-
-//             // var toggles: [2][*:0]const u8 = undefined;
-//             // var num_toggles: usize = 0;
-//             // if (zgpu_options.dawn_skip_validation) {
-//             //     toggles[num_toggles] = "skip_validation";
-//             //     num_toggles += 1;
-//             // }
-//             // if (zgpu_options.dawn_allow_unsafe_apis) {
-//             //     toggles[num_toggles] = "allow_unsafe_apis";
-//             //     num_toggles += 1;
-//             // }
-//             // const dawn_toggles = wgpu.DawnTogglesDescriptor{
-//             //     .chain = .{ .next = null, .struct_type = .dawn_toggles_descriptor },
-//             //     .enabled_toggles_count = num_toggles,
-//             //     .enabled_toggles = &toggles,
-//             // };
-
-//             var response = Response{};
-//             adapter.requestDevice(
-//                 WGPUDeviceDescriptor{
-//                     // .nextInChain = @ptrCast(&dawn_toggles),
-//                     // .requiredFeaturesCount = options.required_features.len,
-//                     // .requiredFeatures = options.required_features.ptr,
-//                     // .requiredLimits = @ptrCast(options.required_limits),
-//                     .requiredFeaturesCount = 0,
-//                     .requiredFeatures = null,
-//                     .requiredLimits = null,
-//                 },
-//                 callback,
-//                 @ptrCast(&response),
-//             );
-
-//             // if (emscripten) {
-//             // wait for response. requires emscripten `-sASYNC` flag
-//             // otherwise whole api would need to be changed in a way that allows whole program to return from main and wait to js to call back
-//             std.log.debug("wait for adapter.requestDevice...", .{});
-//             while (response.status == .unknown) emscripten_sleep(5);
-//             std.log.debug("{}", .{response.status});
-//             // }
-
-//             if (response.status != .success) {
-//                 std.log.err("Failed to request GPU device (status: {s}).", .{@tagName(response.status)});
-//                 return error.NoGraphicsDevice;
-//             }
-//             break :device response.device;
-//         };
-//         errdefer device.release();
-
-//         device.setUncapturedErrorCallback(logUnhandledError, null);
-
-//         // const surface = createSurfaceForWindow(instance, window_provider);
-//         var desc: WGPUSurfaceDescriptorFromCanvasHTMLSelector = .{
-//             .chain = .{ .struct_type = .surface_descriptor_from_canvas_html_selector, .next = null },
-//             .selector = "#canvas",
-//         };
-//         const surface = instance.createSurface(.{
-//             .next_in_chain = @as(*const WGPUChainedStruct, @ptrCast(&desc)),
-//             .label = null,
-//         });
-//         errdefer surface.release();
-
-//         const framebuffer_size = [2]u32{ 1024, 768 };
-
-//         const swapchain_descriptor = WGPUSwapChainDescriptor{
-//             .label = "zig-gamedev-gctx-swapchain",
-//             .usage = .{ .render_attachment = true },
-//             .format = swapchain_format,
-//             .width = @intCast(framebuffer_size[0]),
-//             .height = @intCast(framebuffer_size[1]),
-//             .presentMode = WGPUPresentMode_Fifo,
-//         };
-//         const swapchain = device.createSwapChain(surface, swapchain_descriptor);
-//         errdefer swapchain.release();
-
-//         const gctx = try allocator.create(Self);
-//         gctx.* = .{
-//             // .window_provider = window_provider,
-//             // .native_instance = if (emscripten) null else native_instance,
-//             .instance = instance,
-//             .device = device,
-//             .queue = device.getQueue(),
-//             .surface = surface,
-//             .swapchain = swapchain,
-//             .swapchain_descriptor = swapchain_descriptor,
-//             // .buffer_pool = BufferPool.init(allocator, zgpu_options.buffer_pool_size),
-//             // .texture_pool = TexturePool.init(allocator, zgpu_options.texture_pool_size),
-//             // .texture_view_pool = TextureViewPool.init(allocator, zgpu_options.texture_view_pool_size),
-//             // .sampler_pool = SamplerPool.init(allocator, zgpu_options.sampler_pool_size),
-//             // .render_pipeline_pool = RenderPipelinePool.init(allocator, zgpu_options.render_pipeline_pool_size),
-//             // .compute_pipeline_pool = ComputePipelinePool.init(allocator, zgpu_options.compute_pipeline_pool_size),
-//             // .bind_group_pool = BindGroupPool.init(allocator, zgpu_options.bind_group_pool_size),
-//             // .bind_group_layout_pool = BindGroupLayoutPool.init(allocator, zgpu_options.bind_group_layout_pool_size),
-//             // .pipeline_layout_pool = PipelineLayoutPool.init(allocator, zgpu_options.pipeline_layout_pool_size),
-//             // .mipgens = std.AutoHashMap(wgpu.TextureFormat, MipgenResources).init(allocator),
-//         };
-
-//         // uniformsInit(gctx);
-//         return gctx;
-//     }
-// };
-
-// fn logUnhandledError(
-//     err_type: WGPUErrorType,
-//     message: ?[*:0]const u8,
-//     userdata: ?*anyopaque,
-// ) callconv(.C) void {
-//     _ = userdata;
-//     switch (err_type) {
-//         .no_error => std.log.info("[zgpu] No error: {?s}", .{message}),
-//         .validation => std.log.err("[zgpu] Validation: {?s}", .{message}),
-//         .out_of_memory => std.log.err("[zgpu] Out of memory: {?s}", .{message}),
-//         .device_lost => std.log.err("[zgpu] Device lost: {?s}", .{message}),
-//         .internal => std.log.err("[zgpu] Internal error: {?s}", .{message}),
-//         .unknown => std.log.err("[zgpu] Unknown error: {?s}", .{message}),
-//     }
-
-//     // Exit the process for easier debugging.
-//     if (@import("builtin").mode == .Debug)
-//         std.process.exit(1);
-// }
-
 pub const Context = struct {
-    instance: WGPUInstance = null,
-    device: WGPUDevice = null,
-    queue: WGPUQueue = null,
-    swapchain: WGPUSwapChain = null,
-    pipeline: WGPURenderPipeline = null,
+    instance: WGPUInstance,
+    device: WGPUDevice,
+    queue: WGPUQueue,
+    swapchain: WGPUSwapChain,
+    swapchain_descriptor: WGPUSwapChainDescriptor,
+    // pipeline: WGPURenderPipeline,
 
     const Self = @This();
 
@@ -276,15 +24,6 @@ pub const Context = struct {
         const queue = wgpuDeviceGetQueue(@ptrCast(device));
 
         const canvas_name: []const u8 = "canvas";
-        // var swapchain_descriptor = WGPUSwapChainDescriptor{
-        //     // .label = "zig-gamedev-gctx-swapchain",
-        //     .usage = WGPUTextureUsage_RenderAttachment,
-        //     .format = WGPUTextureFormat_BGRA8Unorm,
-        //     .width = @intCast(framebuffer_size[0]),
-        //     .height = @intCast(framebuffer_size[1]),
-        //     .presentMode = WGPUPresentMode_Fifo,
-        // };
-
         const surface = wgpuInstanceCreateSurface(instance, &WGPUSurfaceDescriptor{
             .nextInChain = @ptrCast(&WGPUSurfaceDescriptorFromCanvasHTMLSelector{
                 .chain = .{ .sType = WGPUSType_SurfaceDescriptorFromCanvasHTMLSelector },
@@ -292,20 +31,18 @@ pub const Context = struct {
                 .selector = "#canvas",
             }),
         });
-
-        const swapchain = wgpuDeviceCreateSwapChain(
-            @ptrCast(device),
-            surface,
-            &WGPUSwapChainDescriptor{
+        const swapchain_descriptor = WGPUSwapChainDescriptor{
                 .nextInChain = null,
                 .usage = WGPUTextureUsage_RenderAttachment,
                 .format = WGPUTextureFormat_BGRA8Unorm,
-                // .width = @intCast(framebuffer_size[0]),
-                // .height = @intCast(framebuffer_size[1]),
-                .width = 450,
-                .height = 800,
+                .width = @intCast(framebuffer_size[0]),
+                .height = @intCast(framebuffer_size[1]),
                 .presentMode = WGPUPresentMode_Fifo,
-            },
+            };
+        const swapchain = wgpuDeviceCreateSwapChain(
+            @ptrCast(device),
+            surface,
+            &swapchain_descriptor,
         );
         errdefer swapchain.release();
 
@@ -315,10 +52,50 @@ pub const Context = struct {
             .device = @ptrCast(device),
             .queue = queue,
             .swapchain = swapchain,
+            .swapchain_descriptor = swapchain_descriptor,
         };
         return self;
     }
 };
+
+pub fn beginRenderPassSimple(
+    encoder: WGPUCommandEncoder,
+    load_op: WGPULoadOp,
+    color_texv: WGPUTextureView,
+    clear_color: ?WGPUColor,
+    depth_texv: ?WGPUTextureView,
+    clear_depth: ?f32,
+) WGPURenderPassEncoder {
+    if (depth_texv == null) {
+        // assert(clear_depth == null);
+    }
+    const color_attachments = [_]WGPURenderPassColorAttachment{.{
+        .depthSlice = WGPU_DEPTH_SLICE_UNDEFINED,
+        .view = color_texv,
+        .loadOp = load_op,
+        .storeOp = WGPUStoreOp_Store,
+        .clearValue = if (clear_color) |cv| cv else .{ .r = 0, .g = 0, .b = 0, .a = 0 },
+    }};
+    if (depth_texv) |dtexv| {
+        const depth_attachment = WGPURenderPassDepthStencilAttachment{
+            .view = dtexv,
+            .depthLoadOp = load_op,
+            .depthStoreOp = WGPUStoreOp_Store,
+            .depthClearValue = if (clear_depth) |cd| cd else 0.0,
+        };
+        return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
+            .colorAttachmentCount = color_attachments.len,
+            .colorAttachments = &color_attachments,
+            .depthStencilAttachment = &depth_attachment,
+        });
+    }
+    return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
+        .colorAttachmentCount = color_attachments.len,
+        .colorAttachments = &color_attachments,
+    });
+}
+
+// -------------------
 pub const __builtin_bswap16 = @import("std").zig.c_builtins.__builtin_bswap16;
 pub const __builtin_bswap32 = @import("std").zig.c_builtins.__builtin_bswap32;
 pub const __builtin_bswap64 = @import("std").zig.c_builtins.__builtin_bswap64;
