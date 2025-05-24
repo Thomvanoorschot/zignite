@@ -36,7 +36,11 @@ pub const Engine = struct {
         self.options = options;
         self.stdout = std.io.getStdOut().writer();
         self.stdErr = std.io.getStdErr().writer();
-        self.window = try initGLFWWindow(self.options.title, self.options.width, self.options.height);
+        self.window = try initGLFWWindow(
+            self.options.title,
+            self.options.width,
+            self.options.height,
+        );
         self.imgui_context = try self.initImGuiContext();
         self.webgpu_context = try self.initWebGPUContext();
         self.initImgGuiBackend(self.webgpu_context);
@@ -49,7 +53,7 @@ pub const Engine = struct {
         glfw.glfwDestroyWindow(self.window);
         glfw.glfwTerminate();
         if (self.options.with_imgui) {
-            imgui.ImGui_DestroyContext(self.imgui_context.?);
+            imgui.igDestroyContext(self.imgui_context.?);
         }
     }
 
@@ -78,10 +82,12 @@ pub const Engine = struct {
     }
 
     fn initImPlotContext(self: *Self) !void {
+        try self.stdout.print("Initializing ImPlot context {}\n", .{self.options.with_implot});
         if (!self.options.with_implot) {
             return;
         }
 
+        try self.stdout.print("ImPlot context created\n", .{});
         const context = implot.ImPlot_CreateContext();
         if (context == null) {
             return error.FailedToCreateImPlotContext;
@@ -93,7 +99,7 @@ pub const Engine = struct {
             return null;
         }
 
-        const context = imgui.ImGui_CreateContext(null);
+        const context = imgui.igCreateContext(null);
         if (context == null) {
             return error.FailedToCreateImGuiContext;
         }
@@ -121,10 +127,10 @@ pub const Engine = struct {
                 self.webgpu_context.swapchain_descriptor.height,
             );
 
-            imgui.ImGui_ShowDemoWindow(null);
+            imgui.igShowDemoWindow(null);
 
-            const swapchain_texv = imgui_webgpu.wgpuSwapChainGetCurrentTextureView(@ptrCast(self.webgpu_context.swapchain));
-            defer imgui_webgpu.wgpuTextureViewRelease(swapchain_texv);
+            const swapchain_texv = webgpu.wgpuSwapChainGetCurrentTextureView(@ptrCast(self.webgpu_context.swapchain));
+            defer webgpu.wgpuTextureViewRelease(swapchain_texv);
 
             const commands = commands: {
                 const encoder = webgpu.wgpuDeviceCreateCommandEncoder(self.webgpu_context.device, null);

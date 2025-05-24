@@ -4,10 +4,7 @@
 #ifndef CIMGUIPLOT_INCLUDED
 #define CIMGUIPLOT_INCLUDED
 
-// ZIGNITE: Changed to use the new official binding
-#include "dcimgui.h"
-// #include "dcimgui_internal.h"
-// #include "cimgui.h"
+#include "cimgui.h"
 
 #ifdef CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <time.h>

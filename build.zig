@@ -17,7 +17,15 @@ pub const Backend = enum {
     sdl3_opengl3,
 };
 
-const no_sanitize = "-fno-sanitize=undefined";
+const cflags = &.{
+    "-fno-sanitize=undefined",
+    "-Wno-elaborated-enum-base",
+    "-Wno-error=date-time",
+};
+
+pub const IMGUI_C_DEFINES: []const [2][]const u8 = &.{
+    .{ "IMGUI_IMPL_API", "extern \"C\"" },
+};
 
 const Options = struct {
     backend: Backend,
@@ -55,21 +63,37 @@ pub fn build(
     };
     if (options.with_imgui) {
         zignite.addIncludePath(b.path("libs/imgui"));
-        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui.cpp"), .flags = &.{no_sanitize} });
-        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_widgets.cpp"), .flags = &.{no_sanitize} });
-        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_tables.cpp"), .flags = &.{no_sanitize} });
-        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_draw.cpp"), .flags = &.{no_sanitize} });
-        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_demo.cpp"), .flags = &.{no_sanitize} });
-        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui.cpp"), .flags = &.{no_sanitize} });
-        zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_internal.cpp"), .flags = &.{no_sanitize} });
+        zignite.addIncludePath(b.path("libs/imgui/backends"));
+        for (IMGUI_C_DEFINES) |c_define| {
+            zignite.root_module.addCMacro(c_define[0], c_define[1]);
+        }
+        zignite.addCSourceFiles(.{
+            .files = &.{
+                "libs/cimgui.cpp",
+                "libs/cimgui_impl.cpp",
+
+                "libs/imgui/imgui.cpp",
+                "libs/imgui/imgui_widgets.cpp",
+                "libs/imgui/imgui_tables.cpp",
+                "libs/imgui/imgui_draw.cpp",
+                "libs/imgui/imgui_demo.cpp",
+            },
+            .flags = cflags,
+        });
     }
 
     if (options.with_implot) {
         zignite.addIncludePath(b.path("libs/implot"));
-        zignite.addCSourceFile(.{ .file = b.path("libs/implot/implot.cpp"), .flags = &.{no_sanitize} });
-        zignite.addCSourceFile(.{ .file = b.path("libs/implot/implot_demo.cpp"), .flags = &.{no_sanitize} });
-        zignite.addCSourceFile(.{ .file = b.path("libs/implot/implot_items.cpp"), .flags = &.{no_sanitize} });
-        zignite.addCSourceFile(.{ .file = b.path("libs/implot/cimplot.cpp"), .flags = &.{no_sanitize} });
+        zignite.addCSourceFiles(.{
+            .files = &.{
+                "libs/cimplot.cpp",
+
+                "libs/implot/implot_demo.cpp",
+                "libs/implot/implot.cpp",
+                "libs/implot/implot_items.cpp",
+            },
+            .flags = cflags,
+        });
     }
 
     const emscripten = target.result.os.tag == .emscripten;
@@ -93,10 +117,8 @@ pub fn build(
             }
 
             if (options.with_imgui) {
-                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_glfw.cpp"), .flags = &.{""} });
-                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_wgpu.cpp"), .flags = &.{""} });
-                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_impl_glfw.cpp"), .flags = &.{""} });
-                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_impl_wgpu.cpp"), .flags = &.{""} });
+                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/backends/imgui_impl_glfw.cpp"), .flags = &.{""} });
+                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/backends/imgui_impl_wgpu.cpp"), .flags = &.{""} });
             }
         },
         else => unreachable,
@@ -105,6 +127,7 @@ pub fn build(
 
     const examples = .{
         "simple_imgui",
+        "simple_implot",
     };
 
     inline for (examples) |example| {

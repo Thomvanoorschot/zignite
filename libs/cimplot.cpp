@@ -2,11 +2,8 @@
 //based on implot.h file version 0.16 from implot https://github.com/epezent/implot
 //with implot_internal.h api
 
-// ZIGNITE: Changed the directory
-#include "implot.h"
-#include "implot_internal.h"
-// #include "./implot/implot.h"
-// #include "./implot/implot_internal.h"
+#include "./implot/implot.h"
+#include "./implot/implot_internal.h"
 #include "cimplot.h"
 
 //ImPlotPoint getters manually wrapped for taking getters modifying ImPlotPoint*
