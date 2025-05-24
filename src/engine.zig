@@ -13,6 +13,7 @@ const OutWriter = @TypeOf(std.io.getStdOut().writer());
 const ErrWriter = @TypeOf(std.io.getStdOut().writer());
 
 const EngineOptions = struct {
+    title: []const u8 = "Zignite",
     with_imgui: bool = true,
     width: u32 = 1024,
     height: u32 = 768,
@@ -33,7 +34,7 @@ pub const Engine = struct {
         self.options = options;
         self.stdout = std.io.getStdOut().writer();
         self.stdErr = std.io.getStdErr().writer();
-        self.window = try initGLFWWindow(self.options.width, self.options.height);
+        self.window = try initGLFWWindow(self.options.title, self.options.width, self.options.height);
         self.imgui_context = try self.initImGuiContext();
         self.webgpu_context = try self.initWebGPUContext();
         self.initImgGuiBackend(self.webgpu_context);
@@ -60,11 +61,11 @@ pub const Engine = struct {
         });
     }
 
-    fn initGLFWWindow(width: u32, height: u32) !*GLFWWindow {
+    fn initGLFWWindow(title: []const u8, width: u32, height: u32) !*GLFWWindow {
         _ = glfw.glfwInit();
         imgui_glfw.SetNextWindowCanvasSelector("#canvas");
         glfw.glfwWindowHint(glfw.GLFW_CLIENT_API, glfw.GLFW_NO_API);
-        const window = glfw.glfwCreateWindow(@intCast(width), @intCast(height), "#canvas", null, null);
+        const window = glfw.glfwCreateWindow(@intCast(width), @intCast(height), title.ptr, null, null);
         imgui_glfw.MakeCanvasResizable(@ptrCast(window));
         if (window == null) {
             return error.FailedToCreateGLFWWindow;

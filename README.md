@@ -47,6 +47,9 @@ zig build run-simple_imgui -Dtarget=wasm32-emscripten
 ### Available Examples
 
 - **simple_imgui** - Basic ImGui integration with rendering loop
+<p align="center">
+  <img src="examples/simple_imgui.png" alt="Project Logo" width="500" />
+</p>
 
 ### Prerequisites
 
