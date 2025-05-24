@@ -29,62 +29,62 @@ pub fn build(
 
     const emsdk = b.dependency("emsdk", .{});
 
-    const zimgui_mod = b.addModule("zimgui", .{
+    const zignite_mod = b.addModule("zignite", .{
         .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
     });
 
-    const zimgui = b.addLibrary(.{
-        .name = "zimgui",
-        .root_module = zimgui_mod,
+    const zignite = b.addLibrary(.{
+        .name = "zignite",
+        .root_module = zignite_mod,
         .linkage = .static,
     });
 
-    zimgui.linkLibCpp();
-    zimgui.linkLibC();
+    zignite.linkLibCpp();
+    zignite.linkLibC();
 
     const options = Options{
         .backend = b.option(Backend, "backend", "") orelse .no_backend,
     };
 
-    zimgui.addIncludePath(b.path("libs/imgui"));
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_widgets.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_tables.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_draw.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_demo.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
-    zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_internal.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zignite.addIncludePath(b.path("libs/imgui"));
+    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_widgets.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_tables.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_draw.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_demo.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
+    zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_internal.cpp"), .flags = &.{"-fno-sanitize=undefined"} });
 
     const emscripten = target.result.os.tag == .emscripten;
 
     if (emscripten) {
         const emsdk_include_path = emsdk.path(b.pathJoin(&.{ "upstream", "emscripten", "cache", "sysroot", "include" }));
 
-        zimgui.addSystemIncludePath(emsdk_include_path);
+        zignite.addSystemIncludePath(emsdk_include_path);
         if (try emSdkSetupStep(b, emsdk)) |emsdk_setup| {
-            zimgui.step.dependOn(&emsdk_setup.step);
+            zignite.step.dependOn(&emsdk_setup.step);
         }
     }
 
     switch (options.backend) {
         .glfw_wgpu => {
             if (!emscripten) {
-                // zimgui.addIncludePath(.{ .cwd_relative = "libs/wgpu" });
+                // zignite.addIncludePath(.{ .cwd_relative = "libs/wgpu" });
 
-                // zimgui.addCSourceFile(.{ .file = b.path("libs/wgpu/lib_webgpu_cpp20.cpp"), .flags = &.{""} });
-                // zimgui.addCSourceFile(.{ .file = b.path("libs/wgpu/lib_webgpu.cpp"), .flags = &.{""} });
+                // zignite.addCSourceFile(.{ .file = b.path("libs/wgpu/lib_webgpu_cpp20.cpp"), .flags = &.{""} });
+                // zignite.addCSourceFile(.{ .file = b.path("libs/wgpu/lib_webgpu.cpp"), .flags = &.{""} });
             }
 
-            zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_glfw.cpp"), .flags = &.{""} });
-            zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_wgpu.cpp"), .flags = &.{""} });
-            zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_impl_glfw.cpp"), .flags = &.{""} });
-            zimgui.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_impl_wgpu.cpp"), .flags = &.{""} });
+            zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_glfw.cpp"), .flags = &.{""} });
+            zignite.addCSourceFile(.{ .file = b.path("libs/imgui/imgui_impl_wgpu.cpp"), .flags = &.{""} });
+            zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_impl_glfw.cpp"), .flags = &.{""} });
+            zignite.addCSourceFile(.{ .file = b.path("libs/imgui/dcimgui_impl_wgpu.cpp"), .flags = &.{""} });
         },
         else => unreachable,
     }
-    b.installArtifact(zimgui);
+    b.installArtifact(zignite);
 }
 
 fn emSdkSetupStep(b: *Build, emsdk: *Build.Dependency) !?*Build.Step.Run {
