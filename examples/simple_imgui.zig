@@ -1,6 +1,7 @@
 const zignite = @import("zignite");
 const std = @import("std");
 
+const imgui = zignite.imgui;
 const engine = zignite.engine;
 
 pub fn main() !void {
@@ -10,5 +11,8 @@ pub fn main() !void {
     });
     defer e.deinit();
 
-    try e.startRenderLoop();
+    while (e.startRender()) {
+        defer e.endRender();
+        imgui.igShowDemoWindow(null);
+    }
 }

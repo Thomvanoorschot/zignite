@@ -164,7 +164,12 @@ pub const Engine = struct {
             self.webgpu_context.swapchain_descriptor.width,
             self.webgpu_context.swapchain_descriptor.height,
         );
-        _ = imgui.igDockSpaceOverViewport(0, null, imgui.ImGuiDockNodeFlags_PassthruCentralNode, null);
+        _ = imgui.igDockSpaceOverViewport(
+            0,
+            null,
+            imgui.ImGuiDockNodeFlags_PassthruCentralNode,
+            null,
+        );
         return true;
     }
 
