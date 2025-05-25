@@ -36,7 +36,15 @@ const Options = struct {
 pub fn build(
     b: *Build,
 ) void {
-    const target = b.standardTargetOptions(.{});
+    var target_query = b.standardTargetOptionsQueryOnly(.{});
+    if (target_query.os_tag == .emscripten) {
+        target_query.cpu_features_add = std.Target.wasm.featureSet(&.{
+            .atomics,
+            .bulk_memory,
+        });
+    }
+    const target = b.resolveTargetQuery(target_query);
+
     const optimize = b.standardOptimizeOption(.{});
 
     const emsdk = b.dependency("emsdk", .{});
@@ -100,7 +108,6 @@ pub fn build(
 
     if (emscripten) {
         const emsdk_include_path = emsdk.path(b.pathJoin(&.{ "upstream", "emscripten", "cache", "sysroot", "include" }));
-
         zignite.addSystemIncludePath(emsdk_include_path);
         if (try emSdkSetupStep(b, emsdk)) |emsdk_setup| {
             zignite.step.dependOn(&emsdk_setup.step);
@@ -117,8 +124,14 @@ pub fn build(
             }
 
             if (options.with_imgui) {
-                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/backends/imgui_impl_glfw.cpp"), .flags = &.{""} });
-                zignite.addCSourceFile(.{ .file = b.path("libs/imgui/backends/imgui_impl_wgpu.cpp"), .flags = &.{""} });
+                zignite.addCSourceFile(.{
+                    .file = b.path("libs/imgui/backends/imgui_impl_glfw.cpp"),
+                    .flags = cflags,
+                });
+                zignite.addCSourceFile(.{
+                    .file = b.path("libs/imgui/backends/imgui_impl_wgpu.cpp"),
+                    .flags = cflags,
+                });
             }
         },
         else => unreachable,
@@ -128,6 +141,7 @@ pub fn build(
     const examples = .{
         "simple_imgui",
         "simple_implot",
+        "simple_webworker",
     };
 
     inline for (examples) |example| {
@@ -157,6 +171,7 @@ fn buildExample(b: *std.Build, comptime exampleName: []const u8, options: Exampl
         .name = exampleName,
         .root_module = example_mod,
     });
+
     example.linkLibC();
     example.root_module.addImport("zignite", options.zignite_mod);
 
@@ -238,6 +253,10 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
             emcc.addArgs(&.{ "--closure", "1" });
         }
     }
+
+    emcc.addArg("-pthread");
+    emcc.addArg(b.fmt("-sPTHREAD_POOL_SIZE={d}", .{4}));
+
     emcc.addArg("-sERROR_ON_UNDEFINED_SYMBOLS=0");
     emcc.addArg("-sALLOW_MEMORY_GROWTH=1");
     emcc.addArg("-sASYNCIFY");

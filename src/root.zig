@@ -4,7 +4,7 @@ pub const imgui_webgpu = @import("imgui_webgpu.zig");
 pub const implot = @import("implot.zig");
 pub const glfw = @import("glfw.zig");
 pub const imgui_glfw = @import("imgui_glfw.zig");
-
+pub const pthread = @import("pthread.zig");
 pub const engine = @import("engine.zig");
 
 // zig translate-c \
