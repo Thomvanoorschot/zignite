@@ -95,6 +95,37 @@ pub fn beginRenderPassSimple(
     });
 }
 
+const FrameStats = struct {
+    time: f64 = 0.0,
+    delta_time: f32 = 0.0,
+    fps_counter: u32 = 0,
+    fps: f64 = 0.0,
+    average_cpu_time: f64 = 0.0,
+    previous_time: f64 = 0.0,
+    fps_refresh_time: f64 = 0.0,
+    cpu_frame_number: u64 = 0,
+    gpu_frame_number: u64 = 0,
+
+    fn tick(stats: *FrameStats, now_secs: f64) void {
+        stats.time = now_secs;
+        stats.delta_time = @floatCast(stats.time - stats.previous_time);
+        stats.previous_time = stats.time;
+
+        if ((stats.time - stats.fps_refresh_time) >= 1.0) {
+            const t = stats.time - stats.fps_refresh_time;
+            const fps = @as(f64, @floatFromInt(stats.fps_counter)) / t;
+            const ms = (1.0 / fps) * 1000.0;
+
+            stats.fps = fps;
+            stats.average_cpu_time = ms;
+            stats.fps_refresh_time = stats.time;
+            stats.fps_counter = 0;
+        }
+        stats.fps_counter += 1;
+        stats.cpu_frame_number += 1;
+    }
+};
+
 // -------------------
 pub const __builtin_bswap16 = @import("std").zig.c_builtins.__builtin_bswap16;
 pub const __builtin_bswap32 = @import("std").zig.c_builtins.__builtin_bswap32;

@@ -5,6 +5,7 @@ const imgui = @import("imgui.zig");
 const webgpu = @import("webgpu.zig");
 const imgui_webgpu = @import("imgui_webgpu.zig");
 const implot = @import("implot.zig");
+const imgui_utils = @import("imgui_utils.zig");
 
 const GLFWWindow = glfw.GLFWwindow;
 const WebGPUContext = webgpu.Context;
@@ -17,8 +18,40 @@ const EngineOptions = struct {
     title: []const u8 = "Zignite",
     with_imgui: bool = true,
     with_implot: bool = false,
+    show_fps: bool = true,
     width: u32 = 1024,
     height: u32 = 768,
+};
+
+const FrameStats = struct {
+    time: f64 = 0.0,
+    delta_time: f32 = 0.0,
+    fps_counter: u32 = 0,
+    fps: f64 = 0.0,
+    average_cpu_time: f64 = 0.0,
+    previous_time: f64 = 0.0,
+    fps_refresh_time: f64 = 0.0,
+    cpu_frame_number: u64 = 0,
+    gpu_frame_number: u64 = 0,
+
+    fn tick(stats: *FrameStats, now_secs: f64) void {
+        stats.time = now_secs;
+        stats.delta_time = @floatCast(stats.time - stats.previous_time);
+        stats.previous_time = stats.time;
+
+        if ((stats.time - stats.fps_refresh_time) >= 1.0) {
+            const t = stats.time - stats.fps_refresh_time;
+            const fps = @as(f64, @floatFromInt(stats.fps_counter)) / t;
+            const ms = (1.0 / fps) * 1000.0;
+
+            stats.fps = fps;
+            stats.average_cpu_time = ms;
+            stats.fps_refresh_time = stats.time;
+            stats.fps_counter = 0;
+        }
+        stats.fps_counter += 1;
+        stats.cpu_frame_number += 1;
+    }
 };
 
 pub const Engine = struct {
@@ -28,6 +61,7 @@ pub const Engine = struct {
     window: *GLFWWindow,
     webgpu_context: *WebGPUContext,
     imgui_context: ?*ImGuiContext,
+    frame_stats: FrameStats,
     const Self = @This();
 
     pub fn init(options: EngineOptions) !Self {
@@ -45,6 +79,7 @@ pub const Engine = struct {
         self.webgpu_context = try self.initWebGPUContext();
         self.initImgGuiBackend(self.webgpu_context);
         try self.initImPlotContext();
+        self.frame_stats = FrameStats{};
 
         return self;
     }
@@ -78,6 +113,7 @@ pub const Engine = struct {
             return error.FailedToCreateGLFWWindow;
         }
         glfw.glfwMakeContextCurrent(window);
+        glfw.glfwSwapInterval(1);
         return window.?;
     }
 
@@ -102,7 +138,6 @@ pub const Engine = struct {
             return error.FailedToCreateImGuiContext;
         }
 
-        // TODO: Move this to some other place
         const io = imgui.igGetIO_Nil();
         io.*.ConfigFlags |= imgui.ImGuiConfigFlags_DockingEnable;
 
@@ -120,47 +155,56 @@ pub const Engine = struct {
         );
     }
 
-    pub fn startRenderLoop(self: *Self) !void {
-        while (glfw.glfwWindowShouldClose(self.window) == 0) {
-            glfw.glfwPollEvents();
-            try self.stdout.print("Rendering...\n", .{});
-
-            imgui_webgpu.newFrame(
-                self.webgpu_context.swapchain_descriptor.width,
-                self.webgpu_context.swapchain_descriptor.height,
-            );
-
-            _ = imgui.igDockSpaceOverViewport(0, null, imgui.ImGuiDockNodeFlags_PassthruCentralNode, null);
-            imgui.igShowDemoWindow(null);
-            implot.ImPlot_ShowDemoWindow(null);
-
-            const swapchain_texv = webgpu.wgpuSwapChainGetCurrentTextureView(@ptrCast(self.webgpu_context.swapchain));
-            defer webgpu.wgpuTextureViewRelease(swapchain_texv);
-
-            const commands = commands: {
-                const encoder = webgpu.wgpuDeviceCreateCommandEncoder(self.webgpu_context.device, null);
-                defer webgpu.wgpuCommandEncoderRelease(encoder);
-                {
-                    const pass = webgpu.beginRenderPassSimple(
-                        encoder,
-                        webgpu.WGPULoadOp_Load,
-                        @ptrCast(swapchain_texv),
-                        null,
-                        null,
-                        null,
-                    );
-                    defer webgpu.wgpuRenderPassEncoderRelease(pass);
-                    defer webgpu.wgpuRenderPassEncoderEnd(pass);
-                    imgui_webgpu.draw(@ptrCast(pass));
-                }
-                break :commands webgpu.wgpuCommandEncoderFinish(encoder, null);
-            };
-            defer webgpu.wgpuCommandBufferRelease(commands);
-
-            const command_buffers = [_]webgpu.WGPUCommandBuffer{commands};
-            webgpu.wgpuQueueSubmit(self.webgpu_context.queue, 1, &command_buffers);
-
-            webgpu.emscripten_sleep(16);
+    pub fn startRender(self: *Self) bool {
+        if (glfw.glfwWindowShouldClose(self.window) == 1) {
+            return false;
         }
+
+        imgui_webgpu.newFrame(
+            self.webgpu_context.swapchain_descriptor.width,
+            self.webgpu_context.swapchain_descriptor.height,
+        );
+        _ = imgui.igDockSpaceOverViewport(0, null, imgui.ImGuiDockNodeFlags_PassthruCentralNode, null);
+        return true;
+    }
+
+    pub fn endRender(self: *Self) void {
+        glfw.glfwPollEvents();
+
+        if (self.options.show_fps) {
+            imgui_utils.renderFPS(self.frame_stats.fps) catch |err| {
+                self.stdErr.print("Failed to print FPS: {}\n", .{err}) catch unreachable;
+            };
+        }
+
+        const swapchain_texv = webgpu.wgpuSwapChainGetCurrentTextureView(@ptrCast(self.webgpu_context.swapchain));
+        defer webgpu.wgpuTextureViewRelease(swapchain_texv);
+
+        const commands = commands: {
+            const encoder = webgpu.wgpuDeviceCreateCommandEncoder(self.webgpu_context.device, null);
+            defer webgpu.wgpuCommandEncoderRelease(encoder);
+            {
+                const pass = webgpu.beginRenderPassSimple(
+                    encoder,
+                    webgpu.WGPULoadOp_Load,
+                    @ptrCast(swapchain_texv),
+                    null,
+                    null,
+                    null,
+                );
+                defer webgpu.wgpuRenderPassEncoderRelease(pass);
+                defer webgpu.wgpuRenderPassEncoderEnd(pass);
+                imgui_webgpu.draw(@ptrCast(pass));
+            }
+            break :commands webgpu.wgpuCommandEncoderFinish(encoder, null);
+        };
+        defer webgpu.wgpuCommandBufferRelease(commands);
+
+        const command_buffers = [_]webgpu.WGPUCommandBuffer{commands};
+        webgpu.wgpuQueueSubmit(self.webgpu_context.queue, 1, &command_buffers);
+
+        self.frame_stats.tick(glfw.glfwGetTime());
+
+        webgpu.emscripten_sleep(1);
     }
 };

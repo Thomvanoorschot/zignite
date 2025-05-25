@@ -1,6 +1,7 @@
 pub const webgpu = @import("webgpu.zig");
 pub const imgui = @import("imgui.zig");
 pub const imgui_webgpu = @import("imgui_webgpu.zig");
+pub const implot = @import("implot.zig");
 pub const glfw = @import("glfw.zig");
 pub const imgui_glfw = @import("imgui_glfw.zig");
 
