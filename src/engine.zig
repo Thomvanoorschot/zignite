@@ -19,6 +19,7 @@ const EngineOptions = struct {
     with_imgui: bool = true,
     with_implot: bool = false,
     show_fps: bool = true,
+    with_docking: bool = true,
     width: u32 = 1024,
     height: u32 = 768,
 };
@@ -139,7 +140,9 @@ pub const Engine = struct {
         }
 
         const io = imgui.igGetIO_Nil();
-        io.*.ConfigFlags |= imgui.ImGuiConfigFlags_DockingEnable;
+        if (self.options.with_docking) {
+            io.*.ConfigFlags |= imgui.ImGuiConfigFlags_DockingEnable;
+        }
 
         return context;
     }
@@ -164,12 +167,14 @@ pub const Engine = struct {
             self.webgpu_context.swapchain_descriptor.width,
             self.webgpu_context.swapchain_descriptor.height,
         );
-        _ = imgui.igDockSpaceOverViewport(
-            0,
-            null,
-            imgui.ImGuiDockNodeFlags_PassthruCentralNode,
-            null,
-        );
+        if (self.options.with_docking) {
+            _ = imgui.igDockSpaceOverViewport(
+                0,
+                null,
+                imgui.ImGuiDockNodeFlags_PassthruCentralNode,
+                null,
+            );
+        }
         return true;
     }
 
