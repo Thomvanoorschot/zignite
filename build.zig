@@ -184,7 +184,9 @@ fn buildExample(b: *std.Build, comptime exampleName: []const u8, options: Exampl
         .use_webgpu = true,
         .use_glfw = true,
         .shell_file_path = b.path("web/shell.html"),
-        .extra_args = &.{"-fsanitize=undefined"},
+        .extra_args = &.{
+            "-lwebsocket.js",
+        },
     });
 
     b.getInstallStep().dependOn(&link_step.step);

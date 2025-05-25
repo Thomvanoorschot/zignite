@@ -6,6 +6,7 @@ pub const glfw = @import("glfw.zig");
 pub const imgui_glfw = @import("imgui_glfw.zig");
 pub const pthread = @import("pthread.zig");
 pub const engine = @import("engine.zig");
+pub const websocket = @import("websocket.zig");
 
 // zig translate-c \
 //   -target wasm32-emscripten \
