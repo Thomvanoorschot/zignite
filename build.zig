@@ -257,7 +257,7 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
     }
 
     emcc.addArg("-pthread");
-    emcc.addArg(b.fmt("-sPTHREAD_POOL_SIZE={d}", .{4}));
+    emcc.addArg(b.fmt("-sPTHREAD_POOL_SIZE={d}", .{1}));
 
     emcc.addArg("-sERROR_ON_UNDEFINED_SYMBOLS=0");
     emcc.addArg("-sALLOW_MEMORY_GROWTH=1");
