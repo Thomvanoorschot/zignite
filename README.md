@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="Project Logo" width="500" />
+</p>
+
 # Zignite: Cross-Platform Graphics Engine
 
 ## Overview
