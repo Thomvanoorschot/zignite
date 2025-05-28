@@ -8,6 +8,26 @@
 
 Zignite is a modern graphics engine built with the Zig programming language, designed for cross-platform development with native performance and WebAssembly compatibility. This project leverages Zig's memory safety and performance characteristics to create a robust foundation for interactive applications, games, and visualization tools.
 
+## Getting Started
+
+### Installation
+
+Use fetch:
+```bash
+zig fetch --save https://github.com/Thomvanoorschot/zignite/archive/main.tar.gz
+```
+
+Or add AsyncZocket to your `build.zig.zon`:
+
+```zig
+.dependencies = .{
+    .async_zocket = .{
+        .url = "https://github.com/thomvanoorschot/zignite/archive/main.tar.gz",
+        .hash = "...", // Update with actual hash
+    },
+},
+```
+
 ## Goals
 • Build a lightweight, high-performance graphics engine using modern APIs \
 • Explore Zig's compile-time features and manual memory management capabilities \
