@@ -142,6 +142,7 @@ pub fn build(
         "simple_imgui",
         "simple_implot",
         "simple_webworker",
+        "simple_webworker_websocket",
     };
 
     inline for (examples) |example| {

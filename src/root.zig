@@ -8,6 +8,8 @@ pub const pthread = @import("pthread.zig");
 pub const engine = @import("engine.zig");
 pub const websocket = @import("websocket.zig");
 pub const emscripten_utils = @import("emscripten_utils.zig");
+pub const web_worker = @import("web_worker.zig");
+pub const websocket_web_worker = @import("websocket_web_worker.zig");
 
 // zig translate-c \
 //   -target wasm32-emscripten \
