@@ -5,7 +5,6 @@ const websocket = zignite.websocket;
 const emscripten_utils = zignite.emscripten_utils;
 const imgui = zignite.imgui;
 const engine = zignite.engine;
-const wss_frame = @import("wss_frame.zig");
 
 const SharedData = struct {
     number: i32,
@@ -25,9 +24,7 @@ fn onWebSocketOpen(eventType: c_int, websocketEvent: [*c]const websocket.Emscrip
         _ = pthread.pthread_mutex_lock(&shared.mutex);
         shared.websocket_ready = true;
         _ = pthread.pthread_mutex_unlock(&shared.mutex);
-
-        const send_result = websocket.sendText(shared.websocket, "open_orderbook:BTC/USD");
-        std.debug.print("send_result: {}\n", .{send_result});
+        _ = websocket.sendText(shared.websocket, "open_orderbook:BTC/USD");
     }
 
     return true;
@@ -36,13 +33,9 @@ fn onWebSocketOpen(eventType: c_int, websocketEvent: [*c]const websocket.Emscrip
 fn onWebSocketMessage(eventType: c_int, websocketEvent: [*c]const websocket.EmscriptenWebSocketMessageEvent, _: ?*anyopaque) callconv(.c) bool {
     _ = eventType;
     const stdout = std.io.getStdOut().writer();
-    // const shared: *SharedData = @ptrCast(@alignCast(userData));
-    const numBytes = websocketEvent.*.numBytes;
-    stdout.print("Received message with {} bytes\n", .{numBytes}) catch unreachable;
 
-    const message_text = websocket.getMessageText(websocketEvent);
+    const message_text = websocket.getMessageBinary(websocketEvent);
     stdout.print("Received message: {s}\n", .{message_text}) catch unreachable;
-    // shared.timestamp = message_text;
     return true;
 }
 
