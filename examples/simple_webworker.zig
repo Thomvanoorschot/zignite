@@ -5,6 +5,7 @@ const websocket = zignite.websocket;
 const emscripten_utils = zignite.emscripten_utils;
 const imgui = zignite.imgui;
 const engine = zignite.engine;
+const wss_frame = @import("wss_frame.zig");
 
 const SharedData = struct {
     number: i32,
@@ -24,19 +25,24 @@ fn onWebSocketOpen(eventType: c_int, websocketEvent: [*c]const websocket.Emscrip
         _ = pthread.pthread_mutex_lock(&shared.mutex);
         shared.websocket_ready = true;
         _ = pthread.pthread_mutex_unlock(&shared.mutex);
+
+        const send_result = websocket.sendText(shared.websocket, "open_orderbook:BTC/USD");
+        std.debug.print("send_result: {}\n", .{send_result});
     }
 
     return true;
 }
 
-fn onWebSocketMessage(eventType: c_int, websocketEvent: [*c]const websocket.EmscriptenWebSocketMessageEvent, userData: ?*anyopaque) callconv(.c) bool {
+fn onWebSocketMessage(eventType: c_int, websocketEvent: [*c]const websocket.EmscriptenWebSocketMessageEvent, _: ?*anyopaque) callconv(.c) bool {
     _ = eventType;
     const stdout = std.io.getStdOut().writer();
-    const shared: *SharedData = @ptrCast(@alignCast(userData));
+    // const shared: *SharedData = @ptrCast(@alignCast(userData));
+    const numBytes = websocketEvent.*.numBytes;
+    stdout.print("Received message with {} bytes\n", .{numBytes}) catch unreachable;
 
     const message_text = websocket.getMessageText(websocketEvent);
     stdout.print("Received message: {s}\n", .{message_text}) catch unreachable;
-    shared.timestamp = message_text;
+    // shared.timestamp = message_text;
     return true;
 }
 
@@ -70,7 +76,7 @@ fn workerThread(arg: ?*anyopaque) callconv(.c) ?*anyopaque {
     }
     stdout.print("WebSockets are supported\n", .{}) catch unreachable;
 
-    shared.websocket = websocket.createWebSocket("wss://echo.websocket.org", false);
+    shared.websocket = websocket.createWebSocket("ws://127.0.0.1:8081", false);
 
     if (shared.websocket == 0) {
         stdout.print("ERROR: Failed to create WebSocket (handle is 0)\n", .{}) catch unreachable;
