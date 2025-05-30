@@ -17,7 +17,7 @@ Use fetch:
 zig fetch --save https://github.com/Thomvanoorschot/zignite/archive/main.tar.gz
 ```
 
-Or add AsyncZocket to your `build.zig.zon`:
+Or add Zignite to your `build.zig.zon`:
 
 ```zig
 .dependencies = .{

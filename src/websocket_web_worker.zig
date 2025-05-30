@@ -11,12 +11,13 @@ pub fn WebSocketWebWorker(comptime SharedDataType: type) type {
         const Self = @This();
 
         pub const WebSocketWebWorkerCallbackOptions = struct {
-            on_open_cb: ?*const fn (userData: *Self) bool = null,
-            on_message_cb: ?*const fn (userData: *Self, message: []const u8) bool = null,
-            on_error_cb: ?*const fn (userData: *Self) bool = null,
-            on_close_cb: ?*const fn (userData: *Self, code: u16, reason: []const u8) bool = null,
+            on_open_cb: ?*const fn (userData: *Self) anyerror!bool = null,
+            on_message_cb: ?*const fn (userData: *Self, message: []const u8) anyerror!bool = null,
+            on_error_cb: ?*const fn (userData: *Self) anyerror!bool = null,
+            on_close_cb: ?*const fn (userData: *Self, code: u16, reason: []const u8) anyerror!bool = null,
         };
 
+        allocator: std.mem.Allocator,
         thread: pthread.pthread_t = undefined,
         url: [:0]const u8,
         shared_data: *SharedDataType,
@@ -24,17 +25,19 @@ pub fn WebSocketWebWorker(comptime SharedDataType: type) type {
         websocket_ready: bool = false,
         std_out: StdOut = std.io.getStdOut().writer(),
         std_err: StdErr = std.io.getStdErr().writer(),
-        worker_entrypoint: ?*const fn (web_worker: *Self) void = null,
+        worker_entrypoint: ?*const fn (web_worker: *Self) anyerror!void = null,
         callback_options: WebSocketWebWorkerCallbackOptions = WebSocketWebWorkerCallbackOptions{},
 
         pub fn init(
+            allocator: std.mem.Allocator,
             url: [:0]const u8,
             shared_data: *SharedDataType,
-            worker_entrypoint: ?*const fn (web_worker: *Self) void,
+            worker_entrypoint: ?*const fn (web_worker: *Self) anyerror!void,
             callback_options: WebSocketWebWorkerCallbackOptions,
         ) !*Self {
-            var self = try std.heap.c_allocator.create(Self);
+            var self = try allocator.create(Self);
             self.* = Self{
+                .allocator = allocator,
                 .url = url,
                 .shared_data = shared_data,
                 .worker_entrypoint = worker_entrypoint,
@@ -53,7 +56,10 @@ pub fn WebSocketWebWorker(comptime SharedDataType: type) type {
             const self: *Self = @ptrCast(@alignCast(self_));
 
             if (self.worker_entrypoint) |entrypoint| {
-                entrypoint(self);
+                entrypoint(self) catch |err| {
+                    self.std_err.print("Error in worker_entrypoint: {}\n", .{err}) catch unreachable;
+                    return null;
+                };
             }
             if (!websocket.isSupported()) {
                 self.std_err.print("WebSockets not supported!", .{}) catch unreachable;
@@ -88,7 +94,10 @@ pub fn WebSocketWebWorker(comptime SharedDataType: type) type {
             const self: *Self = @ptrCast(@alignCast(self_));
             self.websocket_ready = true;
             if (self.callback_options.on_open_cb) |cb| {
-                return cb(self);
+                return cb(self) catch |err| {
+                    self.std_err.print("Error in on_open_cb: {}\n", .{err}) catch unreachable;
+                    return false;
+                };
             }
             return true;
         }
@@ -100,7 +109,10 @@ pub fn WebSocketWebWorker(comptime SharedDataType: type) type {
             const self: *Self = @ptrCast(@alignCast(self_));
             if (self.callback_options.on_message_cb) |cb| {
                 const message_text = websocket.getMessageBinary(websocketEvent);
-                return cb(self, message_text);
+                return cb(self, message_text) catch |err| {
+                    self.std_err.print("Error in on_message_cb: {}\n", .{err}) catch unreachable;
+                    return false;
+                };
             }
 
             return true;
@@ -113,7 +125,10 @@ pub fn WebSocketWebWorker(comptime SharedDataType: type) type {
             const self: *Self = @ptrCast(@alignCast(self_));
             if (self.callback_options.on_error_cb) |cb| {
                 self.std_err.print("WebSocket error: {d}\n", .{eventType}) catch unreachable;
-                return cb(self);
+                return cb(self) catch |err| {
+                    self.std_err.print("Error in on_error_cb: {}\n", .{err}) catch unreachable;
+                    return false;
+                };
             }
 
             return true;
@@ -126,7 +141,10 @@ pub fn WebSocketWebWorker(comptime SharedDataType: type) type {
             const self: *Self = @ptrCast(@alignCast(self_));
             if (self.callback_options.on_close_cb) |cb| {
                 self.std_err.print("WebSocket closed: {d}\n", .{eventType}) catch unreachable;
-                return cb(self, websocketEvent.*.code, &websocketEvent.*.reason);
+                return cb(self, websocketEvent.*.code, &websocketEvent.*.reason) catch |err| {
+                    self.std_err.print("Error in on_close_cb: {}\n", .{err}) catch unreachable;
+                    return false;
+                };
             }
 
             return true;

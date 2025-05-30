@@ -10,11 +10,11 @@ const websocket_web_worker = zignite.websocket_web_worker;
 const WebSocketWebWorker = websocket_web_worker.WebSocketWebWorker;
 const SharedData = struct {};
 
-fn workerEntrypoint(web_worker: *WebSocketWebWorker(SharedData)) void {
+fn workerEntrypoint(web_worker: *WebSocketWebWorker(SharedData)) !void {
     _ = web_worker;
 }
 
-fn onOpenCallback(web_worker: *WebSocketWebWorker(SharedData)) bool {
+fn onOpenCallback(web_worker: *WebSocketWebWorker(SharedData)) !bool {
     web_worker.std_out.print("WebSocket opened\n", .{}) catch unreachable;
     if (web_worker.open_socket) |open_socket| {
         _ = websocket.sendText(open_socket, "open_orderbook:BTC/USD");
@@ -22,17 +22,17 @@ fn onOpenCallback(web_worker: *WebSocketWebWorker(SharedData)) bool {
     return true;
 }
 
-fn onMessageCallback(web_worker: *WebSocketWebWorker(SharedData), message: []const u8) bool {
+fn onMessageCallback(web_worker: *WebSocketWebWorker(SharedData), message: []const u8) !bool {
     web_worker.std_out.print("Received message: {s}\n", .{message}) catch unreachable;
     return true;
 }
 
-fn onErrorCallback(web_worker: *WebSocketWebWorker(SharedData)) bool {
+fn onErrorCallback(web_worker: *WebSocketWebWorker(SharedData)) !bool {
     _ = web_worker;
     return true;
 }
 
-fn onCloseCallback(web_worker: *WebSocketWebWorker(SharedData), code: u16, reason: []const u8) bool {
+fn onCloseCallback(web_worker: *WebSocketWebWorker(SharedData), code: u16, reason: []const u8) !bool {
     _ = web_worker;
     _ = code;
     _ = reason;
@@ -43,7 +43,8 @@ pub fn main() !void {
     var shared = SharedData{};
 
     // Create web worker
-    _ = try WebSocketWebWorker(SharedData).init(
+    const ww = try WebSocketWebWorker(SharedData).init(
+        std.heap.c_allocator,
         "ws://127.0.0.1:8081",
         &shared,
         workerEntrypoint,
@@ -54,6 +55,7 @@ pub fn main() !void {
             .on_close_cb = onCloseCallback,
         },
     );
+    defer std.heap.c_allocator.destroy(ww);
 
     // Main thread loop
     var e = try engine.Engine.init(.{

@@ -12,7 +12,7 @@ const SharedData = struct {
     number: i32,
 };
 
-fn workerEntrypoint(shared: *SharedData) void {
+fn workerEntrypoint(shared: *SharedData) !void {
     while (true) {
         shared.number += 1;
         emscripten_utils.emscripten_sleep(100);
@@ -26,10 +26,12 @@ pub fn main() !void {
     };
 
     // Create web worker
-    _ = try WebWorker(SharedData).init(
+    const ww = try WebWorker(SharedData).init(
+        std.heap.c_allocator,
         &shared,
         workerEntrypoint,
     );
+    defer std.heap.c_allocator.destroy(ww);
 
     // Main thread loop
     var e = try engine.Engine.init(.{
