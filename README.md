@@ -135,7 +135,7 @@ To build and run examples in the browser using WebAssembly:
 
 ```bash
 # Run the simple ImGui example
-zig build run-simple_imgui -Dtarget=wasm32-emscripten
+zig build run-simple_imgui -Dtarget=wasm64-emscripten
 
 # The example will automatically open in Chrome browser
 ```

@@ -67,7 +67,7 @@ pub fn build(
     const options = Options{
         .backend = b.option(Backend, "backend", "") orelse .glfw_wgpu,
         .with_imgui = b.option(bool, "with_imgui", "") orelse true,
-        .with_implot = b.option(bool, "with_implot", "") orelse false,
+        .with_implot = b.option(bool, "with_implot", "") orelse true,
     };
     if (options.with_imgui) {
         zignite.addIncludePath(b.path("libs/imgui"));
@@ -136,6 +136,7 @@ pub fn build(
         },
         else => unreachable,
     }
+
     b.installArtifact(zignite);
 
     const examples = .{
@@ -263,6 +264,7 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
     emcc.addArg("-sERROR_ON_UNDEFINED_SYMBOLS=0");
     emcc.addArg("-sALLOW_MEMORY_GROWTH=1");
     emcc.addArg("-sASYNCIFY");
+    emcc.addArg("-sMEMORY64=1");
     if (options.use_webgpu) {
         emcc.addArg("-sUSE_WEBGPU=1");
     }

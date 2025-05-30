@@ -12,14 +12,10 @@ pub fn WebWorker(comptime SharedDataType: type) type {
         pub fn init(
             allocator: std.mem.Allocator,
             shared_data: *SharedDataType,
-            worker_entrypoint: ?*const fn (shared_data: *SharedDataType) void,
+            worker_entrypoint: ?*const fn (shared_data: *SharedDataType) anyerror!void,
         ) !*Self {
             const self = try allocator.create(Self);
-            self.* = Self{
-                .allocator = allocator,
-                .shared_data = shared_data,
-                .worker_entrypoint = worker_entrypoint
-            };
+            self.* = Self{ .allocator = allocator, .shared_data = shared_data, .worker_entrypoint = worker_entrypoint };
             var thread: pthread.pthread_t = undefined;
             const rc = pthread.pthread_create(&thread, null, workerEntrypoint, self);
             if (rc != 0) {
