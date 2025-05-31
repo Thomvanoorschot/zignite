@@ -12,7 +12,7 @@ pub fn renderFPS(fps: f64) !void {
 
     imgui.ImDrawList_AddText_Vec2(
         draw_list,
-        imgui.ImVec2{ .x = display_width - 80.0, .y = 5.0 },
+        imgui.ImVec2{ .x = display_width - 80.0, .y = 20.0 },
         0xFF00FF00,
         fps_text.ptr,
         fps_text.ptr + fps_text.len,

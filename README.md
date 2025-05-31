@@ -148,6 +148,9 @@ zig build run-simple_imgui -Dtarget=wasm64-emscripten
 </p>
 
 - **simple_webworker_websocket** - WebSocket communication through web workers for real-time data
+<p align="center">
+  <img src="examples/simple_webworker_websocket.gif" alt="Project Logo" width="500" />
+</p>
 
 ### Prerequisites
 

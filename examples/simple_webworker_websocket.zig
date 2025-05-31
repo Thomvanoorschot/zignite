@@ -8,7 +8,9 @@ const engine = zignite.engine;
 const websocket_web_worker = zignite.websocket_web_worker;
 
 const WebSocketWebWorker = websocket_web_worker.WebSocketWebWorker;
-const SharedData = struct {};
+const SharedData = struct {
+    message: []const u8 = "",
+};
 
 fn workerEntrypoint(web_worker: *WebSocketWebWorker(SharedData)) !void {
     _ = web_worker;
@@ -17,13 +19,13 @@ fn workerEntrypoint(web_worker: *WebSocketWebWorker(SharedData)) !void {
 fn onOpenCallback(web_worker: *WebSocketWebWorker(SharedData)) !bool {
     web_worker.std_out.print("WebSocket opened\n", .{}) catch unreachable;
     if (web_worker.open_socket) |open_socket| {
-        _ = websocket.sendText(open_socket, "open_orderbook:BTC/USD");
+        _ = websocket.sendText(open_socket, "{\"method\":\"subscribe\",\"params\":{\"channel\":\"book\",\"symbol\":[\"BTC/USD\"]}}");
     }
     return true;
 }
 
 fn onMessageCallback(web_worker: *WebSocketWebWorker(SharedData), message: []const u8) !bool {
-    web_worker.std_out.print("Received message: {s}\n", .{message}) catch unreachable;
+    web_worker.shared_data.message = message;
     return true;
 }
 
@@ -45,7 +47,7 @@ pub fn main() !void {
     // Create web worker
     const ww = try WebSocketWebWorker(SharedData).init(
         std.heap.c_allocator,
-        "ws://127.0.0.1:8081",
+        "wss://ws.kraken.com/v2",
         &shared,
         workerEntrypoint,
         .{
@@ -66,6 +68,19 @@ pub fn main() !void {
 
     while (e.startRender()) {
         defer e.endRender();
-        imgui.igShowDemoWindow(null);
+
+        _ = imgui.igBegin("WebSocket", null, imgui.ImGuiWindowFlags_None);
+        defer _ = imgui.igEnd();
+
+        const text_buf_size = 2048;
+        var text_buf: [text_buf_size:0]u8 = undefined;
+        const message_str = try std.fmt.bufPrintZ(
+            &text_buf,
+            "Message: {s}",
+            .{shared.message},
+        );
+
+        // Use ImGui's text wrapping
+        imgui.igTextWrapped(message_str.ptr, .{});
     }
 }
