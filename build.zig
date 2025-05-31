@@ -47,8 +47,6 @@ pub fn build(
 
     const optimize = b.standardOptimizeOption(.{});
 
-    const emsdk = b.dependency("emsdk", .{});
-
     const zignite_mod = b.addModule("zignite", .{
         .root_source_file = b.path("src/root.zig"),
         .target = target,
@@ -63,6 +61,37 @@ pub fn build(
 
     zignite.linkLibCpp();
     zignite.linkLibC();
+
+    const emsdk = b.dependency("emsdk", .{});
+
+    const maybe_activate_emsdk = try ensureEmsdkInstalled(
+        b,
+        emsdk,
+    );
+    if (maybe_activate_emsdk) |activateStep| {
+        zignite.step.dependOn(&activateStep.step);
+        const embuilder_path = emSdkLazyPath(
+            b,
+            emsdk,
+            &.{ "upstream", "emscripten", "embuilder" },
+        ).getPath(b);
+
+        const embuilder = b.addSystemCommand(&.{embuilder_path});
+        embuilder.step.dependOn(&activateStep.step);
+        embuilder.setCwd(emsdk.path("."));
+
+        // Set all the necessary emsdk environment variables
+        const emsdk_root = emsdk.path(".").getPath(b);
+        embuilder.setEnvironmentVariable("EMSDK", emsdk_root);
+        embuilder.setEnvironmentVariable("EMSCRIPTEN", b.pathJoin(&.{ emsdk_root, "upstream", "emscripten" }));
+        embuilder.setEnvironmentVariable("EM_CONFIG", b.pathJoin(&.{ emsdk_root, ".emscripten" }));
+        embuilder.setEnvironmentVariable("EM_CACHE", b.pathJoin(&.{ emsdk_root, "upstream", "emscripten", "cache" }));
+
+        embuilder.addArgs(&.{ "build", "contrib.glfw3" });
+        zignite.step.dependOn(&embuilder.step);
+    }
+    const emsdk_include_path = emsdk.path(b.pathJoin(&.{ "upstream", "emscripten", "cache", "sysroot", "include" }));
+    zignite.addSystemIncludePath(emsdk_include_path);
 
     const options = Options{
         .backend = b.option(Backend, "backend", "") orelse .glfw_wgpu,
@@ -104,19 +133,10 @@ pub fn build(
         });
     }
 
-    const emscripten = target.result.os.tag == .emscripten;
-
-    if (emscripten) {
-        const emsdk_include_path = emsdk.path(b.pathJoin(&.{ "upstream", "emscripten", "cache", "sysroot", "include" }));
-        zignite.addSystemIncludePath(emsdk_include_path);
-        if (try emSdkSetupStep(b, emsdk)) |emsdk_setup| {
-            zignite.step.dependOn(&emsdk_setup.step);
-        }
-    }
-
+    const isEmscripten = target.result.os.tag == .emscripten;
     switch (options.backend) {
         .glfw_wgpu => {
-            if (!emscripten) {
+            if (!isEmscripten) {
                 // zignite.addIncludePath(.{ .cwd_relative = "libs/wgpu" });
 
                 // zignite.addCSourceFile(.{ .file = b.path("libs/wgpu/lib_webgpu_cpp20.cpp"), .flags = &.{""} });
@@ -136,81 +156,27 @@ pub fn build(
         },
         else => unreachable,
     }
-
     b.installArtifact(zignite);
-
-    const examples = .{
-        "simple_imgui",
-        "simple_implot",
-        "simple_webworker",
-        "simple_webworker_websocket",
-    };
-
-    inline for (examples) |example| {
-        buildExample(b, example, .{
-            .target = target,
-            .optimize = optimize,
-            .zignite_mod = zignite_mod,
-        });
-    }
-}
-
-const ExampleOptions = struct {
-    target: std.Build.ResolvedTarget,
-    optimize: std.builtin.Mode,
-    zignite_mod: *std.Build.Module,
-};
-
-fn buildExample(b: *std.Build, comptime exampleName: []const u8, options: ExampleOptions) void {
-    const example_mod = b.addModule(exampleName, .{
-        .target = options.target,
-        .optimize = options.optimize,
-        .root_source_file = b.path("examples/" ++ exampleName ++ ".zig"),
-    });
-    example_mod.addImport("zignite", options.zignite_mod);
-
-    const example = b.addStaticLibrary(.{
-        .name = exampleName,
-        .root_module = example_mod,
-    });
-
-    example.linkLibC();
-    example.root_module.addImport("zignite", options.zignite_mod);
-
-    const emsdk = b.dependency("emsdk", .{});
-    const link_step = try emLinkStep(b, .{
-        .lib_main = example,
-        .target = options.target,
-        .optimize = options.optimize,
-        .emsdk = emsdk,
-        .use_webgpu = true,
-        .use_glfw = true,
-        .shell_file_path = b.path("web/shell.html"),
-        .extra_args = &.{
-            "-lwebsocket.js",
-        },
-    });
-
-    b.getInstallStep().dependOn(&link_step.step);
-
-    const run = emRunStep(b, .{ .name = exampleName, .emsdk = emsdk });
-    run.step.dependOn(&link_step.step);
-    b.step("run-" ++ exampleName, "Run example " ++ exampleName).dependOn(&run.step);
 }
 
 fn emSdkSetupStep(b: *Build, emsdk: *Build.Dependency) !?*Build.Step.Run {
-    const dot_emsc_path = emSdkLazyPath(b, emsdk, &.{".emscripten"}).getPath(b);
-    const dot_emsc_exists = !std.meta.isError(std.fs.accessAbsolute(dot_emsc_path, .{}));
-    if (!dot_emsc_exists) {
-        const emsdk_install = createEmsdkStep(b, emsdk);
-        emsdk_install.addArgs(&.{ "install", "latest" });
-        const emsdk_activate = createEmsdkStep(b, emsdk);
-        emsdk_activate.addArgs(&.{ "activate", "latest" });
-        emsdk_activate.step.dependOn(&emsdk_install.step);
-        return emsdk_activate;
-    } else {
-        return null;
-    }
+    const emsdk_install = createEmsdkStep(b, emsdk);
+    emsdk_install.addArgs(&.{ "install", "latest" });
+    const emsdk_activate = createEmsdkStep(b, emsdk);
+    emsdk_activate.addArgs(&.{ "activate", "latest" });
+    emsdk_activate.step.dependOn(&emsdk_install.step);
+    return emsdk_activate;
+}
+
+// -------------------------------------------------------------------
+// (B) ‒ New public helper that just forwards to emSdkSetupStep.
+//     Downstream projects will call this directly.
+// -------------------------------------------------------------------
+pub fn ensureEmsdkInstalled(
+    b: *Build,
+    emsdk: *Build.Dependency,
+) !?*Build.Step.Run {
+    return emSdkSetupStep(b, emsdk);
 }
 
 fn createEmsdkStep(b: *Build, emsdk: *Build.Dependency) *Build.Step.Run {
@@ -224,36 +190,31 @@ fn emSdkLazyPath(b: *Build, emsdk: *Build.Dependency, subPaths: []const []const 
 }
 
 pub const EmLinkOptions = struct {
-    target: Build.ResolvedTarget,
-    optimize: std.builtin.OptimizeMode,
-    lib_main: *Build.Step.Compile,
     emsdk: *Build.Dependency,
-    release_use_closure: bool = true,
-    release_use_lto: bool = true,
-    use_webgpu: bool = false,
-    use_glfw: bool = false,
-    use_filesystem: bool = true,
     shell_file_path: ?Build.LazyPath,
-    extra_args: []const []const u8 = &.{},
+    b_options: EmOptions,
 };
-pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
-    const emcc_path = emSdkLazyPath(b, options.emsdk, &.{ "upstream", "emscripten", "emcc" }).getPath(b);
+pub fn emLinkStep(
+    b: *Build,
+    l_options: EmLinkOptions,
+) !*Build.Step.InstallDir {
+    const emcc_path = emSdkLazyPath(b, l_options.emsdk, &.{ "upstream", "emscripten", "emcc" }).getPath(b);
     const emcc = b.addSystemCommand(&.{emcc_path});
     emcc.setName("emcc"); // hide emcc path
 
-    if (options.optimize == .Debug) {
+    if (l_options.b_options.optimize == .Debug) {
         emcc.addArgs(&.{ "-Og", "-sSAFE_HEAP=1", "-sSTACK_OVERFLOW_CHECK=1", "-sASSERTIONS=1" });
     } else {
         emcc.addArg("-sASSERTIONS=0");
-        if (options.optimize == .ReleaseSmall) {
+        if (l_options.b_options.optimize == .ReleaseSmall) {
             emcc.addArg("-Oz");
         } else {
             emcc.addArg("-O3");
         }
-        if (options.release_use_lto) {
+        if (l_options.b_options.release_use_lto) {
             emcc.addArg("-flto");
         }
-        if (options.release_use_closure) {
+        if (l_options.b_options.release_use_closure) {
             emcc.addArgs(&.{ "--closure", "1" });
         }
     }
@@ -265,29 +226,29 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
     emcc.addArg("-sALLOW_MEMORY_GROWTH=1");
     emcc.addArg("-sASYNCIFY");
     emcc.addArg("-sMEMORY64=1");
-    if (options.use_webgpu) {
+    if (l_options.b_options.use_webgpu) {
         emcc.addArg("-sUSE_WEBGPU=1");
     }
-    if (options.use_glfw) {
+    if (l_options.b_options.use_glfw) {
         emcc.addArg("--use-port=contrib.glfw3");
     }
-    if (!options.use_filesystem) {
+    if (!l_options.b_options.use_filesystem) {
         emcc.addArg("-sNO_FILESYSTEM=1");
     }
-    if (options.shell_file_path) |shell_file_path| {
+    if (l_options.shell_file_path) |shell_file_path| {
         emcc.addPrefixedFileArg("--shell-file=", shell_file_path);
     }
-    for (options.extra_args) |arg| {
+    for (l_options.b_options.extra_args) |arg| {
         emcc.addArg(arg);
     }
 
-    emcc.addArtifactArg(options.lib_main);
-    for (options.lib_main.getCompileDependencies(false)) |item| {
+    emcc.addArtifactArg(l_options.b_options.lib_main);
+    for (l_options.b_options.lib_main.getCompileDependencies(false)) |item| {
         if (item.kind == .lib) {
             emcc.addArtifactArg(item);
         }
     }
-    if (options.optimize == .Debug or options.optimize == .ReleaseSafe) {
+    if (l_options.b_options.optimize == .Debug or l_options.b_options.optimize == .ReleaseSafe) {
         emcc.addArgs(&[_][]const u8{
             "-sUSE_OFFSET_CONVERTER",
             "-sASSERTIONS",
@@ -295,7 +256,7 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
     }
 
     emcc.addArg("-o");
-    const out_file = emcc.addOutputFileArg(b.fmt("{s}.html", .{options.lib_main.name}));
+    const out_file = emcc.addOutputFileArg(b.fmt("{s}.html", .{l_options.b_options.lib_main.name}));
 
     const install = b.addInstallDirectory(.{
         .source_dir = out_file.dirname(),
@@ -306,15 +267,34 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.InstallDir {
     return install;
 }
 
-pub const EmRunOptions = struct {
+pub const EmOptions = struct {
+    target: Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+    zignite_dep: *Build.Dependency,
     name: []const u8,
-    emsdk: *Build.Dependency,
     browser: ?[]const u8 = "chrome",
+    lib_main: *Build.Step.Compile,
+    release_use_closure: bool = true,
+    release_use_lto: bool = true,
+    use_webgpu: bool = false,
+    use_glfw: bool = false,
+    use_filesystem: bool = true,
+    extra_args: []const []const u8 = &.{},
 };
-pub fn emRunStep(b: *Build, options: EmRunOptions) *Build.Step.Run {
+pub fn emRunStep(b: *Build, options: EmOptions) !void {
+    const emsdk = options.zignite_dep.builder.dependency("emsdk", .{});
+
+    const link_step = try emLinkStep(b, .{
+        .b_options = options,
+        .emsdk = emsdk,
+        .shell_file_path = options.zignite_dep.path("web/shell.html"),
+    });
+
+    b.getInstallStep().dependOn(&link_step.step);
+
     const emrun_path = b.findProgram(&.{"emrun"}, &.{}) catch emSdkLazyPath(
         b,
-        options.emsdk,
+        emsdk,
         &.{ "upstream", "emscripten", "emrun" },
     ).getPath(b);
 
@@ -325,6 +305,7 @@ pub fn emRunStep(b: *Build, options: EmRunOptions) *Build.Step.Run {
     }
 
     emrun.addArg(b.fmt("{s}/web/{s}.html", .{ b.install_path, options.name }));
+    emrun.step.dependOn(&link_step.step);
 
-    return emrun;
+    b.step(options.name, "").dependOn(&emrun.step);
 }

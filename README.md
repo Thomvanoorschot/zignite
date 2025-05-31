@@ -34,63 +34,53 @@ Or add Zignite to your `build.zig.zon`:
 const std = @import("std");
 const zignite = @import("zignite");
 
-pub fn build(b: *std.Build) !void {
+pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    // Dependencies
     const zignite_dep = b.dependency("zignite", .{
         .target = target,
         .optimize = optimize,
     });
 
-    // Client module
-    const exe_mod = b.addModule("client", .{
-        .target = target,
-        .optimize = optimize,
-        .root_source_file = .{ .cwd_relative = "src/main.zig" },
-    });
+    const zignite_lib = zignite_dep.artifact("zignite");
 
-    // Add imports
-    exe_mod.addImport("zignite", zignite_dep.module("zignite"));
+    const example_names = .{
+        "simple_imgui",
+        "simple_implot",
+        "simple_webworker",
+        "simple_webworker_websocket",
+    };
 
-    // Add "executable"
-    const exe = b.addStaticLibrary(.{
-        .name = "Example",
-        .root_module = exe_mod,
-    });
+    inline for (example_names) |example_name| {
+        const example_mod = b.addModule(example_name, .{
+            .target = target,
+            .optimize = optimize,
+            .root_source_file = b.path(example_name ++ ".zig"),
+        });
 
-    // Add imports to executable
-    exe.root_module.addImport("zignite", zignite_dep.module("zignite"));
+        const example = b.addStaticLibrary(.{
+            .name = example_name,
+            .root_module = example_mod,
+        });
+        example.linkLibrary(zignite_lib);
+        example.linkLibC();
+        example.root_module.addImport("zignite", zignite_dep.module("zignite"));
 
-
-    exe.linkLibC();
-    exe.root_module.addImport("zignite", zignite_dep.module("zignite"));
-
-    const emsdk = zignite_dep.builder.dependency("emsdk", .{});
-    const link_step = try zignite.emLinkStep(b, .{
-        .lib_main = exe,
-        .target = target,
-        .optimize = optimize,
-        .emsdk = emsdk,
-        .use_webgpu = true,
-        .use_glfw = true,
-        .shell_file_path = zignite_dep.path("web/shell.html"),
-        .extra_args = &.{
-            "-lwebsocket.js",
-        },
-    });
-
-    b.getInstallStep().dependOn(&link_step.step);
-
-    // Add run step
-    const run = zignite.emRunStep(b, .{ .name = "client", .emsdk = emsdk });
-    run.step.dependOn(&link_step.step);
-    b.step("run", "Run client").dependOn(&run.step);
-
-    b.installArtifact(exe);
+        try zignite.emRunStep(b, .{
+            .target = target,
+            .optimize = optimize,
+            .zignite_dep = zignite_dep,
+            .name = example_name,
+            .lib_main = example,
+            .use_glfw = true,
+            .use_webgpu = true,
+            .extra_args = &.{
+                "-lwebsocket.js",
+            },
+        });
+    }
 }
-
 ```
 
 ## Goals
