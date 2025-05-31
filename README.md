@@ -32,15 +32,21 @@ Or add Zignite to your `build.zig.zon`:
 
 ```zig
 const std = @import("std");
-const zignite = @import("zignite");
+const Build = std.Build;
+const zignite_pkg = @import("zignite");
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
     const zignite_dep = b.dependency("zignite", .{
         .target = target,
         .optimize = optimize,
+        .with_imgui = true,
+        .with_implot = false,
+        .use_glfw = true,
+        .use_webgpu = true,
+        .use_filesystem = false,
     });
 
     const zignite_lib = zignite_dep.artifact("zignite");
@@ -63,21 +69,15 @@ pub fn build(b: *std.Build) void {
             .name = example_name,
             .root_module = example_mod,
         });
+
         example.linkLibrary(zignite_lib);
         example.linkLibC();
         example.root_module.addImport("zignite", zignite_dep.module("zignite"));
 
-        try zignite.emRunStep(b, .{
-            .target = target,
-            .optimize = optimize,
-            .zignite_dep = zignite_dep,
+        _ = zignite_pkg.emRunStep(b, .{
             .name = example_name,
+            .zignite_dep = zignite_dep,
             .lib_main = example,
-            .use_glfw = true,
-            .use_webgpu = true,
-            .extra_args = &.{
-                "-lwebsocket.js",
-            },
         });
     }
 }
