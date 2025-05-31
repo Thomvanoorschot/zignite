@@ -97,7 +97,6 @@ pub const Engine = struct {
         var width: c_int = 0;
         var height: c_int = 0;
         glfw.glfwGetFramebufferSize(self.window, &width, &height);
-        std.debug.print("Framebuffer size: {d}x{d}\n", .{ width, height });
         return try webgpu.Context.init(std.heap.c_allocator, .{
             @intCast(width),
             @intCast(height),
@@ -180,7 +179,6 @@ pub const Engine = struct {
 
     pub fn endRender(self: *Self) void {
         glfw.glfwPollEvents();
-
         if (self.options.show_fps) {
             imgui_utils.renderFPS(self.frame_stats.fps) catch |err| {
                 self.stdErr.print("Failed to print FPS: {}\n", .{err}) catch unreachable;

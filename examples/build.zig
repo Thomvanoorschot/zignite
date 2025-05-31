@@ -10,10 +10,11 @@ pub fn build(b: *Build) void {
         .target = target,
         .optimize = optimize,
         .with_imgui = true,
-        .with_implot = false,
+        .with_implot = true,
         .use_glfw = true,
         .use_webgpu = true,
-        .use_filesystem = false,
+        .use_filesystem = true,
+        .use_websockets = true,
     });
 
     const zignite_lib = zignite_dep.artifact("zignite");

@@ -13,8 +13,8 @@ pub const IMGUI_C_DEFINES: []const [2][]const u8 = &.{
 
 pub var defaultWithImgui: bool = true;
 pub var defaultWithImplot: bool = true;
-pub var defaultUseGLFW: bool = false;
-pub var defaultUseWebGPU: bool = false;
+pub var defaultUseGLFW: bool = true;
+pub var defaultUseWebGPU: bool = true;
 pub var defaultUseFilesystem: bool = true;
 pub var defaultTarget: Build.ResolvedTarget = undefined;
 pub var defaultBrowser: []const u8 = "chrome";
@@ -22,6 +22,7 @@ pub var defaultCpuArg: std.Target.Cpu.Arch = .wasm64;
 pub var defaultOptimize: std.builtin.OptimizeMode = .ReleaseSmall;
 pub var defaultReleaseUseLTO: bool = true;
 pub var defaultReleaseUseClosure: bool = true;
+pub var defaultUseWebsockets: bool = false;
 
 pub fn build(b: *Build) !void {
     var target_query = b.standardTargetOptionsQueryOnly(.{});
@@ -44,7 +45,7 @@ pub fn build(b: *Build) !void {
     const use_glfw: bool =
         b.option(bool, "use_glfw", "Enable GLFW in Emscripten") orelse false;
     const use_webgpu: bool =
-        b.option(bool, "use_webgpu", "Enable WebGPU in Emscripten") orelse false;
+        b.option(bool, "use_webgpu", "Enable WebGPU in Emscripten") orelse true;
     const use_filesystem: bool =
         b.option(bool, "use_filesystem", "Enable file system support in Emscripten") orelse true;
     const browser: []const u8 =
@@ -53,6 +54,8 @@ pub fn build(b: *Build) !void {
         b.option(bool, "release_use_lto", "Enable LTO in release builds") orelse true;
     const release_use_closure: bool =
         b.option(bool, "release_use_closure", "Enable Closure compiler in release builds") orelse true;
+    const use_websockets: bool =
+        b.option(bool, "use_websockets", "Enable websockets support in Emscripten") orelse false;
 
     defaultWithImgui = with_imgui;
     defaultWithImplot = with_implot;
@@ -64,6 +67,8 @@ pub fn build(b: *Build) !void {
     defaultTarget = target;
     defaultReleaseUseLTO = release_use_lto;
     defaultReleaseUseClosure = release_use_closure;
+    defaultUseWebsockets = use_websockets;
+
     if (target_query.cpu_arch != null) {
         defaultCpuArg = target_query.cpu_arch.?;
     }
@@ -215,7 +220,11 @@ pub fn emLinkStep(b: *Build, zignite_dep: *Build.Dependency, lib_main: *Build.St
     emcc.addArg("-sERROR_ON_UNDEFINED_SYMBOLS=0");
     emcc.addArg("-sALLOW_MEMORY_GROWTH=1");
     emcc.addArg("-sASYNCIFY");
+    emcc.addArg("-sUSE_OFFSET_CONVERTER");
 
+    if (defaultUseWebsockets) {
+        emcc.addArgs(&.{"-lwebsocket.js"});
+    }
     if (defaultCpuArg == .wasm64) {
         emcc.addArg("-sMEMORY64=1");
     }
@@ -228,7 +237,8 @@ pub fn emLinkStep(b: *Build, zignite_dep: *Build.Dependency, lib_main: *Build.St
     if (!defaultUseFilesystem) {
         emcc.addArg("-sNO_FILESYSTEM=1");
     }
-
+    emcc.addPrefixedFileArg("--shell-file=", zignite_dep.path("web/shell.html"));
+    emcc.addArg("-sASSERTIONS");
     emcc.addArtifactArg(lib_main);
     for (lib_main.getCompileDependencies(false)) |item| {
         if (item.kind == .lib) {
@@ -237,7 +247,7 @@ pub fn emLinkStep(b: *Build, zignite_dep: *Build.Dependency, lib_main: *Build.St
     }
 
     emcc.addArg("-o");
-    const out_file = emcc.addOutputFileArg(b.fmt("{s}.html", .{"zignite"}));
+    const out_file = emcc.addOutputFileArg(b.fmt("{s}.html", .{lib_main.name}));
 
     const install = b.addInstallDirectory(.{
         .source_dir = out_file.dirname(),
