@@ -21,7 +21,7 @@ Or add Zignite to your `build.zig.zon`:
 
 ```zig
 .dependencies = .{
-    .async_zocket = .{
+    .zignite = .{
         .url = "https://github.com/thomvanoorschot/zignite/archive/main.tar.gz",
         .hash = "...", // Update with actual hash
     },
