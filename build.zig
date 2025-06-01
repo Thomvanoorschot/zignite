@@ -32,6 +32,8 @@ pub fn build(b: *Build) !void {
             .bulk_memory,
         });
     } else {
+        // TODO I ran into the issue where ZLS would crash if the downstream project had not set emscripten as the default target.
+        // Probably want to do this in some other way to prevent this.
         return error.UnsupportedOS;
     }
     const target = b.resolveTargetQuery(target_query);
