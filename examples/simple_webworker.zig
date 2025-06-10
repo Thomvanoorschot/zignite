@@ -12,12 +12,22 @@ const SharedData = struct {
     number: i32,
 };
 
-fn workerEntrypoint(shared: *SharedData) !void {
-    while (true) {
-        shared.number += 1;
-        emscripten_utils.emscripten_sleep(100);
+const ExampleStruct = struct {
+    shared_data: *SharedData,
+    const Self = @This();
+
+    fn init(self: *Self, shared: *SharedData) !void {
+        self.shared_data = shared;
     }
-}
+
+    fn workerEntrypoint(self_: *anyopaque) !void {
+        const self: *Self = @ptrCast(@alignCast(self_));
+        while (true) {
+            self.shared_data.number += 1;
+            emscripten_utils.emscripten_sleep(100);
+        }
+    }
+};
 
 pub fn main() !void {
     // Shared data between main thread and web worker
@@ -25,11 +35,16 @@ pub fn main() !void {
         .number = 0,
     };
 
+    // Example structs that holds the shared data and is responsible for the worker entrypoint
+    var example_struct = ExampleStruct{
+        .shared_data = &shared,
+    };
+
     // Create web worker
-    const ww = try WebWorker(SharedData).init(
+    const ww = try WebWorker.init(
         std.heap.c_allocator,
-        &shared,
-        workerEntrypoint,
+        &example_struct,
+        ExampleStruct.workerEntrypoint,
     );
     defer std.heap.c_allocator.destroy(ww);
 

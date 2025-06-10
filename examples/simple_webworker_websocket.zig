@@ -12,49 +12,55 @@ const SharedData = struct {
     message: []const u8 = "",
 };
 
-fn workerEntrypoint(web_worker: *WebSocketWebWorker(SharedData)) !void {
-    _ = web_worker;
-}
+const ExampleStruct = struct {
+    shared_data: *SharedData,
+    const Self = @This();
 
-fn onOpenCallback(web_worker: *WebSocketWebWorker(SharedData)) !bool {
-    web_worker.std_out.print("WebSocket opened\n", .{}) catch unreachable;
-    if (web_worker.open_socket) |open_socket| {
-        _ = websocket.sendText(open_socket, "{\"method\":\"subscribe\",\"params\":{\"channel\":\"book\",\"symbol\":[\"BTC/USD\"]}}");
+    fn init(self: *Self, shared_data: *SharedData) !void {
+        self.shared_data = shared_data;
     }
-    return true;
-}
 
-fn onMessageCallback(web_worker: *WebSocketWebWorker(SharedData), message: []const u8) !bool {
-    web_worker.shared_data.message = message;
-    return true;
-}
+    fn onOpenCallback(_: *anyopaque, ws: websocket.WebSocket) !bool {
+        _ = websocket.sendText(ws, "{\"method\":\"subscribe\",\"params\":{\"channel\":\"book\",\"symbol\":[\"BTC/USD\"]}}");
+        return true;
+    }
 
-fn onErrorCallback(web_worker: *WebSocketWebWorker(SharedData)) !bool {
-    _ = web_worker;
-    return true;
-}
+    fn onMessageCallback(self_: *anyopaque, message: []const u8) !bool {
+        const self: *Self = @ptrCast(@alignCast(self_));
+        self.shared_data.message = message;
+        return true;
+    }
 
-fn onCloseCallback(web_worker: *WebSocketWebWorker(SharedData), code: u16, reason: []const u8) !bool {
-    _ = web_worker;
-    _ = code;
-    _ = reason;
-    return true;
-}
+    fn onErrorCallback(self_: *anyopaque) !bool {
+        _ = self_;
+        return true;
+    }
+
+    fn onCloseCallback(self_: *anyopaque, code: u16, reason: []const u8) !bool {
+        _ = self_;
+        _ = code;
+        _ = reason;
+        return true;
+    }
+};
+
 pub fn main() !void {
     // Shared data between main thread and web worker
     var shared = SharedData{};
 
     // Create web worker
-    const ww = try WebSocketWebWorker(SharedData).init(
+    var example_struct = ExampleStruct{
+        .shared_data = &shared,
+    };
+    const ww = try WebSocketWebWorker.init(
         std.heap.c_allocator,
         "wss://ws.kraken.com/v2",
-        &shared,
-        workerEntrypoint,
         .{
-            .on_open_cb = onOpenCallback,
-            .on_message_cb = onMessageCallback,
-            .on_error_cb = onErrorCallback,
-            .on_close_cb = onCloseCallback,
+            .callback_ctx = &example_struct,
+            .on_open_cb = ExampleStruct.onOpenCallback,
+            .on_message_cb = ExampleStruct.onMessageCallback,
+            .on_error_cb = ExampleStruct.onErrorCallback,
+            .on_close_cb = ExampleStruct.onCloseCallback,
         },
     );
     defer std.heap.c_allocator.destroy(ww);
