@@ -63,7 +63,7 @@ pub fn sendText(websocket: WebSocket, text: []const u8) WebSocketResult {
 }
 
 pub fn sendBinary(websocket: WebSocket, data: []const u8) WebSocketResult {
-    return c.emscripten_websocket_send_binary(websocket, data.ptr, data.len);
+    return c.emscripten_websocket_send_binary(websocket, @ptrCast(@constCast(data.ptr)), @intCast(data.len));
 }
 
 pub fn close(websocket: WebSocket, code: u16, reason: ?[:0]const u8) WebSocketResult {

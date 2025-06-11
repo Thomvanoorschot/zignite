@@ -114,6 +114,7 @@ pub const Engine = struct {
         }
         glfw.glfwMakeContextCurrent(window);
         glfw.glfwSwapInterval(1);
+
         return window.?;
     }
 

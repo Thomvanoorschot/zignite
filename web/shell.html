@@ -21,6 +21,7 @@
             height: 100%;
             overflow: hidden;
             display: block;
+            touch-action: none;
         }
     </style>
 </head>
@@ -39,6 +40,7 @@
                 return document.getElementById('canvas');
             })(),
         };
+        Module.canvas.addEventListener('wheel', e => e.preventDefault(), { passive: false });
 
         initWebGPU = async () => {
             // Check to ensure the user agent supports WebGPU
