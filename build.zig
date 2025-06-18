@@ -6,6 +6,13 @@ const cflags = &.{
     "-Wno-elaborated-enum-base",
     "-Wno-error=date-time",
 };
+const native_cflags = &.{
+    "-fno-sanitize=undefined",
+    "-Wno-elaborated-enum-base",
+    "-Wno-error=date-time",
+    "-DDAWN_ENABLE_BACKEND_METAL",
+    "-DIMGUI_IMPL_WEBGPU_BACKEND_DAWN",
+};
 
 pub const IMGUI_C_DEFINES: []const [2][]const u8 = &.{
     .{ "IMGUI_IMPL_API", "extern \"C\"" },
@@ -34,7 +41,7 @@ pub fn build(b: *Build) !void {
     } else {
         // TODO I ran into the issue where ZLS would crash if the downstream project had not set emscripten as the default target.
         // Probably want to do this in some other way to prevent this.
-        return error.UnsupportedOS;
+        // return error.UnsupportedOS;
     }
     const target = b.resolveTargetQuery(target_query);
     const optimize = b.standardOptimizeOption(.{});
@@ -88,6 +95,84 @@ pub fn build(b: *Build) !void {
     zignite.linkLibCpp();
     zignite.linkLibC();
 
+    if (false) {
+        // Native build setup
+        try setupNativeBuild(b, zignite, with_imgui, with_implot);
+    } else {
+        // Emscripten build setup (existing code)
+        try setupEmscriptenBuild(b, zignite, with_imgui, with_implot);
+    }
+
+    b.installArtifact(zignite);
+}
+
+fn setupNativeBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: bool, with_implot: bool) !void {
+    // Add system libraries for macOS
+    if (zignite.rootModuleTarget().os.tag == .macos) {
+        zignite.linkFramework("Cocoa");
+        zignite.linkFramework("IOKit");
+        zignite.linkFramework("CoreVideo");
+        zignite.linkFramework("Metal");
+        zignite.linkFramework("QuartzCore");
+    }
+
+    // Link GLFW (you'll need to have GLFW installed via Homebrew or build from source)
+    zignite.linkSystemLibrary("glfw3");
+
+    // Add WebGPU/Dawn support
+    zignite.addIncludePath(b.path("libs/webgpu"));
+    zignite.addCSourceFile(.{
+        .file = b.path("libs/webgpu/lib_webgpu_dawn.cpp"),
+        .flags = native_cflags,
+    });
+
+    if (with_imgui) {
+        zignite.addIncludePath(b.path("libs/imgui"));
+        zignite.addIncludePath(b.path("libs/imgui/backends"));
+        for (IMGUI_C_DEFINES) |c_define| {
+            zignite.root_module.addCMacro(c_define[0], c_define[1]);
+        }
+
+        // Add the Dawn backend define for ImGui
+        zignite.root_module.addCMacro("IMGUI_IMPL_WEBGPU_BACKEND_DAWN", "1");
+
+        zignite.addCSourceFiles(.{
+            .files = &.{
+                "libs/cimgui.cpp",
+                "libs/cimgui_impl.cpp",
+                "libs/imgui/imgui.cpp",
+                "libs/imgui/imgui_widgets.cpp",
+                "libs/imgui/imgui_tables.cpp",
+                "libs/imgui/imgui_draw.cpp",
+                "libs/imgui/imgui_demo.cpp",
+            },
+            .flags = cflags,
+        });
+        zignite.addCSourceFile(.{
+            .file = b.path("libs/imgui/backends/imgui_impl_glfw.cpp"),
+            .flags = native_cflags,
+        });
+        zignite.addCSourceFile(.{
+            .file = b.path("libs/imgui/backends/imgui_impl_wgpu.cpp"),
+            .flags = native_cflags,
+        });
+    }
+
+    if (with_implot) {
+        zignite.addIncludePath(b.path("libs/implot"));
+        zignite.addCSourceFiles(.{
+            .files = &.{
+                "libs/cimplot.cpp",
+                "libs/implot/implot_demo.cpp",
+                "libs/implot/implot.cpp",
+                "libs/implot/implot_items.cpp",
+            },
+            .flags = native_cflags,
+        });
+    }
+}
+
+fn setupEmscriptenBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: bool, with_implot: bool) !void {
     const emsdk = b.dependency("emsdk", .{});
     if (emSdkSetupStep(b, emsdk)) |activateStep| {
         zignite.step.dependOn(&activateStep.step);
@@ -146,8 +231,33 @@ pub fn build(b: *Build) !void {
             .flags = cflags,
         });
     }
+}
 
-    b.installArtifact(zignite);
+pub fn nativeAppStep(b: *Build, args: struct {
+    name: []const u8,
+    zignite_dep: *Build.Dependency,
+    lib_main: *Build.Step.Compile,
+}) void {
+    const exe = b.addExecutable(.{
+        .name = args.name,
+        .root_source_file = args.lib_main.root_module.root_source_file.?,
+        .target = args.lib_main.root_module.resolved_target.?,
+        .optimize = args.lib_main.root_module.optimize.?,
+    });
+
+    exe.linkLibrary(args.zignite_dep.artifact("zignite"));
+    exe.root_module.addImport("zignite", args.zignite_dep.module("zignite"));
+
+    const run_cmd = b.addRunArtifact(exe);
+    run_cmd.step.dependOn(b.getInstallStep());
+    if (b.args) |run_args| {
+        run_cmd.addArgs(run_args);
+    }
+
+    const run_step = b.step(args.name, b.fmt("Run the {s} app", .{args.name}));
+    run_step.dependOn(&run_cmd.step);
+
+    b.installArtifact(exe);
 }
 
 fn emSdkSetupStep(b: *Build, emsdk: *Build.Dependency) ?*Build.Step.Run {
@@ -187,7 +297,7 @@ pub fn emRunStep(b: *Build, args: struct {
 
     const emrun = b.addSystemCommand(&.{emrun_path});
     emrun.addArgs(&.{ "--browser", defaultBrowser });
-    // (Here you could also pull “defaultBrowser” from a b.option, if desired.)
+    // (Here you could also pull "defaultBrowser" from a b.option, if desired.)
     emrun.addArg(b.fmt("{s}/web/{s}.html", .{ b.install_path, args.name }));
     emrun.step.dependOn(&link_step.step);
 

@@ -4,6 +4,10 @@ const zignite_pkg = @import("zignite");
 
 pub fn build(b: *Build) void {
     const target = b.standardTargetOptions(.{});
+    // const target = b.resolveTargetQuery(.{
+    //     .cpu_arch = .wasm64,
+    //     .os_tag = .emscripten,
+    // });
     const optimize = b.standardOptimizeOption(.{});
 
     const zignite_dep = b.dependency("zignite", .{
