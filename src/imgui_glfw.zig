@@ -1,14 +1,24 @@
 const cc = @cImport({
-    @cInclude("contrib.glfw3/GLFW/glfw3.h");
-    @cInclude("contrib.glfw3/GLFW/emscripten_glfw3.h");
+    @cDefine("CIMGUI_USE_GLFW", "1");
+    @cDefine("CIMGUI_DEFINE_ENUMS_AND_STRUCTS", "1");
+    if (@import("builtin").target.os.tag == .emscripten) {
+        @cInclude("contrib.glfw3/GLFW/glfw3.h");
+        @cInclude("contrib.glfw3/GLFW/emscripten_glfw3.h");
+    } else {
+        @cInclude("GLFW/glfw3.h");
+    }
 });
 
 pub fn MakeCanvasResizable(window: *cc.GLFWwindow) void {
-    _ = cc.emscripten_glfw_make_canvas_resizable(window, "window", null);
+    if (@import("builtin").target.os.tag == .emscripten) {
+        _ = cc.emscripten_glfw_make_canvas_resizable(window, "window", null);
+    }
 }
 
 pub fn SetNextWindowCanvasSelector(canvasSelector: []const u8) void {
-    _ = cc.emscripten_glfw_set_next_window_canvas_selector(canvasSelector.ptr);
+    if (@import("builtin").target.os.tag == .emscripten) {
+        _ = cc.emscripten_glfw_set_next_window_canvas_selector(canvasSelector.ptr);
+    }
 }
 
 pub const __builtin_bswap16 = @import("std").zig.c_builtins.__builtin_bswap16;

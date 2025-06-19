@@ -32,13 +32,13 @@ pub const Context = struct {
             }),
         });
         const swapchain_descriptor = WGPUSwapChainDescriptor{
-                .nextInChain = null,
-                .usage = WGPUTextureUsage_RenderAttachment,
-                .format = WGPUTextureFormat_BGRA8Unorm,
-                .width = @intCast(framebuffer_size[0]),
-                .height = @intCast(framebuffer_size[1]),
-                .presentMode = WGPUPresentMode_Fifo,
-            };
+            .nextInChain = null,
+            .usage = WGPUTextureUsage_RenderAttachment,
+            .format = WGPUTextureFormat_BGRA8Unorm,
+            .width = @intCast(framebuffer_size[0]),
+            .height = @intCast(framebuffer_size[1]),
+            .presentMode = WGPUPresentMode_Fifo,
+        };
         const swapchain = wgpuDeviceCreateSwapChain(
             @ptrCast(device),
             surface,

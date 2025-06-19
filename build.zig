@@ -91,11 +91,12 @@ pub fn build(b: *Build) !void {
         .root_module = zignite_mod,
         .linkage = .static,
     });
+    std.log.info("Building for {any} {any}", .{ zignite.rootModuleTarget().cpu.arch, zignite.rootModuleTarget().os.tag });
 
     zignite.linkLibCpp();
     zignite.linkLibC();
 
-    if (false) {
+    if (zignite.rootModuleTarget().os.tag == .macos) {
         // Native build setup
         try setupNativeBuild(b, zignite, with_imgui, with_implot);
     } else {
@@ -116,15 +117,17 @@ fn setupNativeBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: bool, w
         zignite.linkFramework("QuartzCore");
     }
 
-    // Link GLFW (you'll need to have GLFW installed via Homebrew or build from source)
-    zignite.linkSystemLibrary("glfw3");
+    // Link GLFW
+    zignite.linkSystemLibrary("glfw");
 
-    // Add WebGPU/Dawn support
-    zignite.addIncludePath(b.path("libs/webgpu"));
-    zignite.addCSourceFile(.{
-        .file = b.path("libs/webgpu/lib_webgpu_dawn.cpp"),
-        .flags = native_cflags,
-    });
+    // Instead of addObjectFile, use addLibraryPath + linkSystemLibrary
+    zignite.addLibraryPath(b.path("libs/dawn"));
+
+    // Try linking the library by name (remove the 'lib' prefix and '.a' suffix)
+    zignite.linkSystemLibrary("dawn_macos");
+
+    // Add Dawn includes
+    zignite.addIncludePath(b.path("libs/dawn/include"));
 
     if (with_imgui) {
         zignite.addIncludePath(b.path("libs/imgui"));
