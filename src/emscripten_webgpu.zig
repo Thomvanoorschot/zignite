@@ -1,128 +1,3 @@
-const std = @import("std");
-const em = @import("emscripten.zig");
-const em_webgpu = @import("emscripten_webgpu.zig");
-const em_html = @import("emscripten_html5.zig");
-
-pub const Context = struct {
-    instance: WGPUInstance,
-    device: WGPUDevice,
-    queue: WGPUQueue,
-    swapchain: WGPUSwapChain,
-    swapchain_descriptor: WGPUSwapChainDescriptor,
-    // pipeline: WGPURenderPipeline,
-
-    const Self = @This();
-
-    pub fn init(allocator: std.mem.Allocator, framebuffer_size: [2]u32) !*Self {
-        const self = try allocator.create(Self);
-        const instance = wgpuCreateInstance(null);
-        const device = em_webgpu.emscripten_webgpu_get_device();
-        const queue = wgpuDeviceGetQueue(@ptrCast(device));
-
-        const canvas_name: []const u8 = "canvas";
-        const surface = wgpuInstanceCreateSurface(instance, &WGPUSurfaceDescriptor{
-            .nextInChain = @ptrCast(&WGPUSurfaceDescriptorFromCanvasHTMLSelector{
-                .chain = .{ .sType = WGPUSType_SurfaceDescriptorFromCanvasHTMLSelector },
-                // .selector = canvas_name.ptr,
-                .selector = "#canvas",
-            }),
-        });
-        const swapchain_descriptor = WGPUSwapChainDescriptor{
-            .nextInChain = null,
-            .usage = WGPUTextureUsage_RenderAttachment,
-            .format = WGPUTextureFormat_BGRA8Unorm,
-            .width = @intCast(framebuffer_size[0]),
-            .height = @intCast(framebuffer_size[1]),
-            .presentMode = WGPUPresentMode_Fifo,
-        };
-        const swapchain = wgpuDeviceCreateSwapChain(
-            @ptrCast(device),
-            surface,
-            &swapchain_descriptor,
-        );
-        errdefer swapchain.release();
-
-        _ = em_html.emscripten_set_canvas_element_size(canvas_name.ptr, @intCast(framebuffer_size[0]), @intCast(framebuffer_size[1]));
-        self.* = .{
-            .instance = instance,
-            .device = @ptrCast(device),
-            .queue = queue,
-            .swapchain = swapchain,
-            .swapchain_descriptor = swapchain_descriptor,
-        };
-        return self;
-    }
-};
-
-pub fn beginRenderPassSimple(
-    encoder: WGPUCommandEncoder,
-    load_op: WGPULoadOp,
-    color_texv: WGPUTextureView,
-    clear_color: ?WGPUColor,
-    depth_texv: ?WGPUTextureView,
-    clear_depth: ?f32,
-) WGPURenderPassEncoder {
-    if (depth_texv == null) {
-        // assert(clear_depth == null);
-    }
-    const color_attachments = [_]WGPURenderPassColorAttachment{.{
-        .depthSlice = WGPU_DEPTH_SLICE_UNDEFINED,
-        .view = color_texv,
-        .loadOp = load_op,
-        .storeOp = WGPUStoreOp_Store,
-        .clearValue = if (clear_color) |cv| cv else .{ .r = 0, .g = 0, .b = 0, .a = 0 },
-    }};
-    if (depth_texv) |dtexv| {
-        const depth_attachment = WGPURenderPassDepthStencilAttachment{
-            .view = dtexv,
-            .depthLoadOp = load_op,
-            .depthStoreOp = WGPUStoreOp_Store,
-            .depthClearValue = if (clear_depth) |cd| cd else 0.0,
-        };
-        return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
-            .colorAttachmentCount = color_attachments.len,
-            .colorAttachments = &color_attachments,
-            .depthStencilAttachment = &depth_attachment,
-        });
-    }
-    return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
-        .colorAttachmentCount = color_attachments.len,
-        .colorAttachments = &color_attachments,
-    });
-}
-
-const FrameStats = struct {
-    time: f64 = 0.0,
-    delta_time: f32 = 0.0,
-    fps_counter: u32 = 0,
-    fps: f64 = 0.0,
-    average_cpu_time: f64 = 0.0,
-    previous_time: f64 = 0.0,
-    fps_refresh_time: f64 = 0.0,
-    cpu_frame_number: u64 = 0,
-    gpu_frame_number: u64 = 0,
-
-    fn tick(stats: *FrameStats, now_secs: f64) void {
-        stats.time = now_secs;
-        stats.delta_time = @floatCast(stats.time - stats.previous_time);
-        stats.previous_time = stats.time;
-
-        if ((stats.time - stats.fps_refresh_time) >= 1.0) {
-            const t = stats.time - stats.fps_refresh_time;
-            const fps = @as(f64, @floatFromInt(stats.fps_counter)) / t;
-            const ms = (1.0 / fps) * 1000.0;
-
-            stats.fps = fps;
-            stats.average_cpu_time = ms;
-            stats.fps_refresh_time = stats.time;
-            stats.fps_counter = 0;
-        }
-        stats.fps_counter += 1;
-        stats.cpu_frame_number += 1;
-    }
-};
-
-// -------------------
 pub const __builtin_bswap16 = @import("std").zig.c_builtins.__builtin_bswap16;
 pub const __builtin_bswap32 = @import("std").zig.c_builtins.__builtin_bswap32;
 pub const __builtin_bswap64 = @import("std").zig.c_builtins.__builtin_bswap64;
@@ -197,11 +72,11 @@ pub const int_fast16_t = i32;
 pub const int_fast32_t = i32;
 pub const uint_fast16_t = u32;
 pub const uint_fast32_t = u32;
-pub const ptrdiff_t = c_long;
 pub const wchar_t = c_int;
+pub const ptrdiff_t = c_long;
 pub const max_align_t = extern struct {
-    __clang_max_align_nonce1: c_longlong align(8) = @import("std").mem.zeroes(c_longlong),
-    __clang_max_align_nonce2: c_longdouble align(8) = @import("std").mem.zeroes(c_longdouble),
+    __ll: c_longlong = @import("std").mem.zeroes(c_longlong),
+    __ld: c_longdouble = @import("std").mem.zeroes(c_longdouble),
 };
 pub const WGPUFlags = u32;
 pub const WGPUBool = u32;
@@ -1791,6 +1666,50 @@ pub extern fn wgpuTextureRelease(texture: WGPUTexture) void;
 pub extern fn wgpuTextureViewSetLabel(textureView: WGPUTextureView, label: [*c]const u8) void;
 pub extern fn wgpuTextureViewReference(textureView: WGPUTextureView) void;
 pub extern fn wgpuTextureViewRelease(textureView: WGPUTextureView) void;
+pub extern fn emscripten_webgpu_get_device() WGPUDevice;
+pub extern fn emscripten_webgpu_release_js_handle(js_handle: c_int) void;
+pub extern fn emscripten_webgpu_import_surface(c_int) WGPUSurface;
+pub extern fn emscripten_webgpu_export_surface(WGPUSurface) c_int;
+pub extern fn emscripten_webgpu_import_swap_chain(c_int) WGPUSwapChain;
+pub extern fn emscripten_webgpu_export_swap_chain(WGPUSwapChain) c_int;
+pub extern fn emscripten_webgpu_import_device(c_int) WGPUDevice;
+pub extern fn emscripten_webgpu_export_device(WGPUDevice) c_int;
+pub extern fn emscripten_webgpu_import_queue(c_int) WGPUQueue;
+pub extern fn emscripten_webgpu_export_queue(WGPUQueue) c_int;
+pub extern fn emscripten_webgpu_import_command_buffer(c_int) WGPUCommandBuffer;
+pub extern fn emscripten_webgpu_export_command_buffer(WGPUCommandBuffer) c_int;
+pub extern fn emscripten_webgpu_import_command_encoder(c_int) WGPUCommandEncoder;
+pub extern fn emscripten_webgpu_export_command_encoder(WGPUCommandEncoder) c_int;
+pub extern fn emscripten_webgpu_import_render_pass_encoder(c_int) WGPURenderPassEncoder;
+pub extern fn emscripten_webgpu_export_render_pass_encoder(WGPURenderPassEncoder) c_int;
+pub extern fn emscripten_webgpu_import_compute_pass_encoder(c_int) WGPUComputePassEncoder;
+pub extern fn emscripten_webgpu_export_compute_pass_encoder(WGPUComputePassEncoder) c_int;
+pub extern fn emscripten_webgpu_import_bind_group(c_int) WGPUBindGroup;
+pub extern fn emscripten_webgpu_export_bind_group(WGPUBindGroup) c_int;
+pub extern fn emscripten_webgpu_import_buffer(c_int) WGPUBuffer;
+pub extern fn emscripten_webgpu_export_buffer(WGPUBuffer) c_int;
+pub extern fn emscripten_webgpu_import_sampler(c_int) WGPUSampler;
+pub extern fn emscripten_webgpu_export_sampler(WGPUSampler) c_int;
+pub extern fn emscripten_webgpu_import_texture(c_int) WGPUTexture;
+pub extern fn emscripten_webgpu_export_texture(WGPUTexture) c_int;
+pub extern fn emscripten_webgpu_import_texture_view(c_int) WGPUTextureView;
+pub extern fn emscripten_webgpu_export_texture_view(WGPUTextureView) c_int;
+pub extern fn emscripten_webgpu_import_query_set(c_int) WGPUQuerySet;
+pub extern fn emscripten_webgpu_export_query_set(WGPUQuerySet) c_int;
+pub extern fn emscripten_webgpu_import_bind_group_layout(c_int) WGPUBindGroupLayout;
+pub extern fn emscripten_webgpu_export_bind_group_layout(WGPUBindGroupLayout) c_int;
+pub extern fn emscripten_webgpu_import_pipeline_layout(c_int) WGPUPipelineLayout;
+pub extern fn emscripten_webgpu_export_pipeline_layout(WGPUPipelineLayout) c_int;
+pub extern fn emscripten_webgpu_import_render_pipeline(c_int) WGPURenderPipeline;
+pub extern fn emscripten_webgpu_export_render_pipeline(WGPURenderPipeline) c_int;
+pub extern fn emscripten_webgpu_import_compute_pipeline(c_int) WGPUComputePipeline;
+pub extern fn emscripten_webgpu_export_compute_pipeline(WGPUComputePipeline) c_int;
+pub extern fn emscripten_webgpu_import_shader_module(c_int) WGPUShaderModule;
+pub extern fn emscripten_webgpu_export_shader_module(WGPUShaderModule) c_int;
+pub extern fn emscripten_webgpu_import_render_bundle_encoder(c_int) WGPURenderBundleEncoder;
+pub extern fn emscripten_webgpu_export_render_bundle_encoder(WGPURenderBundleEncoder) c_int;
+pub extern fn emscripten_webgpu_import_render_bundle(c_int) WGPURenderBundle;
+pub extern fn emscripten_webgpu_export_render_bundle(WGPURenderBundle) c_int;
 pub const __llvm__ = @as(c_int, 1);
 pub const __clang__ = @as(c_int, 1);
 pub const __clang_major__ = @as(c_int, 20);
@@ -1829,8 +1748,11 @@ pub const __FPCLASS_POSNORMAL = @as(c_int, 0x0100);
 pub const __FPCLASS_POSINF = @as(c_int, 0x0200);
 pub const __PRAGMA_REDEFINE_EXTNAME = @as(c_int, 1);
 pub const __VERSION__ = "Clang 20.1.2 (https://github.com/ziglang/zig-bootstrap daa53a0971085d5e5e4b20b9984b21182ecec266)";
-pub const __OBJC_BOOL_IS_BOOL = @as(c_int, 0);
+pub const __OBJC_BOOL_IS_BOOL = @as(c_int, 1);
 pub const __CONSTANT_CFSTRINGS__ = @as(c_int, 1);
+pub const __block = @compileError("unable to translate macro: undefined identifier `__blocks__`");
+// (no file):42:9
+pub const __BLOCKS__ = @as(c_int, 1);
 pub const __clang_literal_encoding__ = "UTF-8";
 pub const __clang_wide_literal_encoding__ = "UTF-32";
 pub const __ORDER_LITTLE_ENDIAN__ = @as(c_int, 1234);
@@ -1838,63 +1760,63 @@ pub const __ORDER_BIG_ENDIAN__ = @as(c_int, 4321);
 pub const __ORDER_PDP_ENDIAN__ = @as(c_int, 3412);
 pub const __BYTE_ORDER__ = __ORDER_LITTLE_ENDIAN__;
 pub const __LITTLE_ENDIAN__ = @as(c_int, 1);
-pub const _ILP32 = @as(c_int, 1);
-pub const __ILP32__ = @as(c_int, 1);
+pub const _LP64 = @as(c_int, 1);
+pub const __LP64__ = @as(c_int, 1);
 pub const __CHAR_BIT__ = @as(c_int, 8);
 pub const __BOOL_WIDTH__ = @as(c_int, 1);
 pub const __SHRT_WIDTH__ = @as(c_int, 16);
 pub const __INT_WIDTH__ = @as(c_int, 32);
-pub const __LONG_WIDTH__ = @as(c_int, 32);
+pub const __LONG_WIDTH__ = @as(c_int, 64);
 pub const __LLONG_WIDTH__ = @as(c_int, 64);
 pub const __BITINT_MAXWIDTH__ = @as(c_int, 128);
 pub const __SCHAR_MAX__ = @as(c_int, 127);
 pub const __SHRT_MAX__ = @as(c_int, 32767);
 pub const __INT_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_int, 2147483647, .decimal);
-pub const __LONG_MAX__ = @as(c_long, 2147483647);
+pub const __LONG_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_long, 9223372036854775807, .decimal);
 pub const __LONG_LONG_MAX__ = @as(c_longlong, 9223372036854775807);
 pub const __WCHAR_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_int, 2147483647, .decimal);
 pub const __WCHAR_WIDTH__ = @as(c_int, 32);
 pub const __WINT_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_int, 2147483647, .decimal);
 pub const __WINT_WIDTH__ = @as(c_int, 32);
-pub const __INTMAX_MAX__ = @as(c_longlong, 9223372036854775807);
+pub const __INTMAX_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_long, 9223372036854775807, .decimal);
 pub const __INTMAX_WIDTH__ = @as(c_int, 64);
-pub const __SIZE_MAX__ = @as(c_ulong, 4294967295);
-pub const __SIZE_WIDTH__ = @as(c_int, 32);
-pub const __UINTMAX_MAX__ = @as(c_ulonglong, 18446744073709551615);
+pub const __SIZE_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_ulong, 18446744073709551615, .decimal);
+pub const __SIZE_WIDTH__ = @as(c_int, 64);
+pub const __UINTMAX_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_ulong, 18446744073709551615, .decimal);
 pub const __UINTMAX_WIDTH__ = @as(c_int, 64);
-pub const __PTRDIFF_MAX__ = @as(c_long, 2147483647);
-pub const __PTRDIFF_WIDTH__ = @as(c_int, 32);
-pub const __INTPTR_MAX__ = @as(c_long, 2147483647);
-pub const __INTPTR_WIDTH__ = @as(c_int, 32);
-pub const __UINTPTR_MAX__ = @as(c_ulong, 4294967295);
-pub const __UINTPTR_WIDTH__ = @as(c_int, 32);
+pub const __PTRDIFF_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_long, 9223372036854775807, .decimal);
+pub const __PTRDIFF_WIDTH__ = @as(c_int, 64);
+pub const __INTPTR_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_long, 9223372036854775807, .decimal);
+pub const __INTPTR_WIDTH__ = @as(c_int, 64);
+pub const __UINTPTR_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_ulong, 18446744073709551615, .decimal);
+pub const __UINTPTR_WIDTH__ = @as(c_int, 64);
 pub const __SIZEOF_DOUBLE__ = @as(c_int, 8);
 pub const __SIZEOF_FLOAT__ = @as(c_int, 4);
 pub const __SIZEOF_INT__ = @as(c_int, 4);
-pub const __SIZEOF_LONG__ = @as(c_int, 4);
-pub const __SIZEOF_LONG_DOUBLE__ = @as(c_int, 16);
+pub const __SIZEOF_LONG__ = @as(c_int, 8);
+pub const __SIZEOF_LONG_DOUBLE__ = @as(c_int, 8);
 pub const __SIZEOF_LONG_LONG__ = @as(c_int, 8);
-pub const __SIZEOF_POINTER__ = @as(c_int, 4);
+pub const __SIZEOF_POINTER__ = @as(c_int, 8);
 pub const __SIZEOF_SHORT__ = @as(c_int, 2);
-pub const __SIZEOF_PTRDIFF_T__ = @as(c_int, 4);
-pub const __SIZEOF_SIZE_T__ = @as(c_int, 4);
+pub const __SIZEOF_PTRDIFF_T__ = @as(c_int, 8);
+pub const __SIZEOF_SIZE_T__ = @as(c_int, 8);
 pub const __SIZEOF_WCHAR_T__ = @as(c_int, 4);
 pub const __SIZEOF_WINT_T__ = @as(c_int, 4);
 pub const __SIZEOF_INT128__ = @as(c_int, 16);
-pub const __INTMAX_TYPE__ = c_longlong;
-pub const __INTMAX_FMTd__ = "lld";
-pub const __INTMAX_FMTi__ = "lli";
-pub const __INTMAX_C_SUFFIX__ = @compileError("unable to translate macro: undefined identifier `LL`");
-// (no file):95:9
-pub const __INTMAX_C = @import("std").zig.c_translation.Macros.LL_SUFFIX;
-pub const __UINTMAX_TYPE__ = c_ulonglong;
-pub const __UINTMAX_FMTo__ = "llo";
-pub const __UINTMAX_FMTu__ = "llu";
-pub const __UINTMAX_FMTx__ = "llx";
-pub const __UINTMAX_FMTX__ = "llX";
-pub const __UINTMAX_C_SUFFIX__ = @compileError("unable to translate macro: undefined identifier `ULL`");
-// (no file):102:9
-pub const __UINTMAX_C = @import("std").zig.c_translation.Macros.ULL_SUFFIX;
+pub const __INTMAX_TYPE__ = c_long;
+pub const __INTMAX_FMTd__ = "ld";
+pub const __INTMAX_FMTi__ = "li";
+pub const __INTMAX_C_SUFFIX__ = @compileError("unable to translate macro: undefined identifier `L`");
+// (no file):97:9
+pub const __INTMAX_C = @import("std").zig.c_translation.Macros.L_SUFFIX;
+pub const __UINTMAX_TYPE__ = c_ulong;
+pub const __UINTMAX_FMTo__ = "lo";
+pub const __UINTMAX_FMTu__ = "lu";
+pub const __UINTMAX_FMTx__ = "lx";
+pub const __UINTMAX_FMTX__ = "lX";
+pub const __UINTMAX_C_SUFFIX__ = @compileError("unable to translate macro: undefined identifier `UL`");
+// (no file):104:9
+pub const __UINTMAX_C = @import("std").zig.c_translation.Macros.UL_SUFFIX;
 pub const __PTRDIFF_TYPE__ = c_long;
 pub const __PTRDIFF_FMTd__ = "ld";
 pub const __PTRDIFF_FMTi__ = "li";
@@ -1908,7 +1830,7 @@ pub const __SIZE_FMTx__ = "lx";
 pub const __SIZE_FMTX__ = "lX";
 pub const __WCHAR_TYPE__ = c_int;
 pub const __WINT_TYPE__ = c_int;
-pub const __SIG_ATOMIC_MAX__ = @as(c_long, 2147483647);
+pub const __SIG_ATOMIC_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_int, 2147483647, .decimal);
 pub const __SIG_ATOMIC_WIDTH__ = @as(c_int, 32);
 pub const __CHAR16_TYPE__ = c_ushort;
 pub const __CHAR32_TYPE__ = c_uint;
@@ -1917,6 +1839,21 @@ pub const __UINTPTR_FMTo__ = "lo";
 pub const __UINTPTR_FMTu__ = "lu";
 pub const __UINTPTR_FMTx__ = "lx";
 pub const __UINTPTR_FMTX__ = "lX";
+pub const __FLT16_DENORM_MIN__ = @as(f16, 5.9604644775390625e-8);
+pub const __FLT16_NORM_MAX__ = @as(f16, 6.5504e+4);
+pub const __FLT16_HAS_DENORM__ = @as(c_int, 1);
+pub const __FLT16_DIG__ = @as(c_int, 3);
+pub const __FLT16_DECIMAL_DIG__ = @as(c_int, 5);
+pub const __FLT16_EPSILON__ = @as(f16, 9.765625e-4);
+pub const __FLT16_HAS_INFINITY__ = @as(c_int, 1);
+pub const __FLT16_HAS_QUIET_NAN__ = @as(c_int, 1);
+pub const __FLT16_MANT_DIG__ = @as(c_int, 11);
+pub const __FLT16_MAX_10_EXP__ = @as(c_int, 4);
+pub const __FLT16_MAX_EXP__ = @as(c_int, 16);
+pub const __FLT16_MAX__ = @as(f16, 6.5504e+4);
+pub const __FLT16_MIN_10_EXP__ = -@as(c_int, 4);
+pub const __FLT16_MIN_EXP__ = -@as(c_int, 13);
+pub const __FLT16_MIN__ = @as(f16, 6.103515625e-5);
 pub const __FLT_DENORM_MIN__ = @as(f32, 1.40129846e-45);
 pub const __FLT_NORM_MAX__ = @as(f32, 3.40282347e+38);
 pub const __FLT_HAS_DENORM__ = @as(c_int, 1);
@@ -1947,23 +1884,23 @@ pub const __DBL_MAX__ = @as(f64, 1.7976931348623157e+308);
 pub const __DBL_MIN_10_EXP__ = -@as(c_int, 307);
 pub const __DBL_MIN_EXP__ = -@as(c_int, 1021);
 pub const __DBL_MIN__ = @as(f64, 2.2250738585072014e-308);
-pub const __LDBL_DENORM_MIN__ = @as(c_longdouble, 6.47517511943802511092443895822764655e-4966);
-pub const __LDBL_NORM_MAX__ = @as(c_longdouble, 1.18973149535723176508575932662800702e+4932);
+pub const __LDBL_DENORM_MIN__ = @as(c_longdouble, 4.9406564584124654e-324);
+pub const __LDBL_NORM_MAX__ = @as(c_longdouble, 1.7976931348623157e+308);
 pub const __LDBL_HAS_DENORM__ = @as(c_int, 1);
-pub const __LDBL_DIG__ = @as(c_int, 33);
-pub const __LDBL_DECIMAL_DIG__ = @as(c_int, 36);
-pub const __LDBL_EPSILON__ = @as(c_longdouble, 1.92592994438723585305597794258492732e-34);
+pub const __LDBL_DIG__ = @as(c_int, 15);
+pub const __LDBL_DECIMAL_DIG__ = @as(c_int, 17);
+pub const __LDBL_EPSILON__ = @as(c_longdouble, 2.2204460492503131e-16);
 pub const __LDBL_HAS_INFINITY__ = @as(c_int, 1);
 pub const __LDBL_HAS_QUIET_NAN__ = @as(c_int, 1);
-pub const __LDBL_MANT_DIG__ = @as(c_int, 113);
-pub const __LDBL_MAX_10_EXP__ = @as(c_int, 4932);
-pub const __LDBL_MAX_EXP__ = @as(c_int, 16384);
-pub const __LDBL_MAX__ = @as(c_longdouble, 1.18973149535723176508575932662800702e+4932);
-pub const __LDBL_MIN_10_EXP__ = -@as(c_int, 4931);
-pub const __LDBL_MIN_EXP__ = -@as(c_int, 16381);
-pub const __LDBL_MIN__ = @as(c_longdouble, 3.36210314311209350626267781732175260e-4932);
-pub const __POINTER_WIDTH__ = @as(c_int, 32);
-pub const __BIGGEST_ALIGNMENT__ = @as(c_int, 16);
+pub const __LDBL_MANT_DIG__ = @as(c_int, 53);
+pub const __LDBL_MAX_10_EXP__ = @as(c_int, 308);
+pub const __LDBL_MAX_EXP__ = @as(c_int, 1024);
+pub const __LDBL_MAX__ = @as(c_longdouble, 1.7976931348623157e+308);
+pub const __LDBL_MIN_10_EXP__ = -@as(c_int, 307);
+pub const __LDBL_MIN_EXP__ = -@as(c_int, 1021);
+pub const __LDBL_MIN__ = @as(c_longdouble, 2.2250738585072014e-308);
+pub const __POINTER_WIDTH__ = @as(c_int, 64);
+pub const __BIGGEST_ALIGNMENT__ = @as(c_int, 8);
 pub const __INT8_TYPE__ = i8;
 pub const __INT8_FMTd__ = "hhd";
 pub const __INT8_FMTi__ = "hhi";
@@ -1992,7 +1929,7 @@ pub const __INT64_TYPE__ = c_longlong;
 pub const __INT64_FMTd__ = "lld";
 pub const __INT64_FMTi__ = "lli";
 pub const __INT64_C_SUFFIX__ = @compileError("unable to translate macro: undefined identifier `LL`");
-// (no file):191:9
+// (no file):208:9
 pub const __INT64_C = @import("std").zig.c_translation.Macros.LL_SUFFIX;
 pub const __UINT8_TYPE__ = u8;
 pub const __UINT8_FMTo__ = "hho";
@@ -2024,7 +1961,7 @@ pub const __UINT32_FMTu__ = "u";
 pub const __UINT32_FMTx__ = "x";
 pub const __UINT32_FMTX__ = "X";
 pub const __UINT32_C_SUFFIX__ = @compileError("unable to translate macro: undefined identifier `U`");
-// (no file):216:9
+// (no file):233:9
 pub const __UINT32_C = @import("std").zig.c_translation.Macros.U_SUFFIX;
 pub const __UINT32_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_uint, 4294967295, .decimal);
 pub const __INT32_MAX__ = @import("std").zig.c_translation.promoteIntLiteral(c_int, 2147483647, .decimal);
@@ -2034,7 +1971,7 @@ pub const __UINT64_FMTu__ = "llu";
 pub const __UINT64_FMTx__ = "llx";
 pub const __UINT64_FMTX__ = "llX";
 pub const __UINT64_C_SUFFIX__ = @compileError("unable to translate macro: undefined identifier `ULL`");
-// (no file):225:9
+// (no file):242:9
 pub const __UINT64_C = @import("std").zig.c_translation.Macros.ULL_SUFFIX;
 pub const __UINT64_MAX__ = @as(c_ulonglong, 18446744073709551615);
 pub const __INT64_MAX__ = @as(c_longlong, 9223372036854775807);
@@ -2126,7 +2063,8 @@ pub const __UINT_FAST64_FMTo__ = "llo";
 pub const __UINT_FAST64_FMTu__ = "llu";
 pub const __UINT_FAST64_FMTx__ = "llx";
 pub const __UINT_FAST64_FMTX__ = "llX";
-pub const __USER_LABEL_PREFIX__ = "";
+pub const __USER_LABEL_PREFIX__ = @compileError("unable to translate macro: undefined identifier `_`");
+// (no file):334:9
 pub const __NO_MATH_ERRNO__ = @as(c_int, 1);
 pub const __FINITE_MATH_ONLY__ = @as(c_int, 0);
 pub const __GNUC_STDC_INLINE__ = @as(c_int, 1);
@@ -2154,27 +2092,118 @@ pub const __GCC_ATOMIC_LONG_LOCK_FREE = @as(c_int, 2);
 pub const __GCC_ATOMIC_LLONG_LOCK_FREE = @as(c_int, 2);
 pub const __GCC_ATOMIC_POINTER_LOCK_FREE = @as(c_int, 2);
 pub const __NO_INLINE__ = @as(c_int, 1);
+pub const __PIC__ = @as(c_int, 2);
+pub const __pic__ = @as(c_int, 2);
 pub const __FLT_RADIX__ = @as(c_int, 2);
 pub const __DECIMAL_DIG__ = __LDBL_DECIMAL_DIG__;
-pub const __wasm = @as(c_int, 1);
-pub const __wasm__ = @as(c_int, 1);
-pub const __wasm_bulk_memory_opt__ = @as(c_int, 1);
-pub const __wasm_extended_const__ = @as(c_int, 1);
-pub const __wasm_multivalue__ = @as(c_int, 1);
-pub const __wasm_mutable_globals__ = @as(c_int, 1);
-pub const __wasm_nontrapping_fptoint__ = @as(c_int, 1);
-pub const __wasm_sign_ext__ = @as(c_int, 1);
+pub const __SSP_STRONG__ = @as(c_int, 2);
+pub const __nonnull = @compileError("unable to translate macro: undefined identifier `_Nonnull`");
+// (no file):369:9
+pub const __null_unspecified = @compileError("unable to translate macro: undefined identifier `_Null_unspecified`");
+// (no file):370:9
+pub const __nullable = @compileError("unable to translate macro: undefined identifier `_Nullable`");
+// (no file):371:9
+pub const TARGET_OS_WIN32 = @as(c_int, 0);
+pub const TARGET_OS_WINDOWS = @as(c_int, 0);
+pub const TARGET_OS_LINUX = @as(c_int, 0);
+pub const TARGET_OS_UNIX = @as(c_int, 0);
+pub const TARGET_OS_MAC = @as(c_int, 1);
+pub const TARGET_OS_OSX = @as(c_int, 1);
+pub const TARGET_OS_IPHONE = @as(c_int, 0);
+pub const TARGET_OS_IOS = @as(c_int, 0);
+pub const TARGET_OS_TV = @as(c_int, 0);
+pub const TARGET_OS_WATCH = @as(c_int, 0);
+pub const TARGET_OS_VISION = @as(c_int, 0);
+pub const TARGET_OS_DRIVERKIT = @as(c_int, 0);
+pub const TARGET_OS_MACCATALYST = @as(c_int, 0);
+pub const TARGET_OS_SIMULATOR = @as(c_int, 0);
+pub const TARGET_OS_EMBEDDED = @as(c_int, 0);
+pub const TARGET_OS_NANO = @as(c_int, 0);
+pub const TARGET_IPHONE_SIMULATOR = @as(c_int, 0);
+pub const TARGET_OS_UIKITFORMAC = @as(c_int, 0);
+pub const __AARCH64EL__ = @as(c_int, 1);
+pub const __aarch64__ = @as(c_int, 1);
+pub const __GCC_ASM_FLAG_OUTPUTS__ = @as(c_int, 1);
+pub const __AARCH64_CMODEL_SMALL__ = @as(c_int, 1);
+pub inline fn __ARM_ACLE_VERSION(year: anytype, quarter: anytype, patch: anytype) @TypeOf(((@as(c_int, 100) * year) + (@as(c_int, 10) * quarter)) + patch) {
+    _ = &year;
+    _ = &quarter;
+    _ = &patch;
+    return ((@as(c_int, 100) * year) + (@as(c_int, 10) * quarter)) + patch;
+}
+pub const __ARM_ACLE = @import("std").zig.c_translation.promoteIntLiteral(c_int, 202420, .decimal);
+pub const __FUNCTION_MULTI_VERSIONING_SUPPORT_LEVEL = @import("std").zig.c_translation.promoteIntLiteral(c_int, 202430, .decimal);
+pub const __ARM_ARCH = @as(c_int, 8);
+pub const __ARM_ARCH_PROFILE = 'A';
+pub const __ARM_64BIT_STATE = @as(c_int, 1);
+pub const __ARM_PCS_AAPCS64 = @as(c_int, 1);
+pub const __ARM_ARCH_ISA_A64 = @as(c_int, 1);
+pub const __ARM_FEATURE_CLZ = @as(c_int, 1);
+pub const __ARM_FEATURE_FMA = @as(c_int, 1);
+pub const __ARM_FEATURE_LDREX = @as(c_int, 0xF);
+pub const __ARM_FEATURE_IDIV = @as(c_int, 1);
+pub const __ARM_FEATURE_DIV = @as(c_int, 1);
+pub const __ARM_FEATURE_NUMERIC_MAXMIN = @as(c_int, 1);
+pub const __ARM_FEATURE_DIRECTED_ROUNDING = @as(c_int, 1);
+pub const __ARM_ALIGN_MAX_STACK_PWR = @as(c_int, 4);
+pub const __ARM_STATE_ZA = @as(c_int, 1);
+pub const __ARM_STATE_ZT0 = @as(c_int, 1);
+pub const __ARM_FP = @as(c_int, 0xE);
+pub const __ARM_FP16_FORMAT_IEEE = @as(c_int, 1);
+pub const __ARM_FP16_ARGS = @as(c_int, 1);
+pub const __ARM_NEON_SVE_BRIDGE = @as(c_int, 1);
+pub const __ARM_SIZEOF_WCHAR_T = @as(c_int, 4);
+pub const __ARM_SIZEOF_MINIMAL_ENUM = @as(c_int, 4);
+pub const __ARM_NEON = @as(c_int, 1);
+pub const __ARM_NEON_FP = @as(c_int, 0xE);
+pub const __ARM_FEATURE_CRC32 = @as(c_int, 1);
+pub const __ARM_FEATURE_RCPC = @as(c_int, 1);
+pub const __ARM_FEATURE_CRYPTO = @as(c_int, 1);
+pub const __ARM_FEATURE_AES = @as(c_int, 1);
+pub const __ARM_FEATURE_SHA2 = @as(c_int, 1);
+pub const __ARM_FEATURE_SHA3 = @as(c_int, 1);
+pub const __ARM_FEATURE_SHA512 = @as(c_int, 1);
+pub const __ARM_FEATURE_PAUTH = @as(c_int, 1);
+pub const __ARM_FEATURE_BTI = @as(c_int, 1);
+pub const __ARM_FEATURE_UNALIGNED = @as(c_int, 1);
+pub const __ARM_FEATURE_FP16_VECTOR_ARITHMETIC = @as(c_int, 1);
+pub const __ARM_FEATURE_FP16_SCALAR_ARITHMETIC = @as(c_int, 1);
+pub const __ARM_FEATURE_DOTPROD = @as(c_int, 1);
+pub const __ARM_FEATURE_MATMUL_INT8 = @as(c_int, 1);
+pub const __ARM_FEATURE_ATOMICS = @as(c_int, 1);
+pub const __ARM_FEATURE_BF16 = @as(c_int, 1);
+pub const __ARM_FEATURE_BF16_VECTOR_ARITHMETIC = @as(c_int, 1);
+pub const __ARM_BF16_FORMAT_ALTERNATIVE = @as(c_int, 1);
+pub const __ARM_FEATURE_BF16_SCALAR_ARITHMETIC = @as(c_int, 1);
+pub const __ARM_FEATURE_FP16_FML = @as(c_int, 1);
+pub const __ARM_FEATURE_FRINT = @as(c_int, 1);
+pub const __ARM_FEATURE_COMPLEX = @as(c_int, 1);
+pub const __ARM_FEATURE_JCVT = @as(c_int, 1);
+pub const __ARM_FEATURE_QRDMX = @as(c_int, 1);
 pub const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_1 = @as(c_int, 1);
 pub const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_2 = @as(c_int, 1);
 pub const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4 = @as(c_int, 1);
 pub const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_8 = @as(c_int, 1);
-pub const __wasm32 = @as(c_int, 1);
-pub const __wasm32__ = @as(c_int, 1);
-pub const __FLOAT128__ = @as(c_int, 1);
-pub const unix = @as(c_int, 1);
-pub const __unix = @as(c_int, 1);
-pub const __unix__ = @as(c_int, 1);
-pub const __EMSCRIPTEN__ = @as(c_int, 1);
+pub const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_16 = @as(c_int, 1);
+pub const __FP_FAST_FMA = @as(c_int, 1);
+pub const __FP_FAST_FMAF = @as(c_int, 1);
+pub const __AARCH64_SIMD__ = @as(c_int, 1);
+pub const __ARM64_ARCH_8__ = @as(c_int, 1);
+pub const __ARM_NEON__ = @as(c_int, 1);
+pub const __REGISTER_PREFIX__ = "";
+pub const __arm64 = @as(c_int, 1);
+pub const __arm64__ = @as(c_int, 1);
+pub const __APPLE_CC__ = @as(c_int, 6000);
+pub const __APPLE__ = @as(c_int, 1);
+pub const __weak = @compileError("unable to translate macro: undefined identifier `objc_gc`");
+// (no file):459:9
+pub const __strong = "";
+pub const __unsafe_unretained = "";
+pub const __DYNAMIC__ = @as(c_int, 1);
+pub const __MACH__ = @as(c_int, 1);
+pub const __STDC_NO_THREADS__ = @as(c_int, 1);
+pub const __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ = @import("std").zig.c_translation.promoteIntLiteral(c_int, 150500, .decimal);
+pub const __ENVIRONMENT_OS_VERSION_MIN_REQUIRED__ = @import("std").zig.c_translation.promoteIntLiteral(c_int, 150500, .decimal);
 pub const __STDC__ = @as(c_int, 1);
 pub const __STDC_HOSTED__ = @as(c_int, 1);
 pub const __STDC_VERSION__ = @as(c_long, 201710);
@@ -2184,8 +2213,7 @@ pub const __STDC_EMBED_NOT_FOUND__ = @as(c_int, 0);
 pub const __STDC_EMBED_FOUND__ = @as(c_int, 1);
 pub const __STDC_EMBED_EMPTY__ = @as(c_int, 2);
 pub const _DEBUG = @as(c_int, 1);
-pub const WGPU_TARGET_BROWSER = @as(c_int, 1);
-pub const WGPU_ALIGN_TO_64BITS = "";
+pub const __GCC_HAVE_DWARF2_CFI_ASM = @as(c_int, 1);
 pub const WEBGPU_H_ = "";
 pub const WGPU_EXPORT = "";
 pub const WGPU_OBJECT_ATTRIBUTE = "";
@@ -2193,7 +2221,6 @@ pub const WGPU_ENUM_ATTRIBUTE = "";
 pub const WGPU_STRUCTURE_ATTRIBUTE = "";
 pub const WGPU_FUNCTION_ATTRIBUTE = "";
 pub const WGPU_NULLABLE = "";
-pub const __CLANG_STDINT_H = "";
 pub const _STDINT_H = "";
 pub const __NEED_int8_t = "";
 pub const __NEED_int16_t = "";
@@ -2272,12 +2299,12 @@ pub const INT_FAST16_MAX = INT32_MAX;
 pub const INT_FAST32_MAX = INT32_MAX;
 pub const UINT_FAST16_MAX = UINT32_MAX;
 pub const UINT_FAST32_MAX = UINT32_MAX;
-pub const INTPTR_MIN = -@as(c_int, 1) - __INTPTR_MAX__;
-pub const INTPTR_MAX = __INTPTR_MAX__;
-pub const UINTPTR_MAX = __UINTPTR_MAX__;
-pub const PTRDIFF_MIN = -@as(c_int, 1) - __PTRDIFF_MAX__;
-pub const PTRDIFF_MAX = __PTRDIFF_MAX__;
-pub const SIZE_MAX = __SIZE_MAX__;
+pub const INTPTR_MIN = INT64_MIN;
+pub const INTPTR_MAX = INT64_MAX;
+pub const UINTPTR_MAX = UINT64_MAX;
+pub const PTRDIFF_MIN = INT64_MIN;
+pub const PTRDIFF_MAX = INT64_MAX;
+pub const SIZE_MAX = UINT64_MAX;
 pub inline fn INT8_C(c: anytype) @TypeOf(c) {
     _ = &c;
     return c;
@@ -2299,24 +2326,22 @@ pub inline fn UINT16_C(c: anytype) @TypeOf(c) {
     return c;
 }
 pub const UINT32_C = @import("std").zig.c_translation.Macros.U_SUFFIX;
-pub const INT64_C = @import("std").zig.c_translation.Macros.LL_SUFFIX;
-pub const UINT64_C = @import("std").zig.c_translation.Macros.ULL_SUFFIX;
-pub const INTMAX_C = @import("std").zig.c_translation.Macros.LL_SUFFIX;
-pub const UINTMAX_C = @import("std").zig.c_translation.Macros.ULL_SUFFIX;
-pub const __need_ptrdiff_t = "";
-pub const __need_size_t = "";
-pub const __need_wchar_t = "";
-pub const __need_NULL = "";
-pub const __need_max_align_t = "";
-pub const __need_offsetof = "";
-pub const __STDDEF_H = "";
-pub const _PTRDIFF_T = "";
-pub const _SIZE_T = "";
-pub const _WCHAR_T = "";
+pub const INT64_C = @import("std").zig.c_translation.Macros.L_SUFFIX;
+pub const UINT64_C = @import("std").zig.c_translation.Macros.UL_SUFFIX;
+pub const INTMAX_C = @import("std").zig.c_translation.Macros.L_SUFFIX;
+pub const UINTMAX_C = @import("std").zig.c_translation.Macros.UL_SUFFIX;
+pub const _STDDEF_H = "";
 pub const NULL = @import("std").zig.c_translation.cast(?*anyopaque, @as(c_int, 0));
-pub const __CLANG_MAX_ALIGN_T_DEFINED = "";
+pub const __NEED_ptrdiff_t = "";
+pub const __NEED_size_t = "";
+pub const __NEED_wchar_t = "";
+pub const __NEED_max_align_t = "";
+pub const __DEFINED_wchar_t = "";
+pub const __DEFINED_size_t = "";
+pub const __DEFINED_ptrdiff_t = "";
+pub const __DEFINED_max_align_t = "";
 pub const offsetof = @compileError("unable to translate C expr: unexpected token 'an identifier'");
-// /Users/thomvanoorschot/zig/0.15.0-dev.483+837e0f9c3/files/lib/include/__stddef_offsetof.h:16:9
+// ./stddef.h:22:9
 pub const WGPU_ARRAY_LAYER_COUNT_UNDEFINED = UINT32_MAX;
 pub const WGPU_COPY_STRIDE_UNDEFINED = UINT32_MAX;
 pub const WGPU_DEPTH_SLICE_UNDEFINED = UINT32_MAX;
@@ -2326,6 +2351,8 @@ pub const WGPU_MIP_LEVEL_COUNT_UNDEFINED = UINT32_MAX;
 pub const WGPU_QUERY_SET_INDEX_UNDEFINED = UINT32_MAX;
 pub const WGPU_WHOLE_MAP_SIZE = SIZE_MAX;
 pub const WGPU_WHOLE_SIZE = UINT64_MAX;
+pub const WEBGPU_MAKE_IMPORT_EXPORT = @compileError("unable to translate macro: undefined identifier `WGPU`");
+// emscripten/html5_webgpu.h:20:9
 pub const WGPUAdapterImpl = struct_WGPUAdapterImpl;
 pub const WGPUBindGroupImpl = struct_WGPUBindGroupImpl;
 pub const WGPUBindGroupLayoutImpl = struct_WGPUBindGroupLayoutImpl;

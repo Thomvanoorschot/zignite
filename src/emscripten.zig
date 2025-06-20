@@ -54,254 +54,238 @@ pub const __builtin_assume = @import("std").zig.c_builtins.__builtin_assume;
 pub const __builtin_unreachable = @import("std").zig.c_builtins.__builtin_unreachable;
 pub const __builtin_constant_p = @import("std").zig.c_builtins.__builtin_constant_p;
 pub const __builtin_mul_overflow = @import("std").zig.c_builtins.__builtin_mul_overflow;
-pub const time_t = c_longlong;
-const union_unnamed_1 = extern union {
-    __i: [10]c_int,
-    __vi: [10]c_int,
-    __s: [10]c_ulong,
+pub extern fn emscripten_asm_const_int(code: [*c]const u8, arg_sigs: [*c]const u8, ...) c_int;
+pub extern fn emscripten_asm_const_ptr(code: [*c]const u8, arg_sigs: [*c]const u8, ...) ?*anyopaque;
+pub extern fn emscripten_asm_const_double(code: [*c]const u8, arg_sigs: [*c]const u8, ...) f64;
+pub extern fn emscripten_asm_const_int_sync_on_main_thread(code: [*c]const u8, arg_sigs: [*c]const u8, ...) c_int;
+pub extern fn emscripten_asm_const_ptr_sync_on_main_thread(code: [*c]const u8, arg_sigs: [*c]const u8, ...) ?*anyopaque;
+pub extern fn emscripten_asm_const_double_sync_on_main_thread(code: [*c]const u8, arg_sigs: [*c]const u8, ...) f64;
+pub extern fn emscripten_asm_const_async_on_main_thread(code: [*c]const u8, arg_sigs: [*c]const u8, ...) void;
+pub const emscripten_align1_short = c_short;
+pub const emscripten_align4_int64 = c_longlong;
+pub const emscripten_align2_int64 = c_longlong;
+pub const emscripten_align1_int64 = c_longlong;
+pub const emscripten_align2_int = c_int;
+pub const emscripten_align1_int = c_int;
+pub const emscripten_align2_float = f32;
+pub const emscripten_align1_float = f32;
+pub const emscripten_align4_double = f64;
+pub const emscripten_align2_double = f64;
+pub const emscripten_align1_double = f64;
+pub const em_callback_func = ?*const fn () callconv(.c) void;
+pub const em_arg_callback_func = ?*const fn (?*anyopaque) callconv(.c) void;
+pub const em_str_callback_func = ?*const fn ([*c]const u8) callconv(.c) void;
+pub const wchar_t = c_int;
+pub extern fn atoi([*c]const u8) c_int;
+pub extern fn atol([*c]const u8) c_long;
+pub extern fn atoll([*c]const u8) c_longlong;
+pub extern fn atof([*c]const u8) f64;
+pub extern fn strtof([*c]const u8, [*c][*c]u8) f32;
+pub extern fn strtod([*c]const u8, [*c][*c]u8) f64;
+pub extern fn strtold([*c]const u8, [*c][*c]u8) c_longdouble;
+pub extern fn strtol([*c]const u8, [*c][*c]u8, c_int) c_long;
+pub extern fn strtoul([*c]const u8, [*c][*c]u8, c_int) c_ulong;
+pub extern fn strtoll([*c]const u8, [*c][*c]u8, c_int) c_longlong;
+pub extern fn strtoull([*c]const u8, [*c][*c]u8, c_int) c_ulonglong;
+pub extern fn rand() c_int;
+pub extern fn srand(c_uint) void;
+pub extern fn malloc(c_ulong) ?*anyopaque;
+pub extern fn calloc(c_ulong, c_ulong) ?*anyopaque;
+pub extern fn realloc(?*anyopaque, c_ulong) ?*anyopaque;
+pub extern fn free(?*anyopaque) void;
+pub extern fn aligned_alloc(c_ulong, c_ulong) ?*anyopaque;
+pub extern fn abort() noreturn;
+pub extern fn atexit(?*const fn () callconv(.c) void) c_int;
+pub extern fn exit(c_int) noreturn;
+pub extern fn _Exit(c_int) noreturn;
+pub extern fn at_quick_exit(?*const fn () callconv(.c) void) c_int;
+pub extern fn quick_exit(c_int) void;
+pub extern fn getenv([*c]const u8) [*c]u8;
+pub extern fn system([*c]const u8) c_int;
+pub extern fn bsearch(?*const anyopaque, ?*const anyopaque, usize, usize, ?*const fn (?*const anyopaque, ?*const anyopaque) callconv(.c) c_int) ?*anyopaque;
+pub extern fn qsort(?*anyopaque, usize, usize, ?*const fn (?*const anyopaque, ?*const anyopaque) callconv(.c) c_int) void;
+pub extern fn abs(c_int) c_int;
+pub extern fn labs(c_long) c_long;
+pub extern fn llabs(c_longlong) c_longlong;
+pub const div_t = extern struct {
+    quot: c_int = @import("std").mem.zeroes(c_int),
+    rem: c_int = @import("std").mem.zeroes(c_int),
 };
-pub const pthread_attr_t = extern struct {
-    __u: union_unnamed_1 = @import("std").mem.zeroes(union_unnamed_1),
+pub const ldiv_t = extern struct {
+    quot: c_long = @import("std").mem.zeroes(c_long),
+    rem: c_long = @import("std").mem.zeroes(c_long),
 };
-const union_unnamed_2 = extern union {
-    __i: [6]c_int,
-    __vi: [6]c_int,
-    __p: [6]?*volatile anyopaque,
+pub const lldiv_t = extern struct {
+    quot: c_longlong = @import("std").mem.zeroes(c_longlong),
+    rem: c_longlong = @import("std").mem.zeroes(c_longlong),
 };
-pub const pthread_mutex_t = extern struct {
-    __u: union_unnamed_2 = @import("std").mem.zeroes(union_unnamed_2),
+pub extern fn div(c_int, c_int) div_t;
+pub extern fn ldiv(c_long, c_long) ldiv_t;
+pub extern fn lldiv(c_longlong, c_longlong) lldiv_t;
+pub extern fn mblen([*c]const u8, usize) c_int;
+pub extern fn mbtowc(noalias [*c]wchar_t, noalias [*c]const u8, usize) c_int;
+pub extern fn wctomb([*c]u8, wchar_t) c_int;
+pub extern fn mbstowcs(noalias [*c]wchar_t, noalias [*c]const u8, usize) usize;
+pub extern fn wcstombs(noalias [*c]u8, noalias [*c]const wchar_t, usize) usize;
+pub extern fn __ctype_get_mb_cur_max() usize;
+pub extern fn posix_memalign([*c]?*anyopaque, usize, usize) c_int;
+pub extern fn setenv([*c]const u8, [*c]const u8, c_int) c_int;
+pub extern fn unsetenv([*c]const u8) c_int;
+pub extern fn mkstemp([*c]u8) c_int;
+pub extern fn mkostemp([*c]u8, c_int) c_int;
+pub extern fn mkdtemp([*c]u8) [*c]u8;
+pub extern fn getsubopt([*c][*c]u8, [*c]const [*c]u8, [*c][*c]u8) c_int;
+pub extern fn rand_r([*c]c_uint) c_int;
+pub extern fn realpath(noalias [*c]const u8, noalias [*c]u8) [*c]u8;
+pub extern fn random() c_long;
+pub extern fn srandom(c_uint) void;
+pub extern fn initstate(c_uint, [*c]u8, usize) [*c]u8;
+pub extern fn setstate([*c]u8) [*c]u8;
+pub extern fn putenv([*c]u8) c_int;
+pub extern fn posix_openpt(c_int) c_int;
+pub extern fn grantpt(c_int) c_int;
+pub extern fn unlockpt(c_int) c_int;
+pub extern fn ptsname(c_int) [*c]u8;
+pub extern fn l64a(c_long) [*c]u8;
+pub extern fn a64l([*c]const u8) c_long;
+pub extern fn setkey([*c]const u8) void;
+pub extern fn drand48() f64;
+pub extern fn erand48([*c]c_ushort) f64;
+pub extern fn lrand48() c_long;
+pub extern fn nrand48([*c]c_ushort) c_long;
+pub extern fn mrand48() c_long;
+pub extern fn jrand48([*c]c_ushort) c_long;
+pub extern fn srand48(c_long) void;
+pub extern fn seed48([*c]c_ushort) [*c]c_ushort;
+pub extern fn lcong48([*c]c_ushort) void;
+pub extern fn alloca(c_ulong) ?*anyopaque;
+pub extern fn mktemp([*c]u8) [*c]u8;
+pub extern fn mkstemps([*c]u8, c_int) c_int;
+pub extern fn mkostemps([*c]u8, c_int, c_int) c_int;
+pub extern fn valloc(usize) ?*anyopaque;
+pub extern fn memalign(c_ulong, c_ulong) ?*anyopaque;
+pub extern fn getloadavg([*c]f64, c_int) c_int;
+pub extern fn clearenv() c_int;
+pub extern fn reallocarray(?*anyopaque, usize, usize) ?*anyopaque;
+pub extern fn qsort_r(?*anyopaque, usize, usize, ?*const fn (?*const anyopaque, ?*const anyopaque, ?*anyopaque) callconv(.c) c_int, ?*anyopaque) void;
+pub const struct__em_promise = opaque {};
+pub const em_promise_t = ?*struct__em_promise;
+pub const EM_PROMISE_FULFILL: c_int = 0;
+pub const EM_PROMISE_MATCH: c_int = 1;
+pub const EM_PROMISE_MATCH_RELEASE: c_int = 2;
+pub const EM_PROMISE_REJECT: c_int = 3;
+pub const enum_em_promise_result_t = c_uint;
+pub const em_promise_result_t = enum_em_promise_result_t;
+pub const em_promise_callback_t = ?*const fn ([*c]?*anyopaque, ?*anyopaque, ?*anyopaque) callconv(.c) em_promise_result_t;
+pub extern fn emscripten_promise_create() em_promise_t;
+pub extern fn emscripten_promise_destroy(promise: em_promise_t) void;
+pub extern fn emscripten_promise_resolve(promise: em_promise_t, result: em_promise_result_t, value: ?*anyopaque) void;
+pub extern fn emscripten_promise_then(promise: em_promise_t, on_fulfilled: em_promise_callback_t, on_rejected: em_promise_callback_t, data: ?*anyopaque) em_promise_t;
+pub extern fn emscripten_promise_all(promises: [*c]em_promise_t, results: [*c]?*anyopaque, num_promises: usize) em_promise_t;
+pub const struct_em_settled_result_t = extern struct {
+    result: em_promise_result_t = @import("std").mem.zeroes(em_promise_result_t),
+    value: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
 };
-const union_unnamed_3 = extern union {
-    __i: [12]c_int,
-    __vi: [12]c_int,
-    __p: [12]?*anyopaque,
-};
-pub const pthread_cond_t = extern struct {
-    __u: union_unnamed_3 = @import("std").mem.zeroes(union_unnamed_3),
-};
-const union_unnamed_4 = extern union {
-    __i: [14]c_int,
-    __vi: [14]c_int,
-    __p: [7]?*anyopaque,
-};
-pub const pthread_rwlock_t = extern struct {
-    __u: union_unnamed_4 = @import("std").mem.zeroes(union_unnamed_4),
-};
-const union_unnamed_5 = extern union {
-    __i: [5]c_int,
-    __vi: [5]c_int,
-    __p: [5]?*anyopaque,
-};
-pub const pthread_barrier_t = extern struct {
-    __u: union_unnamed_5 = @import("std").mem.zeroes(union_unnamed_5),
-};
-pub const clockid_t = c_int;
-pub const struct_timespec = extern struct {
-    tv_sec: time_t = @import("std").mem.zeroes(time_t),
-    tv_nsec: c_long = @import("std").mem.zeroes(c_long),
-};
-pub const struct___pthread = opaque {};
-pub const pthread_t = ?*struct___pthread;
-pub const pthread_once_t = c_int;
-pub const pthread_key_t = c_uint;
-pub const pthread_spinlock_t = c_int;
-pub const pthread_mutexattr_t = extern struct {
-    __attr: c_uint = @import("std").mem.zeroes(c_uint),
-};
-pub const pthread_condattr_t = extern struct {
-    __attr: c_uint = @import("std").mem.zeroes(c_uint),
-};
-pub const pthread_barrierattr_t = extern struct {
-    __attr: c_uint = @import("std").mem.zeroes(c_uint),
-};
-pub const pthread_rwlockattr_t = extern struct {
-    __attr: [2]c_uint = @import("std").mem.zeroes([2]c_uint),
-};
-pub const struct___sigset_t = extern struct {
-    __bits: [16]c_ulong = @import("std").mem.zeroes([16]c_ulong),
-};
-pub const sigset_t = struct___sigset_t;
-pub const pid_t = c_int;
-const struct_unnamed_6 = extern struct {
-    __reserved1: time_t = @import("std").mem.zeroes(time_t),
-    __reserved2: c_long = @import("std").mem.zeroes(c_long),
-};
-pub const struct_sched_param = extern struct {
-    sched_priority: c_int = @import("std").mem.zeroes(c_int),
-    __reserved1: c_int = @import("std").mem.zeroes(c_int),
-    __reserved2: [2]struct_unnamed_6 = @import("std").mem.zeroes([2]struct_unnamed_6),
-    __reserved3: c_int = @import("std").mem.zeroes(c_int),
-};
-pub extern fn sched_get_priority_max(c_int) c_int;
-pub extern fn sched_get_priority_min(c_int) c_int;
-pub extern fn sched_getparam(pid_t, [*c]struct_sched_param) c_int;
-pub extern fn sched_getscheduler(pid_t) c_int;
-pub extern fn sched_rr_get_interval(pid_t, [*c]struct_timespec) c_int;
-pub extern fn sched_setparam(pid_t, [*c]const struct_sched_param) c_int;
-pub extern fn sched_setscheduler(pid_t, c_int, [*c]const struct_sched_param) c_int;
-pub extern fn sched_yield() c_int;
-pub const timer_t = ?*anyopaque;
-pub const clock_t = c_int;
-pub const struct___locale_struct = opaque {};
-pub const locale_t = ?*struct___locale_struct;
-pub const struct_tm = extern struct {
-    tm_sec: c_int = @import("std").mem.zeroes(c_int),
-    tm_min: c_int = @import("std").mem.zeroes(c_int),
-    tm_hour: c_int = @import("std").mem.zeroes(c_int),
-    tm_mday: c_int = @import("std").mem.zeroes(c_int),
-    tm_mon: c_int = @import("std").mem.zeroes(c_int),
-    tm_year: c_int = @import("std").mem.zeroes(c_int),
-    tm_wday: c_int = @import("std").mem.zeroes(c_int),
-    tm_yday: c_int = @import("std").mem.zeroes(c_int),
-    tm_isdst: c_int = @import("std").mem.zeroes(c_int),
-    tm_gmtoff: c_long = @import("std").mem.zeroes(c_long),
-    tm_zone: [*c]const u8 = @import("std").mem.zeroes([*c]const u8),
-};
-pub extern fn clock() clock_t;
-pub extern fn time([*c]time_t) time_t;
-pub extern fn difftime(time_t, time_t) f64;
-pub extern fn mktime([*c]struct_tm) time_t;
-pub extern fn strftime(noalias [*c]u8, usize, noalias [*c]const u8, noalias [*c]const struct_tm) usize;
-pub extern fn gmtime([*c]const time_t) [*c]struct_tm;
-pub extern fn localtime([*c]const time_t) [*c]struct_tm;
-pub extern fn asctime([*c]const struct_tm) [*c]u8;
-pub extern fn ctime([*c]const time_t) [*c]u8;
-pub extern fn timespec_get([*c]struct_timespec, c_int) c_int;
-pub extern fn strftime_l(noalias [*c]u8, usize, noalias [*c]const u8, noalias [*c]const struct_tm, locale_t) usize;
-pub extern fn gmtime_r(noalias [*c]const time_t, noalias [*c]struct_tm) [*c]struct_tm;
-pub extern fn localtime_r(noalias [*c]const time_t, noalias [*c]struct_tm) [*c]struct_tm;
-pub extern fn asctime_r(noalias [*c]const struct_tm, noalias [*c]u8) [*c]u8;
-pub extern fn ctime_r([*c]const time_t, [*c]u8) [*c]u8;
-pub extern fn tzset() void;
-pub const struct_itimerspec = extern struct {
-    it_interval: struct_timespec = @import("std").mem.zeroes(struct_timespec),
-    it_value: struct_timespec = @import("std").mem.zeroes(struct_timespec),
-};
-pub extern fn nanosleep([*c]const struct_timespec, [*c]struct_timespec) c_int;
-pub extern fn clock_getres(clockid_t, [*c]struct_timespec) c_int;
-pub extern fn clock_gettime(clockid_t, [*c]struct_timespec) c_int;
-pub extern fn clock_settime(clockid_t, [*c]const struct_timespec) c_int;
-pub extern fn clock_nanosleep(clockid_t, c_int, [*c]const struct_timespec, [*c]struct_timespec) c_int;
-pub extern fn clock_getcpuclockid(pid_t, [*c]clockid_t) c_int;
-pub const struct_sigevent = opaque {};
-pub extern fn timer_create(clockid_t, noalias ?*struct_sigevent, noalias [*c]timer_t) c_int;
-pub extern fn timer_delete(timer_t) c_int;
-pub extern fn timer_settime(timer_t, c_int, noalias [*c]const struct_itimerspec, noalias [*c]struct_itimerspec) c_int;
-pub extern fn timer_gettime(timer_t, [*c]struct_itimerspec) c_int;
-pub extern fn timer_getoverrun(timer_t) c_int;
-pub extern var tzname: [2][*c]u8;
-pub extern fn strptime(noalias [*c]const u8, noalias [*c]const u8, noalias [*c]struct_tm) [*c]u8;
-pub extern var daylight: c_int;
-pub extern var timezone: c_long;
-pub extern var getdate_err: c_int;
-pub extern fn getdate([*c]const u8) [*c]struct_tm;
-pub extern fn stime([*c]const time_t) c_int;
-pub extern fn timegm([*c]struct_tm) time_t;
-pub extern fn pthread_create(noalias [*c]pthread_t, noalias [*c]const pthread_attr_t, ?*const fn (?*anyopaque) callconv(.c) ?*anyopaque, noalias ?*anyopaque) c_int;
-pub extern fn pthread_detach(pthread_t) c_int;
-pub extern fn pthread_exit(?*anyopaque) void;
-pub extern fn pthread_join(pthread_t, [*c]?*anyopaque) c_int;
-pub extern fn pthread_self() pthread_t;
-pub extern fn pthread_equal(pthread_t, pthread_t) c_int;
-pub extern fn pthread_setcancelstate(c_int, [*c]c_int) c_int;
-pub extern fn pthread_setcanceltype(c_int, [*c]c_int) c_int;
-pub extern fn pthread_testcancel() void;
-pub extern fn pthread_cancel(pthread_t) c_int;
-pub extern fn pthread_getschedparam(pthread_t, noalias [*c]c_int, noalias [*c]struct_sched_param) c_int;
-pub extern fn pthread_setschedparam(pthread_t, c_int, [*c]const struct_sched_param) c_int;
-pub extern fn pthread_setschedprio(pthread_t, c_int) c_int;
-pub extern fn pthread_once([*c]pthread_once_t, ?*const fn () callconv(.c) void) c_int;
-pub extern fn pthread_mutex_init(noalias [*c]pthread_mutex_t, noalias [*c]const pthread_mutexattr_t) c_int;
-pub extern fn pthread_mutex_lock([*c]pthread_mutex_t) c_int;
-pub extern fn pthread_mutex_unlock([*c]pthread_mutex_t) c_int;
-pub extern fn pthread_mutex_trylock([*c]pthread_mutex_t) c_int;
-pub extern fn pthread_mutex_timedlock(noalias [*c]pthread_mutex_t, noalias [*c]const struct_timespec) c_int;
-pub extern fn pthread_mutex_destroy([*c]pthread_mutex_t) c_int;
-pub extern fn pthread_mutex_consistent([*c]pthread_mutex_t) c_int;
-pub extern fn pthread_mutex_getprioceiling(noalias [*c]const pthread_mutex_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_mutex_setprioceiling(noalias [*c]pthread_mutex_t, c_int, noalias [*c]c_int) c_int;
-pub extern fn pthread_cond_init(noalias [*c]pthread_cond_t, noalias [*c]const pthread_condattr_t) c_int;
-pub extern fn pthread_cond_destroy([*c]pthread_cond_t) c_int;
-pub extern fn pthread_cond_wait(noalias [*c]pthread_cond_t, noalias [*c]pthread_mutex_t) c_int;
-pub extern fn pthread_cond_timedwait(noalias [*c]pthread_cond_t, noalias [*c]pthread_mutex_t, noalias [*c]const struct_timespec) c_int;
-pub extern fn pthread_cond_broadcast([*c]pthread_cond_t) c_int;
-pub extern fn pthread_cond_signal([*c]pthread_cond_t) c_int;
-pub extern fn pthread_rwlock_init(noalias [*c]pthread_rwlock_t, noalias [*c]const pthread_rwlockattr_t) c_int;
-pub extern fn pthread_rwlock_destroy([*c]pthread_rwlock_t) c_int;
-pub extern fn pthread_rwlock_rdlock([*c]pthread_rwlock_t) c_int;
-pub extern fn pthread_rwlock_tryrdlock([*c]pthread_rwlock_t) c_int;
-pub extern fn pthread_rwlock_timedrdlock(noalias [*c]pthread_rwlock_t, noalias [*c]const struct_timespec) c_int;
-pub extern fn pthread_rwlock_wrlock([*c]pthread_rwlock_t) c_int;
-pub extern fn pthread_rwlock_trywrlock([*c]pthread_rwlock_t) c_int;
-pub extern fn pthread_rwlock_timedwrlock(noalias [*c]pthread_rwlock_t, noalias [*c]const struct_timespec) c_int;
-pub extern fn pthread_rwlock_unlock([*c]pthread_rwlock_t) c_int;
-pub extern fn pthread_spin_init([*c]pthread_spinlock_t, c_int) c_int;
-pub extern fn pthread_spin_destroy([*c]pthread_spinlock_t) c_int;
-pub extern fn pthread_spin_lock([*c]pthread_spinlock_t) c_int;
-pub extern fn pthread_spin_trylock([*c]pthread_spinlock_t) c_int;
-pub extern fn pthread_spin_unlock([*c]pthread_spinlock_t) c_int;
-pub extern fn pthread_barrier_init(noalias [*c]pthread_barrier_t, noalias [*c]const pthread_barrierattr_t, c_uint) c_int;
-pub extern fn pthread_barrier_destroy([*c]pthread_barrier_t) c_int;
-pub extern fn pthread_barrier_wait([*c]pthread_barrier_t) c_int;
-pub extern fn pthread_key_create([*c]pthread_key_t, ?*const fn (?*anyopaque) callconv(.c) void) c_int;
-pub extern fn pthread_key_delete(pthread_key_t) c_int;
-pub extern fn pthread_getspecific(pthread_key_t) ?*anyopaque;
-pub extern fn pthread_setspecific(pthread_key_t, ?*const anyopaque) c_int;
-pub extern fn pthread_attr_init([*c]pthread_attr_t) c_int;
-pub extern fn pthread_attr_destroy([*c]pthread_attr_t) c_int;
-pub extern fn pthread_attr_getguardsize(noalias [*c]const pthread_attr_t, noalias [*c]usize) c_int;
-pub extern fn pthread_attr_setguardsize([*c]pthread_attr_t, usize) c_int;
-pub extern fn pthread_attr_getstacksize(noalias [*c]const pthread_attr_t, noalias [*c]usize) c_int;
-pub extern fn pthread_attr_setstacksize([*c]pthread_attr_t, usize) c_int;
-pub extern fn pthread_attr_getdetachstate([*c]const pthread_attr_t, [*c]c_int) c_int;
-pub extern fn pthread_attr_setdetachstate([*c]pthread_attr_t, c_int) c_int;
-pub extern fn pthread_attr_getstack(noalias [*c]const pthread_attr_t, noalias [*c]?*anyopaque, noalias [*c]usize) c_int;
-pub extern fn pthread_attr_setstack([*c]pthread_attr_t, ?*anyopaque, usize) c_int;
-pub extern fn pthread_attr_getscope(noalias [*c]const pthread_attr_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_attr_setscope([*c]pthread_attr_t, c_int) c_int;
-pub extern fn pthread_attr_getschedpolicy(noalias [*c]const pthread_attr_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_attr_setschedpolicy([*c]pthread_attr_t, c_int) c_int;
-pub extern fn pthread_attr_getschedparam(noalias [*c]const pthread_attr_t, noalias [*c]struct_sched_param) c_int;
-pub extern fn pthread_attr_setschedparam(noalias [*c]pthread_attr_t, noalias [*c]const struct_sched_param) c_int;
-pub extern fn pthread_attr_getinheritsched(noalias [*c]const pthread_attr_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_attr_setinheritsched([*c]pthread_attr_t, c_int) c_int;
-pub extern fn pthread_mutexattr_destroy([*c]pthread_mutexattr_t) c_int;
-pub extern fn pthread_mutexattr_getprioceiling(noalias [*c]const pthread_mutexattr_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_mutexattr_getprotocol(noalias [*c]const pthread_mutexattr_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_mutexattr_getpshared(noalias [*c]const pthread_mutexattr_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_mutexattr_getrobust(noalias [*c]const pthread_mutexattr_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_mutexattr_gettype(noalias [*c]const pthread_mutexattr_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_mutexattr_init([*c]pthread_mutexattr_t) c_int;
-pub extern fn pthread_mutexattr_setprioceiling([*c]pthread_mutexattr_t, c_int) c_int;
-pub extern fn pthread_mutexattr_setprotocol([*c]pthread_mutexattr_t, c_int) c_int;
-pub extern fn pthread_mutexattr_setpshared([*c]pthread_mutexattr_t, c_int) c_int;
-pub extern fn pthread_mutexattr_setrobust([*c]pthread_mutexattr_t, c_int) c_int;
-pub extern fn pthread_mutexattr_settype([*c]pthread_mutexattr_t, c_int) c_int;
-pub extern fn pthread_condattr_init([*c]pthread_condattr_t) c_int;
-pub extern fn pthread_condattr_destroy([*c]pthread_condattr_t) c_int;
-pub extern fn pthread_condattr_setclock([*c]pthread_condattr_t, clockid_t) c_int;
-pub extern fn pthread_condattr_setpshared([*c]pthread_condattr_t, c_int) c_int;
-pub extern fn pthread_condattr_getclock(noalias [*c]const pthread_condattr_t, noalias [*c]clockid_t) c_int;
-pub extern fn pthread_condattr_getpshared(noalias [*c]const pthread_condattr_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_rwlockattr_init([*c]pthread_rwlockattr_t) c_int;
-pub extern fn pthread_rwlockattr_destroy([*c]pthread_rwlockattr_t) c_int;
-pub extern fn pthread_rwlockattr_setpshared([*c]pthread_rwlockattr_t, c_int) c_int;
-pub extern fn pthread_rwlockattr_getpshared(noalias [*c]const pthread_rwlockattr_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_barrierattr_destroy([*c]pthread_barrierattr_t) c_int;
-pub extern fn pthread_barrierattr_getpshared(noalias [*c]const pthread_barrierattr_t, noalias [*c]c_int) c_int;
-pub extern fn pthread_barrierattr_init([*c]pthread_barrierattr_t) c_int;
-pub extern fn pthread_barrierattr_setpshared([*c]pthread_barrierattr_t, c_int) c_int;
-pub extern fn pthread_atfork(?*const fn () callconv(.c) void, ?*const fn () callconv(.c) void, ?*const fn () callconv(.c) void) c_int;
-pub extern fn pthread_getconcurrency() c_int;
-pub extern fn pthread_setconcurrency(c_int) c_int;
-pub extern fn pthread_getcpuclockid(pthread_t, [*c]clockid_t) c_int;
-pub const struct___ptcb = extern struct {
-    __f: ?*const fn (?*anyopaque) callconv(.c) void = @import("std").mem.zeroes(?*const fn (?*anyopaque) callconv(.c) void),
-    __x: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
-    __next: [*c]struct___ptcb = @import("std").mem.zeroes([*c]struct___ptcb),
-};
-pub extern fn _pthread_cleanup_push([*c]struct___ptcb, ?*const fn (?*anyopaque) callconv(.c) void, ?*anyopaque) void;
-pub extern fn _pthread_cleanup_pop([*c]struct___ptcb, c_int) void;
+pub const em_settled_result_t = struct_em_settled_result_t;
+pub extern fn emscripten_promise_all_settled(promises: [*c]em_promise_t, results: [*c]em_settled_result_t, num_promises: usize) em_promise_t;
+pub extern fn emscripten_promise_any(promises: [*c]em_promise_t, errors: [*c]?*anyopaque, num_promises: usize) em_promise_t;
+pub extern fn emscripten_promise_race(promises: [*c]em_promise_t, num_promises: usize) em_promise_t;
+pub extern fn emscripten_promise_await(promise: em_promise_t) em_settled_result_t;
+pub extern fn emscripten_async_wget(url: [*c]const u8, file: [*c]const u8, onload: em_str_callback_func, onerror: em_str_callback_func) void;
+pub const em_async_wget_onload_func = ?*const fn (?*anyopaque, ?*anyopaque, c_int) callconv(.c) void;
+pub extern fn emscripten_async_wget_data(url: [*c]const u8, userdata: ?*anyopaque, onload: em_async_wget_onload_func, onerror: em_arg_callback_func) void;
+pub const em_async_wget2_onload_func = ?*const fn (c_uint, ?*anyopaque, [*c]const u8) callconv(.c) void;
+pub const em_async_wget2_onstatus_func = ?*const fn (c_uint, ?*anyopaque, c_int) callconv(.c) void;
+pub extern fn emscripten_async_wget2(url: [*c]const u8, file: [*c]const u8, requesttype: [*c]const u8, param: [*c]const u8, userdata: ?*anyopaque, onload: em_async_wget2_onload_func, onerror: em_async_wget2_onstatus_func, onprogress: em_async_wget2_onstatus_func) c_int;
+pub const em_async_wget2_data_onload_func = ?*const fn (c_uint, ?*anyopaque, ?*anyopaque, c_uint) callconv(.c) void;
+pub const em_async_wget2_data_onerror_func = ?*const fn (c_uint, ?*anyopaque, c_int, [*c]const u8) callconv(.c) void;
+pub const em_async_wget2_data_onprogress_func = ?*const fn (c_uint, ?*anyopaque, c_int, c_int) callconv(.c) void;
+pub extern fn emscripten_async_wget2_data(url: [*c]const u8, requesttype: [*c]const u8, param: [*c]const u8, arg: ?*anyopaque, free: c_int, onload: em_async_wget2_data_onload_func, onerror: em_async_wget2_data_onerror_func, onprogress: em_async_wget2_data_onprogress_func) c_int;
+pub extern fn emscripten_async_wget2_abort(handle: c_int) void;
+pub extern fn emscripten_wget(url: [*c]const u8, file: [*c]const u8) c_int;
+pub extern fn emscripten_wget_data(url: [*c]const u8, pbuffer: [*c]?*anyopaque, pnum: [*c]c_int, perror: [*c]c_int) void;
+pub extern fn emscripten_run_script(script: [*c]const u8) void;
+pub extern fn emscripten_run_script_int(script: [*c]const u8) c_int;
+pub extern fn emscripten_run_script_string(script: [*c]const u8) [*c]u8;
+pub extern fn emscripten_async_run_script(script: [*c]const u8, millis: c_int) void;
+pub extern fn emscripten_async_load_script(script: [*c]const u8, onload: em_callback_func, onerror: em_callback_func) void;
+pub extern fn emscripten_set_main_loop(func: em_callback_func, fps: c_int, simulate_infinite_loop: bool) void;
+pub extern fn emscripten_set_main_loop_timing(mode: c_int, value: c_int) c_int;
+pub extern fn emscripten_get_main_loop_timing(mode: [*c]c_int, value: [*c]c_int) void;
+pub extern fn emscripten_set_main_loop_arg(func: em_arg_callback_func, arg: ?*anyopaque, fps: c_int, simulate_infinite_loop: bool) void;
+pub extern fn emscripten_pause_main_loop() void;
+pub extern fn emscripten_resume_main_loop() void;
+pub extern fn emscripten_cancel_main_loop() void;
+pub const em_socket_callback = ?*const fn (c_int, ?*anyopaque) callconv(.c) void;
+pub const em_socket_error_callback = ?*const fn (c_int, c_int, [*c]const u8, ?*anyopaque) callconv(.c) void;
+pub extern fn emscripten_set_socket_error_callback(userData: ?*anyopaque, callback: em_socket_error_callback) void;
+pub extern fn emscripten_set_socket_open_callback(userData: ?*anyopaque, callback: em_socket_callback) void;
+pub extern fn emscripten_set_socket_listen_callback(userData: ?*anyopaque, callback: em_socket_callback) void;
+pub extern fn emscripten_set_socket_connection_callback(userData: ?*anyopaque, callback: em_socket_callback) void;
+pub extern fn emscripten_set_socket_message_callback(userData: ?*anyopaque, callback: em_socket_callback) void;
+pub extern fn emscripten_set_socket_close_callback(userData: ?*anyopaque, callback: em_socket_callback) void;
+pub extern fn _emscripten_push_main_loop_blocker(func: em_arg_callback_func, arg: ?*anyopaque, name: [*c]const u8) void;
+pub extern fn _emscripten_push_uncounted_main_loop_blocker(func: em_arg_callback_func, arg: ?*anyopaque, name: [*c]const u8) void;
+pub extern fn emscripten_set_main_loop_expected_blockers(num: c_int) void;
+pub extern fn emscripten_async_call(func: em_arg_callback_func, arg: ?*anyopaque, millis: c_int) void;
+pub extern fn emscripten_exit_with_live_runtime() noreturn;
+pub extern fn emscripten_force_exit(status: c_int) noreturn;
+pub extern fn emscripten_get_device_pixel_ratio() f64;
+pub extern fn emscripten_get_window_title() [*c]u8;
+pub extern fn emscripten_set_window_title([*c]const u8) void;
+pub extern fn emscripten_get_screen_size(width: [*c]c_int, height: [*c]c_int) void;
+pub extern fn emscripten_hide_mouse() void;
+pub extern fn emscripten_set_canvas_size(width: c_int, height: c_int) void;
+pub extern fn emscripten_get_canvas_size(width: [*c]c_int, height: [*c]c_int, isFullscreen: [*c]c_int) void;
+pub extern fn emscripten_get_now() f64;
+pub extern fn emscripten_random() f32;
+pub const em_idb_onload_func = ?*const fn (?*anyopaque, ?*anyopaque, c_int) callconv(.c) void;
+pub extern fn emscripten_idb_async_load(db_name: [*c]const u8, file_id: [*c]const u8, arg: ?*anyopaque, onload: em_idb_onload_func, onerror: em_arg_callback_func) void;
+pub extern fn emscripten_idb_async_store(db_name: [*c]const u8, file_id: [*c]const u8, ptr: ?*anyopaque, num: c_int, arg: ?*anyopaque, onstore: em_arg_callback_func, onerror: em_arg_callback_func) void;
+pub extern fn emscripten_idb_async_delete(db_name: [*c]const u8, file_id: [*c]const u8, arg: ?*anyopaque, ondelete: em_arg_callback_func, onerror: em_arg_callback_func) void;
+pub const em_idb_exists_func = ?*const fn (?*anyopaque, c_int) callconv(.c) void;
+pub extern fn emscripten_idb_async_exists(db_name: [*c]const u8, file_id: [*c]const u8, arg: ?*anyopaque, oncheck: em_idb_exists_func, onerror: em_arg_callback_func) void;
+pub extern fn emscripten_idb_async_clear(db_name: [*c]const u8, arg: ?*anyopaque, onclear: em_arg_callback_func, onerror: em_arg_callback_func) void;
+pub extern fn emscripten_idb_load(db_name: [*c]const u8, file_id: [*c]const u8, pbuffer: [*c]?*anyopaque, pnum: [*c]c_int, perror: [*c]c_int) void;
+pub extern fn emscripten_idb_store(db_name: [*c]const u8, file_id: [*c]const u8, buffer: ?*anyopaque, num: c_int, perror: [*c]c_int) void;
+pub extern fn emscripten_idb_delete(db_name: [*c]const u8, file_id: [*c]const u8, perror: [*c]c_int) void;
+pub extern fn emscripten_idb_exists(db_name: [*c]const u8, file_id: [*c]const u8, pexists: [*c]c_int, perror: [*c]c_int) void;
+pub extern fn emscripten_idb_clear(db_name: [*c]const u8, perror: [*c]c_int) void;
+pub extern fn emscripten_idb_load_blob(db_name: [*c]const u8, file_id: [*c]const u8, pblob: [*c]c_int, perror: [*c]c_int) void;
+pub extern fn emscripten_idb_store_blob(db_name: [*c]const u8, file_id: [*c]const u8, buffer: ?*anyopaque, num: c_int, perror: [*c]c_int) void;
+pub extern fn emscripten_idb_read_from_blob(blob: c_int, start: c_int, num: c_int, buffer: ?*anyopaque) void;
+pub extern fn emscripten_idb_free_blob(blob: c_int) void;
+pub extern fn emscripten_run_preload_plugins(file: [*c]const u8, onload: em_str_callback_func, onerror: em_str_callback_func) c_int;
+pub const em_run_preload_plugins_data_onload_func = ?*const fn (?*anyopaque, [*c]const u8) callconv(.c) void;
+pub extern fn emscripten_run_preload_plugins_data(data: [*c]u8, size: c_int, suffix: [*c]const u8, arg: ?*anyopaque, onload: em_run_preload_plugins_data_onload_func, onerror: em_arg_callback_func) void;
+pub extern fn emscripten_lazy_load_code() void;
+pub const worker_handle = c_int;
+pub extern fn emscripten_create_worker(url: [*c]const u8) worker_handle;
+pub extern fn emscripten_destroy_worker(worker: worker_handle) void;
+pub const em_worker_callback_func = ?*const fn ([*c]u8, c_int, ?*anyopaque) callconv(.c) void;
+pub extern fn emscripten_call_worker(worker: worker_handle, funcname: [*c]const u8, data: [*c]u8, size: c_int, callback: em_worker_callback_func, arg: ?*anyopaque) void;
+pub extern fn emscripten_worker_respond(data: [*c]u8, size: c_int) void;
+pub extern fn emscripten_worker_respond_provisionally(data: [*c]u8, size: c_int) void;
+pub extern fn emscripten_get_worker_queue_size(worker: worker_handle) c_int;
+pub extern fn emscripten_get_compiler_setting(name: [*c]const u8) c_long;
+pub extern fn emscripten_has_asyncify() c_int;
+pub extern fn emscripten_debugger() void;
+pub const struct__IO_FILE = opaque {};
+pub const FILE = struct__IO_FILE;
+pub extern fn emscripten_get_preloaded_image_data(path: [*c]const u8, w: [*c]c_int, h: [*c]c_int) [*c]u8;
+pub extern fn emscripten_get_preloaded_image_data_from_FILE(file: ?*FILE, w: [*c]c_int, h: [*c]c_int) [*c]u8;
+pub extern fn emscripten_log(flags: c_int, format: [*c]const u8, ...) void;
+pub extern fn emscripten_get_callstack(flags: c_int, out: [*c]u8, maxbytes: c_int) c_int;
+pub extern fn emscripten_print_double(x: f64, to: [*c]u8, max: c_int) c_int;
+pub const em_scan_func = ?*const fn (?*anyopaque, ?*anyopaque) callconv(.c) void;
+pub extern fn emscripten_scan_registers(func: em_scan_func) void;
+pub extern fn emscripten_scan_stack(func: em_scan_func) void;
+pub const em_dlopen_callback = ?*const fn (?*anyopaque, ?*anyopaque) callconv(.c) void;
+pub extern fn emscripten_dlopen(filename: [*c]const u8, flags: c_int, user_data: ?*anyopaque, onsuccess: em_dlopen_callback, onerror: em_arg_callback_func) void;
+pub extern fn emscripten_dlopen_promise(filename: [*c]const u8, flags: c_int) em_promise_t;
+pub extern fn emscripten_throw_number(number: f64) void;
+pub extern fn emscripten_throw_string(utf8String: [*c]const u8) void;
+pub extern fn emscripten_sleep(ms: c_uint) void;
 pub const __llvm__ = @as(c_int, 1);
 pub const __clang__ = @as(c_int, 1);
 pub const __clang_major__ = @as(c_int, 20);
@@ -806,7 +790,127 @@ pub const __STDC_EMBED_FOUND__ = @as(c_int, 1);
 pub const __STDC_EMBED_EMPTY__ = @as(c_int, 2);
 pub const _DEBUG = @as(c_int, 1);
 pub const __GCC_HAVE_DWARF2_CFI_ASM = @as(c_int, 1);
-pub const _PTHREAD_H = "";
+pub const LONG_CODE = 'i';
+pub const _EM_ASM_SIG_CHAR = @compileError("unable to translate C expr: unexpected token '_Generic'");
+// emscripten/em_asm.h:83:9
+pub inline fn _EM_ASM_CONCATENATE(a: anytype, b: anytype) @TypeOf(_EM_ASM_CONCATENATE_(a, b)) {
+    _ = &a;
+    _ = &b;
+    return _EM_ASM_CONCATENATE_(a, b);
+}
+pub const _EM_ASM_CONCATENATE_ = @compileError("unable to translate C expr: unexpected token '##'");
+// emscripten/em_asm.h:104:9
+pub const _EM_ASM_COUNT_ARGS_EXP = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:109:9
+pub const _EM_ASM_COUNT_ARGS = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:110:9
+pub const _EM_ASM_ARG_SIGS_0 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:114:9
+pub const _EM_ASM_ARG_SIGS_1 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:115:9
+pub const _EM_ASM_ARG_SIGS_2 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:116:9
+pub const _EM_ASM_ARG_SIGS_3 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:117:9
+pub const _EM_ASM_ARG_SIGS_4 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:118:9
+pub const _EM_ASM_ARG_SIGS_5 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:119:9
+pub const _EM_ASM_ARG_SIGS_6 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:120:9
+pub const _EM_ASM_ARG_SIGS_7 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:121:9
+pub const _EM_ASM_ARG_SIGS_8 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:122:9
+pub const _EM_ASM_ARG_SIGS_9 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:123:9
+pub const _EM_ASM_ARG_SIGS_10 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:124:9
+pub const _EM_ASM_ARG_SIGS_11 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:125:9
+pub const _EM_ASM_ARG_SIGS_12 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:126:9
+pub const _EM_ASM_ARG_SIGS_13 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:127:9
+pub const _EM_ASM_ARG_SIGS_14 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:128:9
+pub const _EM_ASM_ARG_SIGS_15 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:129:9
+pub const _EM_ASM_ARG_SIGS_16 = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:130:9
+pub const _EM_ASM_ARG_SIGS_ = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:131:9
+pub const _EM_ASM_ARG_SIGS = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:134:9
+pub const _EM_ASM_PREP_ARGS = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:138:9
+pub const CODE_EXPR = @compileError("unable to translate macro: undefined identifier `section`");
+// emscripten/em_asm.h:213:9
+pub const EM_ASM = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:221:9
+pub const EM_ASM_INT = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:225:9
+pub const EM_ASM_PTR = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:231:9
+pub const EM_ASM_DOUBLE = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:235:9
+pub const MAIN_THREAD_EM_ASM = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:251:9
+pub const MAIN_THREAD_EM_ASM_INT = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:256:9
+pub const MAIN_THREAD_EM_ASM_PTR = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:263:9
+pub const MAIN_THREAD_EM_ASM_DOUBLE = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:268:9
+pub const MAIN_THREAD_ASYNC_EM_ASM = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:278:9
+pub const EM_ASM_ = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:283:9
+pub const EM_ASM_ARGS = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_asm.h:284:9
+pub inline fn EM_ASM_INT_V(code: anytype) @TypeOf(EM_ASM_INT(code)) {
+    _ = &code;
+    return EM_ASM_INT(code);
+}
+pub inline fn EM_ASM_DOUBLE_V(code: anytype) @TypeOf(EM_ASM_DOUBLE(code)) {
+    _ = &code;
+    return EM_ASM_DOUBLE(code);
+}
+pub const EMSCRIPTEN_KEEPALIVE = @compileError("unable to translate macro: undefined identifier `used`");
+// emscripten/em_macros.h:10:9
+pub const EM_IMPORT = @compileError("unable to translate C expr: unexpected token ''");
+// emscripten/em_macros.h:15:9
+pub const _EM_BEGIN_CDECL = "";
+pub const _EM_END_CDECL = "";
+pub const EM_JS_DEPS = @compileError("unable to translate macro: undefined identifier `section`");
+// emscripten/em_macros.h:47:9
+pub const _STDBOOL_H = "";
+pub const @"true" = @as(c_int, 1);
+pub const @"false" = @as(c_int, 0);
+pub const @"bool" = bool;
+pub const __bool_true_false_are_defined = @as(c_int, 1);
+pub const EM_BOOL = @"bool";
+pub const EM_TRUE = @"true";
+pub const EM_FALSE = @"false";
+pub const EM_UTF8 = u8;
+pub const EMSCRIPTEN_RESULT = c_int;
+pub const EMSCRIPTEN_RESULT_SUCCESS = @as(c_int, 0);
+pub const EMSCRIPTEN_RESULT_DEFERRED = @as(c_int, 1);
+pub const EMSCRIPTEN_RESULT_NOT_SUPPORTED = -@as(c_int, 1);
+pub const EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED = -@as(c_int, 2);
+pub const EMSCRIPTEN_RESULT_INVALID_TARGET = -@as(c_int, 3);
+pub const EMSCRIPTEN_RESULT_UNKNOWN_TARGET = -@as(c_int, 4);
+pub const EMSCRIPTEN_RESULT_INVALID_PARAM = -@as(c_int, 5);
+pub const EMSCRIPTEN_RESULT_FAILED = -@as(c_int, 6);
+pub const EMSCRIPTEN_RESULT_NO_DATA = -@as(c_int, 7);
+pub const EMSCRIPTEN_RESULT_TIMED_OUT = -@as(c_int, 8);
+pub const _EM_JS = @compileError("unable to translate macro: undefined identifier `visibility`");
+// emscripten/em_js.h:61:9
+pub const EM_JS = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_js.h:71:9
+pub const EM_ASYNC_JS = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/em_js.h:73:9
+pub const _STDLIB_H = "";
 pub const _FEATURES_H = "";
 pub const _BSD_SOURCE = @as(c_int, 1);
 pub const _XOPEN_SOURCE = @as(c_int, 700);
@@ -816,24 +920,9 @@ pub const __inline = @compileError("unable to translate C expr: unexpected token
 // ./features.h:33:9
 pub const __REDIR = @compileError("unable to translate C expr: unexpected token '__typeof__'");
 // ./features.h:45:9
-pub const __NEED_time_t = "";
-pub const __NEED_clockid_t = "";
-pub const __NEED_struct_timespec = "";
-pub const __NEED_sigset_t = "";
-pub const __NEED_pthread_t = "";
-pub const __NEED_pthread_attr_t = "";
-pub const __NEED_pthread_mutexattr_t = "";
-pub const __NEED_pthread_condattr_t = "";
-pub const __NEED_pthread_rwlockattr_t = "";
-pub const __NEED_pthread_barrierattr_t = "";
-pub const __NEED_pthread_mutex_t = "";
-pub const __NEED_pthread_cond_t = "";
-pub const __NEED_pthread_rwlock_t = "";
-pub const __NEED_pthread_barrier_t = "";
-pub const __NEED_pthread_spinlock_t = "";
-pub const __NEED_pthread_key_t = "";
-pub const __NEED_pthread_once_t = "";
+pub const NULL = @import("std").zig.c_translation.cast(?*anyopaque, @as(c_int, 0));
 pub const __NEED_size_t = "";
+pub const __NEED_wchar_t = "";
 pub const __LITTLE_ENDIAN = @as(c_int, 1234);
 pub const __BIG_ENDIAN = @as(c_int, 4321);
 pub const __USE_TIME_BITS64 = @as(c_int, 1);
@@ -842,103 +931,70 @@ pub const __LONG_MAX = __LONG_MAX__;
 pub const _Addr = __PTRDIFF_TYPE__;
 pub const _Int64 = __INT64_TYPE__;
 pub const _Reg = __PTRDIFF_TYPE__;
-pub const __DEFINED_time_t = "";
-pub const __DEFINED_pthread_attr_t = "";
-pub const __DEFINED_pthread_mutex_t = "";
-pub const __DEFINED_pthread_cond_t = "";
-pub const __DEFINED_pthread_rwlock_t = "";
-pub const __DEFINED_pthread_barrier_t = "";
+pub const __DEFINED_wchar_t = "";
 pub const __DEFINED_size_t = "";
-pub const __DEFINED_clockid_t = "";
-pub const __DEFINED_struct_timespec = "";
-pub const __DEFINED_pthread_t = "";
-pub const __DEFINED_pthread_once_t = "";
-pub const __DEFINED_pthread_key_t = "";
-pub const __DEFINED_pthread_spinlock_t = "";
-pub const __DEFINED_pthread_mutexattr_t = "";
-pub const __DEFINED_pthread_condattr_t = "";
-pub const __DEFINED_pthread_barrierattr_t = "";
-pub const __DEFINED_pthread_rwlockattr_t = "";
-pub const __DEFINED_sigset_t = "";
-pub const _SCHED_H = "";
-pub const __NEED_pid_t = "";
-pub const __DEFINED_pid_t = "";
-pub const SCHED_OTHER = @as(c_int, 0);
-pub const SCHED_FIFO = @as(c_int, 1);
-pub const SCHED_RR = @as(c_int, 2);
-pub const SCHED_BATCH = @as(c_int, 3);
-pub const SCHED_IDLE = @as(c_int, 5);
-pub const SCHED_DEADLINE = @as(c_int, 6);
-pub const SCHED_RESET_ON_FORK = @import("std").zig.c_translation.promoteIntLiteral(c_int, 0x40000000, .hex);
-pub const _TIME_H = "";
-pub const NULL = @import("std").zig.c_translation.cast(?*anyopaque, @as(c_int, 0));
-pub const __NEED_clock_t = "";
-pub const __NEED_timer_t = "";
-pub const __NEED_locale_t = "";
-pub const __DEFINED_timer_t = "";
-pub const __DEFINED_clock_t = "";
-pub const __DEFINED_locale_t = "";
-pub const __tm_gmtoff = @compileError("unable to translate macro: undefined identifier `tm_gmtoff`");
-// ./time.h:36:9
-pub const __tm_zone = @compileError("unable to translate macro: undefined identifier `tm_zone`");
-// ./time.h:37:9
-pub const CLOCKS_PER_SEC = @as(c_long, 1000000);
-pub const TIME_UTC = @as(c_int, 1);
-pub const CLOCK_REALTIME = @as(c_int, 0);
-pub const CLOCK_MONOTONIC = @as(c_int, 1);
-pub const CLOCK_PROCESS_CPUTIME_ID = @as(c_int, 2);
-pub const CLOCK_THREAD_CPUTIME_ID = @as(c_int, 3);
-pub const CLOCK_MONOTONIC_RAW = @as(c_int, 4);
-pub const CLOCK_REALTIME_COARSE = @as(c_int, 5);
-pub const CLOCK_MONOTONIC_COARSE = @as(c_int, 6);
-pub const CLOCK_BOOTTIME = @as(c_int, 7);
-pub const CLOCK_REALTIME_ALARM = @as(c_int, 8);
-pub const CLOCK_BOOTTIME_ALARM = @as(c_int, 9);
-pub const CLOCK_SGI_CYCLE = @as(c_int, 10);
-pub const CLOCK_TAI = @as(c_int, 11);
-pub const TIMER_ABSTIME = @as(c_int, 1);
-pub const PTHREAD_CREATE_JOINABLE = @as(c_int, 0);
-pub const PTHREAD_CREATE_DETACHED = @as(c_int, 1);
-pub const PTHREAD_MUTEX_NORMAL = @as(c_int, 0);
-pub const PTHREAD_MUTEX_DEFAULT = @as(c_int, 0);
-pub const PTHREAD_MUTEX_RECURSIVE = @as(c_int, 1);
-pub const PTHREAD_MUTEX_ERRORCHECK = @as(c_int, 2);
-pub const PTHREAD_MUTEX_STALLED = @as(c_int, 0);
-pub const PTHREAD_MUTEX_ROBUST = @as(c_int, 1);
-pub const PTHREAD_PRIO_NONE = @as(c_int, 0);
-pub const PTHREAD_PRIO_INHERIT = @as(c_int, 1);
-pub const PTHREAD_PRIO_PROTECT = @as(c_int, 2);
-pub const PTHREAD_INHERIT_SCHED = @as(c_int, 0);
-pub const PTHREAD_EXPLICIT_SCHED = @as(c_int, 1);
-pub const PTHREAD_SCOPE_SYSTEM = @as(c_int, 0);
-pub const PTHREAD_SCOPE_PROCESS = @as(c_int, 1);
-pub const PTHREAD_PROCESS_PRIVATE = @as(c_int, 0);
-pub const PTHREAD_PROCESS_SHARED = @as(c_int, 1);
-pub const PTHREAD_MUTEX_INITIALIZER = @compileError("unable to translate C expr: unexpected token '{'");
-// pthread.h:58:9
-pub const PTHREAD_RWLOCK_INITIALIZER = @compileError("unable to translate C expr: unexpected token '{'");
-// pthread.h:59:9
-pub const PTHREAD_COND_INITIALIZER = @compileError("unable to translate C expr: unexpected token '{'");
-// pthread.h:60:9
-pub const PTHREAD_ONCE_INIT = @as(c_int, 0);
-pub const PTHREAD_CANCEL_ENABLE = @as(c_int, 0);
-pub const PTHREAD_CANCEL_DISABLE = @as(c_int, 1);
-pub const PTHREAD_CANCEL_MASKED = @as(c_int, 2);
-pub const PTHREAD_CANCEL_DEFERRED = @as(c_int, 0);
-pub const PTHREAD_CANCEL_ASYNCHRONOUS = @as(c_int, 1);
-pub const PTHREAD_CANCELED = @import("std").zig.c_translation.cast(?*anyopaque, -@as(c_int, 1));
-pub const PTHREAD_BARRIER_SERIAL_THREAD = -@as(c_int, 1);
-pub const PTHREAD_NULL = @import("std").zig.c_translation.cast(pthread_t, @as(c_int, 0));
-pub const pthread_cleanup_push = @compileError("unable to translate macro: undefined identifier `__cb`");
-// pthread.h:215:9
-pub const pthread_cleanup_pop = @compileError("unable to translate macro: undefined identifier `__cb`");
-// pthread.h:216:9
-pub const timespec = struct_timespec;
-pub const __pthread = struct___pthread;
-pub const __sigset_t = struct___sigset_t;
-pub const sched_param = struct_sched_param;
-pub const __locale_struct = struct___locale_struct;
-pub const tm = struct_tm;
-pub const itimerspec = struct_itimerspec;
-pub const sigevent = struct_sigevent;
-pub const __ptcb = struct___ptcb;
+pub const EXIT_FAILURE = @as(c_int, 1);
+pub const EXIT_SUCCESS = @as(c_int, 0);
+pub const MB_CUR_MAX = __ctype_get_mb_cur_max();
+pub const RAND_MAX = @import("std").zig.c_translation.promoteIntLiteral(c_int, 0x7fffffff, .hex);
+pub const WNOHANG = @as(c_int, 1);
+pub const WUNTRACED = @as(c_int, 2);
+pub inline fn WEXITSTATUS(s: anytype) @TypeOf((s & @import("std").zig.c_translation.promoteIntLiteral(c_int, 0xff00, .hex)) >> @as(c_int, 8)) {
+    _ = &s;
+    return (s & @import("std").zig.c_translation.promoteIntLiteral(c_int, 0xff00, .hex)) >> @as(c_int, 8);
+}
+pub inline fn WTERMSIG(s: anytype) @TypeOf(s & @as(c_int, 0x7f)) {
+    _ = &s;
+    return s & @as(c_int, 0x7f);
+}
+pub inline fn WSTOPSIG(s: anytype) @TypeOf(WEXITSTATUS(s)) {
+    _ = &s;
+    return WEXITSTATUS(s);
+}
+pub inline fn WIFEXITED(s: anytype) @TypeOf(!(WTERMSIG(s) != 0)) {
+    _ = &s;
+    return !(WTERMSIG(s) != 0);
+}
+pub inline fn WIFSTOPPED(s: anytype) @TypeOf(@import("std").zig.c_translation.cast(c_short, ((s & @import("std").zig.c_translation.promoteIntLiteral(c_int, 0xffff, .hex)) * @import("std").zig.c_translation.promoteIntLiteral(c_uint, 0x10001, .hex)) >> @as(c_int, 8)) > @as(c_int, 0x7f00)) {
+    _ = &s;
+    return @import("std").zig.c_translation.cast(c_short, ((s & @import("std").zig.c_translation.promoteIntLiteral(c_int, 0xffff, .hex)) * @import("std").zig.c_translation.promoteIntLiteral(c_uint, 0x10001, .hex)) >> @as(c_int, 8)) > @as(c_int, 0x7f00);
+}
+pub inline fn WIFSIGNALED(s: anytype) @TypeOf(((s & @import("std").zig.c_translation.promoteIntLiteral(c_int, 0xffff, .hex)) - @as(c_uint, 1)) < @as(c_uint, 0xff)) {
+    _ = &s;
+    return ((s & @import("std").zig.c_translation.promoteIntLiteral(c_int, 0xffff, .hex)) - @as(c_uint, 1)) < @as(c_uint, 0xff);
+}
+pub const _ALLOCA_H = "";
+pub inline fn WCOREDUMP(s: anytype) @TypeOf(s & @as(c_int, 0x80)) {
+    _ = &s;
+    return s & @as(c_int, 0x80);
+}
+pub inline fn WIFCONTINUED(s: anytype) @TypeOf(s == @import("std").zig.c_translation.promoteIntLiteral(c_int, 0xffff, .hex)) {
+    _ = &s;
+    return s == @import("std").zig.c_translation.promoteIntLiteral(c_int, 0xffff, .hex);
+}
+pub const __EMSCRIPTEN_major__ = @as(c_int, 4);
+pub const __EMSCRIPTEN_minor__ = @as(c_int, 0);
+pub const __EMSCRIPTEN_tiny__ = @as(c_int, 8);
+pub const EM_TIMING_SETTIMEOUT = @as(c_int, 0);
+pub const EM_TIMING_RAF = @as(c_int, 1);
+pub const EM_TIMING_SETIMMEDIATE = @as(c_int, 2);
+pub const emscripten_push_main_loop_blocker = @compileError("unable to translate C expr: unexpected token '#'");
+// emscripten/emscripten.h:66:9
+pub const emscripten_push_uncounted_main_loop_blocker = @compileError("unable to translate C expr: unexpected token '#'");
+// emscripten/emscripten.h:68:9
+pub const emscripten_async_prepare = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/emscripten.h:123:9
+pub const emscripten_async_prepare_data = @compileError("unable to translate C expr: expected ')' instead got '...'");
+// emscripten/emscripten.h:124:9
+pub const EM_LOG_CONSOLE = @as(c_int, 1);
+pub const EM_LOG_WARN = @as(c_int, 2);
+pub const EM_LOG_ERROR = @as(c_int, 4);
+pub const EM_LOG_C_STACK = @as(c_int, 8);
+pub const EM_LOG_JS_STACK = @as(c_int, 16);
+pub const EM_LOG_DEMANGLE = @as(c_int, 32);
+pub const EM_LOG_NO_PATHS = @as(c_int, 64);
+pub const EM_LOG_FUNC_PARAMS = @as(c_int, 128);
+pub const EM_LOG_DEBUG = @as(c_int, 256);
+pub const EM_LOG_INFO = @as(c_int, 512);
+pub const _em_promise = struct__em_promise;
+pub const _IO_FILE = struct__IO_FILE;

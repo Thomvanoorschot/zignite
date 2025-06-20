@@ -2,7 +2,7 @@ const std = @import("std");
 const zignite = @import("zignite");
 const pthread = zignite.pthread;
 const websocket = zignite.websocket;
-const emscripten_utils = zignite.emscripten_utils;
+const em = zignite.emscripten;
 const imgui = zignite.imgui;
 const engine = zignite.engine;
 const web_worker = zignite.web_worker;
@@ -24,7 +24,7 @@ const ExampleStruct = struct {
         const self: *Self = @ptrCast(@alignCast(self_));
         while (true) {
             self.shared_data.number += 1;
-            emscripten_utils.emscripten_sleep(100);
+            em.emscripten_sleep(100);
         }
     }
 };

@@ -1,7 +1,7 @@
 const std = @import("std");
 const pthread = @import("pthread.zig");
 const websocket = @import("websocket.zig");
-const emscripten_utils = @import("emscripten_utils.zig");
+const em = @import("emscripten.zig");
 
 const StdOut = @TypeOf(std.io.getStdOut().writer());
 const StdErr = @TypeOf(std.io.getStdErr().writer());
@@ -67,7 +67,7 @@ pub const WebSocketWebWorker = struct {
         _ = websocket.setCloseCallback(self.open_socket.?, self, closeCallback);
 
         while (!self.websocket_ready) {
-            emscripten_utils.emscripten_sleep(10);
+            em.emscripten_sleep(10);
         }
 
         self.std_out.print("WebSocket ready\n", .{}) catch unreachable;
