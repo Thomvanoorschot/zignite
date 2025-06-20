@@ -36,20 +36,32 @@ pub fn build(b: *Build) void {
             .optimize = optimize,
             .root_source_file = b.path(example_name ++ ".zig"),
         });
+        if (target.query.os_tag == .emscripten) {
+            const example = b.addStaticLibrary(.{
+                .name = example_name,
+                .root_module = example_mod,
+            });
 
-        const example = b.addStaticLibrary(.{
-            .name = example_name,
-            .root_module = example_mod,
-        });
+            example.linkLibrary(zignite_lib);
+            example.linkLibC();
+            example.root_module.addImport("zignite", zignite_dep.module("zignite"));
 
-        example.linkLibrary(zignite_lib);
-        example.linkLibC();
-        example.root_module.addImport("zignite", zignite_dep.module("zignite"));
+            _ = zignite_pkg.emRunStep(b, .{
+                .name = example_name,
+                .zignite_dep = zignite_dep,
+                .lib_main = example,
+            });
+        } else {
+            const example = b.addExecutable(.{
+                .name = example_name,
+                .root_module = example_mod,
+            });
+            example.linkLibrary(zignite_lib);
+            example.linkLibC();
+            example.root_module.addImport("zignite", zignite_dep.module("zignite"));
+            b.installArtifact(example);
 
-        _ = zignite_pkg.emRunStep(b, .{
-            .name = example_name,
-            .zignite_dep = zignite_dep,
-            .lib_main = example,
-        });
+            b.step(example_name, "Run " ++ example_name).dependOn(b.getInstallStep());
+        }
     }
 }

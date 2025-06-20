@@ -42,7 +42,9 @@ pub const Context = struct {
         );
         errdefer swapchain.release();
 
-        _ = em_html.emscripten_set_canvas_element_size(canvas_name.ptr, @intCast(framebuffer_size[0]), @intCast(framebuffer_size[1]));
+        if (em.is_emscripten) {
+            _ = em_html.emscripten_set_canvas_element_size(canvas_name.ptr, @intCast(framebuffer_size[0]), @intCast(framebuffer_size[1]));
+        }
         self.* = .{
             .instance = instance,
             .device = @ptrCast(device),
