@@ -6,7 +6,6 @@ const webgpu = @import("webgpu.zig");
 const imgui_webgpu = @import("imgui_webgpu.zig");
 const implot = @import("implot.zig");
 const imgui_utils = @import("imgui_utils.zig");
-const em = @import("emscripten.zig");
 
 const GLFWWindow = glfw.GLFWwindow;
 const WebGPUContext = webgpu.Context;
@@ -215,6 +214,6 @@ pub const Engine = struct {
 
         self.frame_stats.tick(glfw.glfwGetTime());
 
-        em.emscripten_sleep(1);
+        webgpu.emscripten_sleep(1);
     }
 };

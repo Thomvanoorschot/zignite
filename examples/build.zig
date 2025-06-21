@@ -4,10 +4,6 @@ const zignite_pkg = @import("zignite");
 
 pub fn build(b: *Build) void {
     const target = b.standardTargetOptions(.{});
-    // const target = b.resolveTargetQuery(.{
-    //     .cpu_arch = .wasm64,
-    //     .os_tag = .emscripten,
-    // });
     const optimize = b.standardOptimizeOption(.{});
 
     const zignite_dep = b.dependency("zignite", .{
@@ -36,32 +32,20 @@ pub fn build(b: *Build) void {
             .optimize = optimize,
             .root_source_file = b.path(example_name ++ ".zig"),
         });
-        if (target.query.os_tag == .emscripten) {
-            const example = b.addStaticLibrary(.{
-                .name = example_name,
-                .root_module = example_mod,
-            });
 
-            example.linkLibrary(zignite_lib);
-            example.linkLibC();
-            example.root_module.addImport("zignite", zignite_dep.module("zignite"));
+        const example = b.addStaticLibrary(.{
+            .name = example_name,
+            .root_module = example_mod,
+        });
 
-            _ = zignite_pkg.emRunStep(b, .{
-                .name = example_name,
-                .zignite_dep = zignite_dep,
-                .lib_main = example,
-            });
-        } else {
-            const example = b.addExecutable(.{
-                .name = example_name,
-                .root_module = example_mod,
-            });
-            example.linkLibrary(zignite_lib);
-            example.linkLibC();
-            example.root_module.addImport("zignite", zignite_dep.module("zignite"));
-            b.installArtifact(example);
+        example.linkLibrary(zignite_lib);
+        example.linkLibC();
+        example.root_module.addImport("zignite", zignite_dep.module("zignite"));
 
-            b.step(example_name, "Run " ++ example_name).dependOn(b.getInstallStep());
-        }
+        _ = zignite_pkg.emRunStep(b, .{
+            .name = example_name,
+            .zignite_dep = zignite_dep,
+            .lib_main = example,
+        });
     }
 }

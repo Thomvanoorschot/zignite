@@ -1,7 +1,11 @@
 const std = @import("std");
-const em = @import("emscripten.zig");
-const em_webgpu = @import("emscripten_webgpu.zig");
-const em_html = @import("emscripten_html5.zig");
+const cc = @cImport({
+    @cInclude("emscripten.h");
+    @cInclude("emscripten/html5.h");
+    @cInclude("emscripten/html5_webgpu.h");
+    @cInclude("webgpu/webgpu.h");
+});
+pub extern fn emscripten_sleep(ms: u32) void;
 
 pub const Context = struct {
     instance: WGPUInstance,
@@ -16,7 +20,7 @@ pub const Context = struct {
     pub fn init(allocator: std.mem.Allocator, framebuffer_size: [2]u32) !*Self {
         const self = try allocator.create(Self);
         const instance = wgpuCreateInstance(null);
-        const device = em_webgpu.emscripten_webgpu_get_device();
+        const device = cc.emscripten_webgpu_get_device();
         const queue = wgpuDeviceGetQueue(@ptrCast(device));
 
         const canvas_name: []const u8 = "canvas";
@@ -28,13 +32,13 @@ pub const Context = struct {
             }),
         });
         const swapchain_descriptor = WGPUSwapChainDescriptor{
-            .nextInChain = null,
-            .usage = WGPUTextureUsage_RenderAttachment,
-            .format = WGPUTextureFormat_BGRA8Unorm,
-            .width = @intCast(framebuffer_size[0]),
-            .height = @intCast(framebuffer_size[1]),
-            .presentMode = WGPUPresentMode_Fifo,
-        };
+                .nextInChain = null,
+                .usage = WGPUTextureUsage_RenderAttachment,
+                .format = WGPUTextureFormat_BGRA8Unorm,
+                .width = @intCast(framebuffer_size[0]),
+                .height = @intCast(framebuffer_size[1]),
+                .presentMode = WGPUPresentMode_Fifo,
+            };
         const swapchain = wgpuDeviceCreateSwapChain(
             @ptrCast(device),
             surface,
@@ -42,9 +46,7 @@ pub const Context = struct {
         );
         errdefer swapchain.release();
 
-        if (em.is_emscripten) {
-            _ = em_html.emscripten_set_canvas_element_size(canvas_name.ptr, @intCast(framebuffer_size[0]), @intCast(framebuffer_size[1]));
-        }
+        _ = cc.emscripten_set_canvas_element_size(canvas_name.ptr, @intCast(framebuffer_size[0]), @intCast(framebuffer_size[1]));
         self.* = .{
             .instance = instance,
             .device = @ptrCast(device),
