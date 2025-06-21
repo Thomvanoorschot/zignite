@@ -7,6 +7,7 @@ const imgui_webgpu = @import("imgui_webgpu.zig");
 const implot = @import("implot.zig");
 const imgui_utils = @import("imgui_utils.zig");
 const em = @import("emscripten.zig");
+const builtin = @import("builtin");
 
 const GLFWWindow = glfw.GLFWwindow;
 const WebGPUContext = webgpu.Context;
@@ -64,6 +65,7 @@ pub const Engine = struct {
     webgpu_context: *WebGPUContext,
     imgui_context: ?*ImGuiContext,
     frame_stats: FrameStats,
+    user_render_fn: ?*const fn () void = null,
     const Self = @This();
 
     pub fn init(options: EngineOptions) !Self {
@@ -98,10 +100,27 @@ pub const Engine = struct {
         var width: c_int = 0;
         var height: c_int = 0;
         glfw.glfwGetFramebufferSize(self.window, &width, &height);
-        return try webgpu.Context.init(std.heap.c_allocator, .{
+        const context = try webgpu.Context.init(std.heap.c_allocator, .{
             @intCast(width),
             @intCast(height),
         });
+
+        // Add device error callback for better debugging
+        if (builtin.target.os.tag == .emscripten) {
+            // Set up device error callback
+            webgpu.wgpuDeviceSetUncapturedErrorCallback(
+                context.device,
+                deviceErrorCallback,
+                null,
+            );
+        }
+
+        return context;
+    }
+
+    fn deviceErrorCallback(type_: webgpu.WGPUErrorType, message: [*:0]const u8, userdata: ?*anyopaque) callconv(.C) void {
+        _ = userdata;
+        std.log.err("WebGPU Device Error (type {}): {s}", .{ type_, message });
     }
 
     fn initGLFWWindow(title: []const u8, width: u32, height: u32) !*GLFWWindow {
@@ -154,7 +173,7 @@ pub const Engine = struct {
         imgui_webgpu.init(
             @ptrCast(self.window),
             @ptrCast(webgpu_context.device),
-            webgpu.WGPUTextureFormat_BGRA8Unorm,
+            webgpu_context.swapchain_descriptor.format,
             webgpu.WGPUTextureFormat_Undefined,
         );
     }
@@ -187,8 +206,11 @@ pub const Engine = struct {
             };
         }
 
-        const swapchain_texv = webgpu.wgpuSwapChainGetCurrentTextureView(@ptrCast(self.webgpu_context.swapchain));
-        defer webgpu.wgpuTextureViewRelease(swapchain_texv);
+        const surface_texv = self.webgpu_context.getCurrentTextureView() catch |err| {
+            self.stdErr.print("Failed to get surface texture view: {}\n", .{err}) catch unreachable;
+            return;
+        };
+        defer webgpu.wgpuTextureViewRelease(surface_texv);
 
         const commands = commands: {
             const encoder = webgpu.wgpuDeviceCreateCommandEncoder(self.webgpu_context.device, null);
@@ -197,7 +219,7 @@ pub const Engine = struct {
                 const pass = webgpu.beginRenderPassSimple(
                     encoder,
                     webgpu.WGPULoadOp_Load,
-                    @ptrCast(swapchain_texv),
+                    surface_texv,
                     null,
                     null,
                     null,
@@ -213,8 +235,38 @@ pub const Engine = struct {
         const command_buffers = [_]webgpu.WGPUCommandBuffer{commands};
         webgpu.wgpuQueueSubmit(self.webgpu_context.queue, 1, &command_buffers);
 
+        self.webgpu_context.present();
+
         self.frame_stats.tick(glfw.glfwGetTime());
 
         em.emscripten_sleep(1);
     }
+
+    pub fn run(self: *Self, render_fn: *const fn () void) void {
+        if (builtin.target.os.tag == .emscripten) {
+            self.user_render_fn = render_fn;
+            global_engine_for_callback = self;
+            em.emscripten_set_main_loop(emscriptenEngineMainLoop, 0, true);
+        } else {
+            while (self.startRender()) {
+                defer self.endRender();
+                render_fn();
+            }
+        }
+    }
 };
+
+var global_engine_for_callback: ?*Engine = null;
+
+fn emscriptenEngineMainLoop() callconv(.C) void {
+    if (global_engine_for_callback) |e| {
+        if (e.startRender()) {
+            defer e.endRender();
+            if (e.user_render_fn) |render_fn| {
+                render_fn();
+            }
+        } else {
+            em.emscripten_cancel_main_loop();
+        }
+    }
+}

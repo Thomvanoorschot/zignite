@@ -173,6 +173,12 @@ fn setupNativeBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: bool, w
             .flags = native_cflags,
         });
     }
+
+    zignite.addIncludePath(b.path("libs"));
+    zignite.addCSourceFile(.{
+        .file = b.path("libs/dawn_native_wrapper.cpp"),
+        .flags = native_cflags,
+    });
 }
 
 fn setupEmscriptenBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: bool, with_implot: bool) !void {
