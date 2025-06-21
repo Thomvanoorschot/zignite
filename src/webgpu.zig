@@ -22,8 +22,8 @@ pub const WGPUTextureFormat_RGBA8Unorm: u32 = 18;
 pub const WGPUTextureFormat_Undefined: u32 = 0;
 pub const WGPUPresentMode_Fifo: u32 = 1;
 pub const WGPUSType_SurfaceDescriptorFromCanvasHTMLSelector: u32 = 4;
-pub const WGPULoadOp_Clear: u32 = 0;
-pub const WGPULoadOp_Load: u32 = 1;
+pub const WGPULoadOp_Clear: u32 = 1;
+pub const WGPULoadOp_Load: u32 = 2;
 pub const WGPUStoreOp_Store: u32 = 1;
 pub const WGPU_DEPTH_SLICE_UNDEFINED: u32 = 0xFFFFFFFF;
 
@@ -47,9 +47,9 @@ pub const WGPUTextureViewDimension_Cube: u32 = 4;
 pub const WGPUTextureViewDimension_CubeArray: u32 = 5;
 pub const WGPUTextureViewDimension_3D: u32 = 6;
 
-pub const WGPUTextureAspect_All: u32 = 0;
-pub const WGPUTextureAspect_StencilOnly: u32 = 1;
-pub const WGPUTextureAspect_DepthOnly: u32 = 2;
+pub const WGPUTextureAspect_All: u32 = 1;
+pub const WGPUTextureAspect_StencilOnly: u32 = 2;
+pub const WGPUTextureAspect_DepthOnly: u32 = 3;
 
 pub const WGPU_MIP_LEVEL_COUNT_UNDEFINED: u32 = 0xFFFFFFFF;
 pub const WGPU_ARRAY_LAYER_COUNT_UNDEFINED: u32 = 0xFFFFFFFF;
