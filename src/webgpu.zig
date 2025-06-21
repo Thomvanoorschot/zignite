@@ -20,11 +20,11 @@ pub const WGPUTextureUsage_RenderAttachment: u32 = 0x00000010;
 pub const WGPUTextureFormat_BGRA8Unorm: u32 = 23;
 pub const WGPUTextureFormat_RGBA8Unorm: u32 = 18;
 pub const WGPUTextureFormat_Undefined: u32 = 0;
-pub const WGPUPresentMode_Fifo: u32 = 2;
+pub const WGPUPresentMode_Fifo: u32 = 1;
 pub const WGPUSType_SurfaceDescriptorFromCanvasHTMLSelector: u32 = 4;
 pub const WGPULoadOp_Clear: u32 = 0;
 pub const WGPULoadOp_Load: u32 = 1;
-pub const WGPUStoreOp_Store: u32 = 0;
+pub const WGPUStoreOp_Store: u32 = 1;
 pub const WGPU_DEPTH_SLICE_UNDEFINED: u32 = 0xFFFFFFFF;
 
 // New surface API constants
@@ -243,11 +243,12 @@ pub const Context = struct {
             const device = em_webgpu.emscripten_webgpu_get_device();
             const queue = wgpuDeviceGetQueue(@ptrCast(device));
 
-            const canvas_selector = "#canvas";
+            // const canvas_selector = "canvas";
             const surface = wgpuInstanceCreateSurface(instance, &WGPUSurfaceDescriptor{
                 .nextInChain = @ptrCast(&WGPUSurfaceDescriptorFromCanvasHTMLSelector{
                     .chain = .{ .next = null, .sType = WGPUSType_SurfaceDescriptorFromCanvasHTMLSelector },
-                    .selector = canvas_selector.ptr,
+                    // .selector = canvas_selector.ptr,
+                    .selector = "#canvas",
                 }),
                 .label = null,
             });
@@ -262,7 +263,11 @@ pub const Context = struct {
                 .presentMode = WGPUPresentMode_Fifo,
             };
 
-            const swapchain = wgpuDeviceCreateSwapChain(@ptrCast(device), surface, &swapchain_descriptor);
+            const swapchain = wgpuDeviceCreateSwapChain(
+                @ptrCast(device),
+                surface,
+                &swapchain_descriptor,
+            );
 
             const canvas_name: []const u8 = "canvas";
             _ = em_html.emscripten_set_canvas_element_size(canvas_name.ptr, @intCast(framebuffer_size[0]), @intCast(framebuffer_size[1]));
