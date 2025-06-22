@@ -517,49 +517,108 @@ pub fn beginRenderPassSimple(
     depth_texv: ?WGPUTextureView,
     clear_depth: ?f32,
 ) WGPURenderPassEncoder {
-    const color_attachments = [_]WGPURenderPassColorAttachment{.{
-        .nextInChain = null,
-        .view = color_texv,
-        .depthSlice = WGPU_DEPTH_SLICE_UNDEFINED,
-        .resolveTarget = null,
-        .loadOp = load_op,
-        .storeOp = WGPUStoreOp_Store,
-        .clearValue = if (clear_color) |cv| cv else .{ .r = 0, .g = 0, .b = 0, .a = 0 },
-    }};
+    if (builtin.target.os.tag == .emscripten) {
+        // Convert color to emscripten format if provided
+        const em_clear_color: em_webgpu.struct_WGPUColor = if (clear_color) |cv| .{
+            .r = cv.r,
+            .g = cv.g,
+            .b = cv.b,
+            .a = cv.a,
+        } else .{ .r = 0, .g = 0, .b = 0, .a = 0 };
 
-    if (depth_texv) |dtexv| {
-        const depth_attachment = WGPURenderPassDepthStencilAttachment{
+        // Use emscripten-compatible structs
+        const em_color_attachments = [_]em_webgpu.struct_WGPURenderPassColorAttachment{.{
             .nextInChain = null,
-            .view = dtexv,
-            .depthLoadOp = load_op,
-            .depthStoreOp = WGPUStoreOp_Store,
-            .depthClearValue = if (clear_depth) |cd| cd else 0.0,
-            .depthReadOnly = false,
-            .stencilLoadOp = WGPULoadOp_Undefined,
-            .stencilStoreOp = WGPUStoreOp_Undefined,
-            .stencilClearValue = 0,
-            .stencilReadOnly = false,
-        };
-        return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
+            .view = @ptrCast(color_texv),
+            .depthSlice = WGPU_DEPTH_SLICE_UNDEFINED,
+            .resolveTarget = null,
+            .loadOp = load_op,
+            .storeOp = WGPUStoreOp_Store,
+            .clearValue = em_clear_color,
+        }};
+
+        if (depth_texv) |dtexv| {
+            const em_depth_attachment = em_webgpu.struct_WGPURenderPassDepthStencilAttachment{
+                .view = @ptrCast(dtexv),
+                .depthLoadOp = load_op,
+                .depthStoreOp = WGPUStoreOp_Store,
+                .depthClearValue = if (clear_depth) |cd| cd else 0.0,
+                .depthReadOnly = 0,
+                .stencilLoadOp = WGPULoadOp_Undefined,
+                .stencilStoreOp = WGPUStoreOp_Undefined,
+                .stencilClearValue = 0,
+                .stencilReadOnly = 0,
+            };
+
+            const em_render_pass_descriptor = em_webgpu.struct_WGPURenderPassDescriptor{
+                .nextInChain = null,
+                .label = null,
+                .colorAttachmentCount = em_color_attachments.len,
+                .colorAttachments = &em_color_attachments,
+                .depthStencilAttachment = &em_depth_attachment,
+                .occlusionQuerySet = null,
+                .timestampWrites = null,
+            };
+            return wgpuCommandEncoderBeginRenderPass(encoder, @ptrCast(&em_render_pass_descriptor));
+        } else {
+            const em_render_pass_descriptor = em_webgpu.struct_WGPURenderPassDescriptor{
+                .nextInChain = null,
+                .label = null,
+                .colorAttachmentCount = em_color_attachments.len,
+                .colorAttachments = &em_color_attachments,
+                .depthStencilAttachment = null,
+                .occlusionQuerySet = null,
+                .timestampWrites = null,
+            };
+            return wgpuCommandEncoderBeginRenderPass(encoder, @ptrCast(&em_render_pass_descriptor));
+        }
+    } else {
+        // Use Dawn native structs
+        const color_attachments = [_]WGPURenderPassColorAttachment{.{
             .nextInChain = null,
-            .label = WGPUStringView{ .data = null, .length = 0 },
-            .colorAttachmentCount = color_attachments.len,
-            .colorAttachments = &color_attachments,
-            .depthStencilAttachment = &depth_attachment,
-            .occlusionQuerySet = null,
-            .timestampWrites = null,
-        });
+            .view = color_texv,
+            .depthSlice = WGPU_DEPTH_SLICE_UNDEFINED,
+            .resolveTarget = null,
+            .loadOp = load_op,
+            .storeOp = WGPUStoreOp_Store,
+            .clearValue = if (clear_color) |cv| cv else .{ .r = 0, .g = 0, .b = 0, .a = 0 },
+        }};
+
+        if (depth_texv) |dtexv| {
+            const depth_attachment = WGPURenderPassDepthStencilAttachment{
+                .nextInChain = null,
+                .view = dtexv,
+                .depthLoadOp = load_op,
+                .depthStoreOp = WGPUStoreOp_Store,
+                .depthClearValue = if (clear_depth) |cd| cd else 0.0,
+                .depthReadOnly = false,
+                .stencilLoadOp = WGPULoadOp_Undefined,
+                .stencilStoreOp = WGPUStoreOp_Undefined,
+                .stencilClearValue = 0,
+                .stencilReadOnly = false,
+            };
+
+            return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
+                .nextInChain = null,
+                .label = WGPUStringView{ .data = null, .length = 0 },
+                .colorAttachmentCount = color_attachments.len,
+                .colorAttachments = &color_attachments,
+                .depthStencilAttachment = &depth_attachment,
+                .occlusionQuerySet = null,
+                .timestampWrites = null,
+            });
+        } else {
+            return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
+                .nextInChain = null,
+                .label = WGPUStringView{ .data = null, .length = 0 },
+                .colorAttachmentCount = color_attachments.len,
+                .colorAttachments = &color_attachments,
+                .depthStencilAttachment = null,
+                .occlusionQuerySet = null,
+                .timestampWrites = null,
+            });
+        }
     }
-
-    return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
-        .nextInChain = null,
-        .label = WGPUStringView{ .data = null, .length = 0 },
-        .colorAttachmentCount = color_attachments.len,
-        .colorAttachments = &color_attachments,
-        .depthStencilAttachment = null,
-        .occlusionQuerySet = null,
-        .timestampWrites = null,
-    });
 }
 
 // WebGPU error types
