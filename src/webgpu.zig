@@ -185,25 +185,26 @@ pub const WGPURenderPassColorAttachment = extern struct {
 };
 
 pub const WGPURenderPassDepthStencilAttachment = extern struct {
+    nextInChain: ?*const WGPUChainedStruct = null,
     view: WGPUTextureView,
-    depthLoadOp: u32,
-    depthStoreOp: u32,
-    depthClearValue: f32,
-    depthReadOnly: u32 = undefined, // WGPUBool
-    stencilLoadOp: u32 = undefined,
-    stencilStoreOp: u32 = undefined,
-    stencilClearValue: u32 = undefined,
-    stencilReadOnly: u32 = undefined, // WGPUBool
+    depthLoadOp: u32 = WGPULoadOp_Undefined,
+    depthStoreOp: u32 = WGPUStoreOp_Undefined,
+    depthClearValue: f32 = 0.0,
+    depthReadOnly: bool = false, // WGPUBool
+    stencilLoadOp: u32 = WGPULoadOp_Undefined,
+    stencilStoreOp: u32 = WGPUStoreOp_Undefined,
+    stencilClearValue: u32 = 0,
+    stencilReadOnly: bool = false, // WGPUBool
 };
 
 pub const WGPURenderPassDescriptor = extern struct {
-    nextInChain: ?*const WGPUChainedStruct,
-    label: WGPUStringView,
+    nextInChain: ?*const WGPUChainedStruct = null,
+    label: WGPUStringView = .{ .data = null, .length = 0 },
     colorAttachmentCount: usize,
     colorAttachments: ?[*]const WGPURenderPassColorAttachment,
-    depthStencilAttachment: ?*const WGPURenderPassDepthStencilAttachment,
-    occlusionQuerySet: WGPUQuerySet,
-    timestampWrites: ?*const anyopaque,
+    depthStencilAttachment: ?*const WGPURenderPassDepthStencilAttachment = null,
+    occlusionQuerySet: WGPUQuerySet = null,
+    timestampWrites: ?*const anyopaque = null,
 };
 
 // Dawn-specific proc table (opaque to Zig)
@@ -528,10 +529,16 @@ pub fn beginRenderPassSimple(
 
     if (depth_texv) |dtexv| {
         const depth_attachment = WGPURenderPassDepthStencilAttachment{
+            .nextInChain = null,
             .view = dtexv,
             .depthLoadOp = load_op,
             .depthStoreOp = WGPUStoreOp_Store,
             .depthClearValue = if (clear_depth) |cd| cd else 0.0,
+            .depthReadOnly = false,
+            .stencilLoadOp = WGPULoadOp_Undefined,
+            .stencilStoreOp = WGPUStoreOp_Undefined,
+            .stencilClearValue = 0,
+            .stencilReadOnly = false,
         };
         return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
             .nextInChain = null,
