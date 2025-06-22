@@ -196,16 +196,22 @@ pub const Engine = struct {
             };
         }
 
+        std.log.info("[Engine] Getting surface texture view...", .{});
         const surface_texv = self.webgpu_context.getCurrentTextureView() catch |err| {
             self.stdErr.print("Failed to get surface texture view: {}\n", .{err}) catch unreachable;
             return;
         };
         defer webgpu.wgpuTextureViewRelease(surface_texv);
+        std.log.info("[Engine] Surface texture view acquired successfully", .{});
 
         const commands = commands: {
+            std.log.info("[Engine] Creating command encoder...", .{});
             const encoder = webgpu.wgpuDeviceCreateCommandEncoder(self.webgpu_context.device, null);
             defer webgpu.wgpuCommandEncoderRelease(encoder);
+            std.log.info("[Engine] Command encoder created: {?}", .{encoder});
+
             {
+                std.log.info("[Engine] Beginning render pass...", .{});
                 const pass = webgpu.beginRenderPassSimple(
                     encoder,
                     webgpu.WGPULoadOp_Load,
@@ -216,17 +222,27 @@ pub const Engine = struct {
                 );
                 defer webgpu.wgpuRenderPassEncoderRelease(pass);
                 defer webgpu.wgpuRenderPassEncoderEnd(pass);
+                std.log.info("[Engine] Render pass created: {?}", .{pass});
+
+                std.log.info("[Engine] About to call imgui_webgpu.draw()...", .{});
                 imgui_webgpu.draw(@ptrCast(pass));
+                std.log.info("[Engine] imgui_webgpu.draw() completed", .{});
             }
+            std.log.info("[Engine] Finishing command encoder...", .{});
             break :commands webgpu.wgpuCommandEncoderFinish(encoder, null);
         };
         defer webgpu.wgpuCommandBufferRelease(commands);
+        std.log.info("[Engine] Command buffer created: {?}", .{commands});
 
+        std.log.info("[Engine] Submitting commands to queue...", .{});
         const command_buffers = [_]webgpu.WGPUCommandBuffer{commands};
         webgpu.wgpuQueueSubmit(self.webgpu_context.queue, 1, &command_buffers);
+        std.log.info("[Engine] Commands submitted", .{});
 
         if (builtin.target.os.tag != .emscripten) {
+            std.log.info("[Engine] About to present...", .{});
             self.webgpu_context.present();
+            std.log.info("[Engine] Present completed", .{});
         }
 
         self.frame_stats.tick(glfw.glfwGetTime());

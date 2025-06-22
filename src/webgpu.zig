@@ -37,10 +37,12 @@ pub const WGPUCompositeAlphaMode_Premultiplied: u32 = 2;
 pub const WGPUCompositeAlphaMode_Unpremultiplied: u32 = 3;
 pub const WGPUCompositeAlphaMode_Inherit: u32 = 4;
 
-pub const WGPUSurfaceGetCurrentTextureStatus_Success: u32 = 0;
-pub const WGPUSurfaceGetCurrentTextureStatus_Timeout: u32 = 1;
-pub const WGPUSurfaceGetCurrentTextureStatus_Outdated: u32 = 2;
-pub const WGPUSurfaceGetCurrentTextureStatus_Lost: u32 = 3;
+pub const WGPUSurfaceGetCurrentTextureStatus_SuccessOptimal: u32 = 0;
+pub const WGPUSurfaceGetCurrentTextureStatus_SuccessSuboptimal: u32 = 1;
+pub const WGPUSurfaceGetCurrentTextureStatus_Timeout: u32 = 2;
+pub const WGPUSurfaceGetCurrentTextureStatus_Outdated: u32 = 3;
+pub const WGPUSurfaceGetCurrentTextureStatus_Lost: u32 = 4;
+pub const WGPUSurfaceGetCurrentTextureStatus_Error: u32 = 5;
 
 pub const WGPUTextureViewDimension_Undefined: u32 = 0;
 pub const WGPUTextureViewDimension_1D: u32 = 1;
@@ -88,7 +90,7 @@ pub const WGPURequestAdapterOptions = extern struct {
     compatibleSurface: WGPUSurface,
     powerPreference: u32,
     backendType: u32,
-    forceFallbackAdapter: u32, // WGPUBool
+    forceFallbackAdapter: bool, // WGPUBool
 };
 
 pub const WGPUDeviceDescriptor = extern struct {
@@ -98,8 +100,8 @@ pub const WGPUDeviceDescriptor = extern struct {
     requiredFeatures: ?[*]const u32,
     requiredLimits: ?*const anyopaque, // WGPURequiredLimits
     defaultQueue: WGPUQueueDescriptor,
-    deviceLostCallback: ?*const fn (reason: u32, message: [*:0]const u8, userdata: ?*anyopaque) callconv(.C) void,
-    deviceLostUserdata: ?*anyopaque,
+    deviceLostCallback: ?*const fn (reason: u32, message: [*:0]const u8, userdata: ?*anyopaque) callconv(.C) void = null,
+    deviceLostUserdata: ?*anyopaque = null,
 };
 
 pub const WGPUQueueDescriptor = extern struct {
@@ -132,9 +134,10 @@ pub const WGPUSurfaceConfiguration = extern struct {
 };
 
 pub const WGPUSurfaceTexture = extern struct {
-    texture: WGPUTexture,
-    suboptimal: u32, // WGPUBool
-    status: u32, // WGPUSurfaceGetCurrentTextureStatus
+    _unknown_field: u64, // 8-byte field at offset 0
+    texture: WGPUTexture, // 8-byte field at offset 8
+    status: u32, // 4-byte field at offset 16
+    _padding: u32 = undefined, // 4-byte padding to reach 24 bytes
 };
 
 pub const WGPUTextureViewDescriptor = extern struct {
@@ -166,13 +169,18 @@ pub const WGPUColor = extern struct {
     a: f64,
 };
 
+pub const WGPUStringView = extern struct {
+    data: ?[*]const u8,
+    length: usize,
+};
+
 pub const WGPURenderPassColorAttachment = extern struct {
-    nextInChain: ?*const WGPUChainedStruct = null,
+    nextInChain: ?*const WGPUChainedStruct,
     view: WGPUTextureView,
     depthSlice: u32,
-    resolveTarget: WGPUTextureView = undefined,
-    loadOp: u32,
-    storeOp: u32,
+    resolveTarget: WGPUTextureView,
+    loadOp: u32, // WGPULoadOp
+    storeOp: u32, // WGPUStoreOp
     clearValue: WGPUColor,
 };
 
@@ -189,13 +197,13 @@ pub const WGPURenderPassDepthStencilAttachment = extern struct {
 };
 
 pub const WGPURenderPassDescriptor = extern struct {
-    nextInChain: ?*const WGPUChainedStruct = null,
-    label: ?[*:0]const u8 = null,
+    nextInChain: ?*const WGPUChainedStruct,
+    label: WGPUStringView,
     colorAttachmentCount: usize,
-    colorAttachments: [*]const WGPURenderPassColorAttachment = undefined,
-    depthStencilAttachment: ?*const WGPURenderPassDepthStencilAttachment = null,
-    occlusionQuerySet: WGPUQuerySet = undefined,
-    timestampWrites: ?*const anyopaque = null, // WGPURenderPassTimestampWrites
+    colorAttachments: ?[*]const WGPURenderPassColorAttachment,
+    depthStencilAttachment: ?*const WGPURenderPassDepthStencilAttachment,
+    occlusionQuerySet: WGPUQuerySet,
+    timestampWrites: ?*const anyopaque,
 };
 
 // Dawn-specific proc table (opaque to Zig)
@@ -235,11 +243,11 @@ pub extern fn wgpuBufferRelease(buffer: WGPUBuffer) void;
 // Platform-specific extern functions for Dawn Native (only available on native platforms)
 
 // GLFW surface creation function
-pub extern fn wgpuGlfwCreateSurfaceForWindow(instance: WGPUInstance, window: ?*anyopaque) WGPUSurface;
+// pub extern fn wgpuGlfwCreateSurfaceForWindow(instance: WGPUInstance, window: ?*anyopaque) WGPUSurface;
 
 // Add missing WebGPU adapter functions
-pub extern fn wgpuInstanceRequestAdapter(instance: WGPUInstance, options: ?*const WGPURequestAdapterOptions, callback: *const fn (WGPURequestAdapterStatus, WGPUAdapter, [*:0]const u8, ?*anyopaque) callconv(.C) void, userdata: ?*anyopaque) void;
-pub extern fn wgpuAdapterRequestDevice(adapter: WGPUAdapter, descriptor: ?*const WGPUDeviceDescriptor, callback: *const fn (WGPURequestDeviceStatus, WGPUDevice, [*:0]const u8, ?*anyopaque) callconv(.C) void, userdata: ?*anyopaque) void;
+// pub extern fn wgpuInstanceRequestAdapter(instance: WGPUInstance, options: ?*const WGPURequestAdapterOptions, callback: *const fn (WGPURequestAdapterStatus, WGPUAdapter, [*:0]const u8, ?*anyopaque) callconv(.C) void, userdata: ?*anyopaque) void;
+// pub extern fn wgpuAdapterRequestDevice(adapter: WGPUAdapter, descriptor: ?*const WGPUDeviceDescriptor, callback: *const fn (WGPURequestDeviceStatus, WGPUDevice, [*:0]const u8, ?*anyopaque) callconv(.C) void, userdata: ?*anyopaque) void;
 
 // Add status enums
 pub const WGPURequestAdapterStatus = u32;
@@ -262,7 +270,6 @@ pub extern fn simpleDawnCreateInstance() WGPUInstance;
 pub extern fn simpleDawnGetFirstAdapterSync() WGPUAdapter;
 pub extern fn simpleDawnCleanup() void;
 pub extern fn dawnGetProcs() *const DawnProcTable;
-pub extern fn dawnProcSetProcs(procs: *const anyopaque) void;
 
 // Add the new device creation function
 pub extern fn simpleDawnCreateDevice() WGPUDevice;
@@ -289,6 +296,20 @@ pub extern fn simpleDawnGetSurfaceTextureViewDirect() WGPUTextureView;
 
 pub extern fn simpleDawnTestCreateRenderPass(encoder: WGPUCommandEncoder, textureView: WGPUTextureView) WGPURenderPassEncoder;
 
+// Dawn native function declarations - comprehensive C wrapper
+pub extern fn dawnNativeGetProcs() *const DawnProcTable;
+pub extern fn dawnProcSetProcs(procs: *const anyopaque) void;
+pub extern fn dawnNativeInitializeComplete(window: ?*anyopaque, width: u32, height: u32) bool;
+pub extern fn dawnNativeGetInstance() WGPUInstance;
+pub extern fn dawnNativeGetAdapter() WGPUAdapter;
+pub extern fn dawnNativeGetDevice() WGPUDevice;
+pub extern fn dawnNativeGetSurface() WGPUSurface;
+pub extern fn dawnNativeGetQueue() WGPUQueue;
+pub extern fn dawnNativeInstanceDestroy(handle: ?*anyopaque) void;
+
+// GLFW WebGPU integration
+pub extern fn wgpuGlfwCreateSurfaceForWindow(instance: WGPUInstance, window: ?*anyopaque) WGPUSurface;
+
 pub const Context = struct {
     instance: WGPUInstance,
     device: WGPUDevice,
@@ -300,11 +321,10 @@ pub const Context = struct {
     const Self = @This();
 
     pub fn init(allocator: std.mem.Allocator, framebuffer_size: [2]u32, window: ?*anyopaque) !*Self {
-        std.log.info("[Zig] Starting Context.init", .{});
         const self = try allocator.create(Self);
 
         if (builtin.target.os.tag == .emscripten) {
-            // Emscripten path using swapchain API
+            // Emscripten path using swapchain API (existing code)
             const instance = wgpuCreateInstance(null);
             const device = em_webgpu.emscripten_webgpu_get_device();
             const queue = wgpuDeviceGetQueue(@ptrCast(device));
@@ -345,90 +365,54 @@ pub const Context = struct {
                 .swapchain_descriptor = swapchain_descriptor,
             };
         } else {
-            std.log.info("[Zig] Native build path", .{});
+            // Dawn native path
+            std.log.info("[Zig] Using Dawn native path...", .{});
 
-            if (window == null) {
-                return error.WindowRequiredForNativeBuild;
-            }
-            std.log.info("[Zig] Window provided: {?}", .{window});
-
-            // Set up Dawn proc table FIRST
-            std.log.info("[Zig] Getting Dawn proc table...", .{});
-            const procs = dawnGetProcs();
-            std.log.info("[Zig] Got proc table: {?}", .{procs});
-
-            std.log.info("[Zig] Setting Dawn proc table...", .{});
+            // Set up proc table
+            const procs = dawnNativeGetProcs();
             dawnProcSetProcs(@ptrCast(procs));
-            std.log.info("[Zig] Dawn proc table set", .{});
 
-            // Create Dawn native instance
-            std.log.info("[Zig] Creating Dawn instance...", .{});
-            const instance = simpleDawnCreateInstance();
-            std.log.info("[Zig] Dawn instance created: {?}", .{instance});
-            if (instance == null) {
-                return error.FailedToCreateWebGPUInstance;
+            // Use the comprehensive initialization function
+            const success = dawnNativeInitializeComplete(window, @intCast(framebuffer_size[0]), @intCast(framebuffer_size[1]));
+            if (!success) {
+                return error.FailedToInitializeDawn;
             }
 
-            // Get adapter first
-            std.log.info("[Zig] Getting adapter...", .{});
-            const adapter = simpleDawnGetFirstAdapterSync();
-            std.log.info("[Zig] Adapter obtained: {?}", .{adapter});
-            if (adapter == null) {
-                return error.FailedToGetAdapter;
+            // Get all the initialized objects
+            const instance = dawnNativeGetInstance();
+            const device = dawnNativeGetDevice();
+            const queue = dawnNativeGetQueue();
+            const surface = dawnNativeGetSurface();
+
+            if (instance == null or device == null or queue == null or surface == null) {
+                return error.FailedToGetDawnObjects;
             }
 
-            // Create surface using Dawn native
-            std.log.info("[Zig] Creating surface via Dawn native...", .{});
-            const surface = simpleDawnCreateSurface(window);
-            std.log.info("[Zig] Dawn surface created: {?}", .{surface});
-            if (surface == null) {
-                return error.FailedToCreateSurface;
-            }
+            // Configure the surface - this was missing!
+            const surface_config = WGPUSurfaceConfiguration{
+                .nextInChain = null,
+                .device = device,
+                .format = WGPUTextureFormat_BGRA8Unorm,
+                .usage = WGPUTextureUsage_RenderAttachment,
+                .viewFormatCount = 0,
+                .viewFormats = null,
+                .alphaMode = WGPUCompositeAlphaMode_Opaque,
+                .width = @intCast(framebuffer_size[0]),
+                .height = @intCast(framebuffer_size[1]),
+                .presentMode = WGPUPresentMode_Fifo,
+            };
+            wgpuSurfaceConfigure(surface, &surface_config);
 
-            // Check surface capabilities
-            std.log.info("[Zig] Checking surface capabilities...", .{});
-            simpleDawnGetSurfaceCapabilities(surface, adapter);
-
-            // Create device using Dawn native
-            std.log.info("[Zig] Creating device via Dawn native...", .{});
-            const device = simpleDawnCreateDevice();
-            std.log.info("[Zig] Device created: {?}", .{device});
-            if (device == null) {
-                return error.FailedToCreateDevice;
-            }
-
-            std.log.info("[Zig] Getting device queue...", .{});
-            const queue = wgpuDeviceGetQueue(device);
-            std.log.info("[Zig] Queue obtained: {?}", .{queue});
-
-            // Configure surface using the new helper function
-            std.log.info("[Zig] Configuring surface via Dawn helper...", .{});
-            const config_success = simpleDawnConfigureSurface(@intCast(framebuffer_size[0]), @intCast(framebuffer_size[1]));
-            if (!config_success) {
-                return error.FailedToConfigureSurface;
-            }
-            std.log.info("[Zig] Surface configured successfully", .{});
-
-            // Wait for window to be ready
-            std.log.info("[Zig] Waiting for window to be ready...", .{});
-            simpleDawnWaitForWindow();
-
-            // Test surface texture retrieval immediately
-            std.log.info("[Zig] Testing surface texture retrieval...", .{});
-            simpleDawnTestSurfaceTexture(surface);
-
-            std.log.info("[Zig] Creating swapchain descriptor...", .{});
             const swapchain_descriptor = WGPUSwapChainDescriptor{
                 .nextInChain = null,
                 .label = null,
                 .usage = WGPUTextureUsage_RenderAttachment,
-                .format = 23, // This will be updated based on actual surface capabilities
+                .format = WGPUTextureFormat_BGRA8Unorm,
                 .width = @intCast(framebuffer_size[0]),
                 .height = @intCast(framebuffer_size[1]),
-                .presentMode = 1,
+                .presentMode = WGPUPresentMode_Fifo,
             };
 
-            std.log.info("[Zig] Initializing context struct...", .{});
             self.* = .{
                 .instance = instance,
                 .device = device,
@@ -437,50 +421,35 @@ pub const Context = struct {
                 .swapchain = null, // Not used in native path
                 .swapchain_descriptor = swapchain_descriptor,
             };
-            std.log.info("[Zig] Context struct initialized", .{});
         }
 
-        std.log.info("[Zig] Context.init completed successfully", .{});
         return self;
     }
 
     pub fn getCurrentTextureView(self: *Self) !WGPUTextureView {
-        std.log.info("[Zig] getCurrentTextureView called", .{});
-
         if (builtin.target.os.tag == .emscripten) {
-            // Use swapchain for Emscripten
             return wgpuSwapChainGetCurrentTextureView(self.swapchain);
         } else {
-            std.log.info("[Zig] Trying direct surface texture approach...", .{});
+            var surface_texture: WGPUSurfaceTexture = undefined;
+            wgpuSurfaceGetCurrentTexture(self.surface, &surface_texture);
 
-            // First try the direct approach that accepts timeout status
-            var texture_view = simpleDawnGetSurfaceTextureViewDirect();
-            if (texture_view != null) {
-                std.log.info("[Zig] Successfully got texture view directly: {?}", .{texture_view});
-
-                // Validate the texture view before returning it
-                std.log.info("[Zig] Validating texture view...", .{});
-                const is_valid = simpleDawnValidateTextureView(texture_view);
-                if (!is_valid) {
-                    std.log.err("[Zig] Texture view validation failed!", .{});
-                    return error.InvalidTextureView;
-                }
-                std.log.info("[Zig] Texture view validation passed", .{});
-
-                return texture_view;
-            }
-
-            std.log.info("[Zig] Direct approach failed, trying retry approach...", .{});
-
-            // Fall back to the retry approach
-            texture_view = simpleDawnGetSurfaceTextureView();
-            if (texture_view == null) {
-                std.log.err("[Zig] Failed to get surface texture view from both approaches", .{});
+            if (surface_texture.texture == null) {
                 return error.FailedToGetSurfaceTexture;
             }
 
-            std.log.info("[Zig] Successfully got texture view: {?}", .{texture_view});
-            return texture_view;
+            if (surface_texture.status == WGPUSurfaceGetCurrentTextureStatus_SuccessOptimal or
+                surface_texture.status == WGPUSurfaceGetCurrentTextureStatus_SuccessSuboptimal or
+                surface_texture.status == WGPUSurfaceGetCurrentTextureStatus_Timeout)
+            {
+                const texture_view = wgpuTextureCreateView(surface_texture.texture, null);
+                if (texture_view == null) {
+                    return error.FailedToCreateTextureView;
+                }
+                std.log.info("[Zig] About to return texture view, everything looks good!", .{});
+                return texture_view;
+            } else {
+                return error.InvalidSurfaceTextureStatus;
+            }
         }
     }
 
@@ -494,18 +463,15 @@ pub const Context = struct {
 
     pub fn resize(self: *Self, new_size: [2]u32) void {
         if (builtin.target.os.tag == .emscripten) {
-            // Update swapchain descriptor for new size
             self.swapchain_descriptor.width = @intCast(new_size[0]);
             self.swapchain_descriptor.height = @intCast(new_size[1]);
 
-            // Release old swapchain and create new one
             wgpuSwapChainRelease(self.swapchain);
             self.swapchain = wgpuDeviceCreateSwapChain(self.device, self.surface, &self.swapchain_descriptor);
 
             const canvas_name: []const u8 = "canvas";
             _ = em_html.emscripten_set_canvas_element_size(canvas_name.ptr, @intCast(new_size[0]), @intCast(new_size[1]));
         } else {
-            // Update surface configuration for new size (native path)
             self.swapchain_descriptor.width = @intCast(new_size[0]);
             self.swapchain_descriptor.height = @intCast(new_size[1]);
 
@@ -531,7 +497,7 @@ pub const Context = struct {
             wgpuSwapChainRelease(self.swapchain);
         } else {
             wgpuSurfaceUnconfigure(self.surface);
-            simpleDawnCleanup(); // Clean up Dawn native instance
+            dawnNativeInstanceDestroy(null);
         }
         wgpuSurfaceRelease(self.surface);
         wgpuQueueRelease(self.queue);
@@ -550,14 +516,16 @@ pub fn beginRenderPassSimple(
     depth_texv: ?WGPUTextureView,
     clear_depth: ?f32,
 ) WGPURenderPassEncoder {
-    if (builtin.target.os.tag == .emscripten) {
-         const color_attachments = [_]WGPURenderPassColorAttachment{.{
-        .depthSlice = WGPU_DEPTH_SLICE_UNDEFINED,
+    const color_attachments = [_]WGPURenderPassColorAttachment{.{
+        .nextInChain = null,
         .view = color_texv,
+        .depthSlice = WGPU_DEPTH_SLICE_UNDEFINED,
+        .resolveTarget = null,
         .loadOp = load_op,
         .storeOp = WGPUStoreOp_Store,
         .clearValue = if (clear_color) |cv| cv else .{ .r = 0, .g = 0, .b = 0, .a = 0 },
     }};
+
     if (depth_texv) |dtexv| {
         const depth_attachment = WGPURenderPassDepthStencilAttachment{
             .view = dtexv,
@@ -566,36 +534,25 @@ pub fn beginRenderPassSimple(
             .depthClearValue = if (clear_depth) |cd| cd else 0.0,
         };
         return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
+            .nextInChain = null,
+            .label = WGPUStringView{ .data = null, .length = 0 },
             .colorAttachmentCount = color_attachments.len,
             .colorAttachments = &color_attachments,
             .depthStencilAttachment = &depth_attachment,
+            .occlusionQuerySet = null,
+            .timestampWrites = null,
         });
     }
+
     return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
+        .nextInChain = null,
+        .label = WGPUStringView{ .data = null, .length = 0 },
         .colorAttachmentCount = color_attachments.len,
         .colorAttachments = &color_attachments,
+        .depthStencilAttachment = null,
+        .occlusionQuerySet = null,
+        .timestampWrites = null,
     });
-    }
-    std.log.info("[Zig] beginRenderPassSimple called", .{});
-    std.log.info("[Zig] encoder: {?}", .{encoder});
-    std.log.info("[Zig] color_texv: {?}", .{color_texv});
-    std.log.info("[Zig] load_op: {}", .{load_op});
-
-    // For now, ignore depth and use the C++ test function
-    if (depth_texv != null) {
-        std.log.warn("[Zig] Depth textures not supported in test mode", .{});
-    }
-
-    std.log.info("[Zig] Calling C++ test render pass creation...", .{});
-    const render_pass = simpleDawnTestCreateRenderPass(encoder, color_texv);
-
-    if (render_pass == null) {
-        std.log.err("[Zig] C++ render pass creation failed!", .{});
-        return @ptrFromInt(0); // Return null instead of panicking
-    }
-
-    std.log.info("[Zig] C++ render pass creation succeeded: {?}", .{render_pass});
-    return render_pass;
 }
 
 // WebGPU error types
@@ -626,3 +583,8 @@ pub extern fn wgpuSwapChainPresent(swapChain: WGPUSwapChain) void;
 pub extern fn wgpuSwapChainRelease(swapChain: WGPUSwapChain) void;
 
 pub extern fn simpleDawnValidateTextureView(textureView: WGPUTextureView) bool;
+
+// Add this extern declaration
+pub extern fn dawnNativeTestSurfaceTexture() void;
+
+pub extern fn dawnNativeDebugSurfaceTextureStruct() void;
