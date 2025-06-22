@@ -103,17 +103,7 @@ pub const Engine = struct {
         const context = try webgpu.Context.init(std.heap.c_allocator, .{
             @intCast(width),
             @intCast(height),
-        });
-
-        // Add device error callback for better debugging
-        if (builtin.target.os.tag == .emscripten) {
-            // Set up device error callback
-            webgpu.wgpuDeviceSetUncapturedErrorCallback(
-                context.device,
-                deviceErrorCallback,
-                null,
-            );
-        }
+        }, self.window);
 
         return context;
     }

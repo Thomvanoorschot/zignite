@@ -54,6 +54,22 @@ pub const WGPUTextureAspect_DepthOnly: u32 = 3;
 pub const WGPU_MIP_LEVEL_COUNT_UNDEFINED: u32 = 0xFFFFFFFF;
 pub const WGPU_ARRAY_LAYER_COUNT_UNDEFINED: u32 = 0xFFFFFFFF;
 
+// Power preference constants
+pub const WGPUPowerPreference_Undefined: u32 = 0;
+pub const WGPUPowerPreference_LowPower: u32 = 1;
+pub const WGPUPowerPreference_HighPerformance: u32 = 2;
+
+// Backend type constants
+pub const WGPUBackendType_Undefined: u32 = 0;
+pub const WGPUBackendType_Null: u32 = 1;
+pub const WGPUBackendType_WebGPU: u32 = 2;
+pub const WGPUBackendType_D3D11: u32 = 3;
+pub const WGPUBackendType_D3D12: u32 = 4;
+pub const WGPUBackendType_Metal: u32 = 5;
+pub const WGPUBackendType_Vulkan: u32 = 6;
+pub const WGPUBackendType_OpenGL: u32 = 7;
+pub const WGPUBackendType_OpenGLES: u32 = 8;
+
 // WebGPU structs
 pub const WGPUChainedStruct = extern struct {
     next: ?*const WGPUChainedStruct,
@@ -217,6 +233,14 @@ pub extern fn wgpuBufferRelease(buffer: WGPUBuffer) void;
 pub extern fn dawnNativeGetProcs() *const DawnProcTable;
 pub extern fn dawnNativeSetProcTable() void;
 
+// GLFW surface creation function
+pub extern fn wgpuGlfwCreateSurfaceForWindow(instance: WGPUInstance, window: ?*anyopaque) WGPUSurface;
+
+// Dawn native wrapper functions
+pub extern fn dawnNativeCreateInstance(descriptor: ?*const WGPUInstanceDescriptor) ?*anyopaque;
+pub extern fn dawnNativeInstanceEnumerateAdapters(instance: ?*anyopaque, options: ?*const WGPURequestAdapterOptions) ?[*]?*anyopaque;
+pub extern fn dawnNativeAdapterCreateDevice(adapter: ?*anyopaque, descriptor: ?*const WGPUDeviceDescriptor) WGPUDevice;
+
 // Conditional imports
 const em_webgpu = if (builtin.target.os.tag == .emscripten) @import("emscripten_webgpu.zig") else struct {};
 const em_html = if (builtin.target.os.tag == .emscripten) @import("emscripten_html5.zig") else struct {};
@@ -231,7 +255,7 @@ pub const Context = struct {
 
     const Self = @This();
 
-    pub fn init(allocator: std.mem.Allocator, framebuffer_size: [2]u32) !*Self {
+    pub fn init(allocator: std.mem.Allocator, framebuffer_size: [2]u32, window: ?*anyopaque) !*Self {
         const self = try allocator.create(Self);
 
         if (builtin.target.os.tag == .emscripten) {
@@ -240,11 +264,9 @@ pub const Context = struct {
             const device = em_webgpu.emscripten_webgpu_get_device();
             const queue = wgpuDeviceGetQueue(@ptrCast(device));
 
-            // const canvas_selector = "canvas";
             const surface = wgpuInstanceCreateSurface(instance, &WGPUSurfaceDescriptor{
                 .nextInChain = @ptrCast(&WGPUSurfaceDescriptorFromCanvasHTMLSelector{
                     .chain = .{ .next = null, .sType = WGPUSType_SurfaceDescriptorFromCanvasHTMLSelector },
-                    // .selector = canvas_selector.ptr,
                     .selector = "#canvas",
                 }),
                 .label = null,
@@ -278,16 +300,104 @@ pub const Context = struct {
                 .swapchain_descriptor = swapchain_descriptor,
             };
         } else {
-            // Native path - simplified for now
+            // Native path - implement full Dawn Native setup
+            if (window == null) {
+                return error.WindowRequiredForNativeBuild;
+            }
+
             // Set up Dawn proc table first
             dawnNativeSetProcTable();
 
-            // Create instance
-            _ = wgpuCreateInstance(null);
+            // Create Dawn native instance
+            const dawn_instance = dawnNativeCreateInstance(null);
+            if (dawn_instance == null) {
+                return error.FailedToCreateDawnInstance;
+            }
 
-            // For now, return an error until we implement adapter enumeration
-            return error.NativeWebGPUNotImplementedYet;
-        }
+            // Create WebGPU instance
+            const instance = wgpuCreateInstance(null);
+            if (instance == null) {
+                return error.FailedToCreateWebGPUInstance;
+            }
+
+            // Create surface from GLFW window
+            const surface = wgpuGlfwCreateSurfaceForWindow(instance, window);
+            if (surface == null) {
+                return error.FailedToCreateSurface;
+            }
+
+                     // Get adapters - don't require surface compatibility initially
+            const adapter_options = WGPURequestAdapterOptions{
+                .nextInChain = null,
+                .compatibleSurface = null, // Remove surface compatibility requirement
+                .powerPreference = WGPUPowerPreference_HighPerformance,
+                .backendType = WGPUBackendType_Undefined, // Let Dawn choose
+                .forceFallbackAdapter = 0,
+            };
+
+            const adapters = dawnNativeInstanceEnumerateAdapters(dawn_instance, &adapter_options);
+            if (adapters == null or adapters.?[0] == null) {
+                return error.NoAdaptersFound;
+            }
+
+            // Create device from first adapter
+            const device_descriptor = WGPUDeviceDescriptor{
+                .nextInChain = null,
+                .label = null,
+                .requiredFeatureCount = 0,
+                .requiredFeatures = null,
+                .requiredLimits = null,
+                .defaultQueue = WGPUQueueDescriptor{
+                    .nextInChain = null,
+                    .label = null,
+                },
+                .deviceLostCallback = null,
+                .deviceLostUserdata = null,
+            };
+
+            const device = dawnNativeAdapterCreateDevice(adapters.?[0], &device_descriptor);
+            if (device == null) {
+                return error.FailedToCreateDevice;
+            }
+
+            const queue = wgpuDeviceGetQueue(device);
+
+            // Configure surface
+            const surface_config = WGPUSurfaceConfiguration{
+                .nextInChain = null,
+                .device = device,
+                .format = WGPUTextureFormat_BGRA8Unorm,
+                .usage = WGPUTextureUsage_RenderAttachment,
+                .viewFormatCount = 0,
+                .viewFormats = null,
+                .alphaMode = WGPUCompositeAlphaMode_Opaque,
+                .width = @intCast(framebuffer_size[0]),
+                .height = @intCast(framebuffer_size[1]),
+                .presentMode = WGPUPresentMode_Fifo,
+            };
+
+            wgpuSurfaceConfigure(surface, &surface_config);
+
+            // Create a fake swapchain descriptor for compatibility with existing code
+            const swapchain_descriptor = WGPUSwapChainDescriptor{
+                .nextInChain = null,
+                .label = null,
+                .usage = WGPUTextureUsage_RenderAttachment,
+                .format = WGPUTextureFormat_BGRA8Unorm,
+                .width = @intCast(framebuffer_size[0]),
+                .height = @intCast(framebuffer_size[1]),
+                .presentMode = WGPUPresentMode_Fifo,
+            };
+
+            self.* = .{
+                .instance = instance,
+                .device = device,
+                .queue = queue,
+                .surface = surface,
+                .swapchain = null, // Not used in native path
+                .swapchain_descriptor = swapchain_descriptor,
+            };
+        } 
 
         return self;
     }
@@ -341,7 +451,23 @@ pub const Context = struct {
             _ = em_html.emscripten_set_canvas_element_size(canvas_name.ptr, @intCast(new_size[0]), @intCast(new_size[1]));
         } else {
             // Update surface configuration for new size (native path)
-            // TODO: Implement native resize
+            self.swapchain_descriptor.width = @intCast(new_size[0]);
+            self.swapchain_descriptor.height = @intCast(new_size[1]);
+
+            const surface_config = WGPUSurfaceConfiguration{
+                .nextInChain = null,
+                .device = self.device,
+                .format = WGPUTextureFormat_BGRA8Unorm,
+                .usage = WGPUTextureUsage_RenderAttachment,
+                .viewFormatCount = 0,
+                .viewFormats = null,
+                .alphaMode = WGPUCompositeAlphaMode_Opaque,
+                .width = @intCast(new_size[0]),
+                .height = @intCast(new_size[1]),
+                .presentMode = WGPUPresentMode_Fifo,
+            };
+
+            wgpuSurfaceConfigure(self.surface, &surface_config);
         }
     }
 
@@ -420,12 +546,6 @@ pub const WGPUErrorType_Internal: u32 = 3;
 pub const WGPUErrorType_Unknown: u32 = 4;
 pub const WGPUErrorType_DeviceLost: u32 = 5;
 pub const WGPUErrorType = u32;
-
-// Error callback function type
-pub const WGPUErrorCallback = *const fn (type_: WGPUErrorType, message: [*:0]const u8, userdata: ?*anyopaque) callconv(.C) void;
-
-// Device error callback function
-pub extern fn wgpuDeviceSetUncapturedErrorCallback(device: WGPUDevice, callback: WGPUErrorCallback, userdata: ?*anyopaque) void;
 
 // WebGPU swapchain types and constants (older API)
 pub const WGPUSwapChain = ?*opaque {};
