@@ -177,7 +177,7 @@ fn setupNativeBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: bool, w
 
     zignite.addIncludePath(b.path("libs"));
     zignite.addCSourceFile(.{
-        .file = b.path("libs/dawn_native_wrapper.cpp"),
+        .file = b.path("libs/simple_dawn_wrapper.cpp"),
         .flags = native_cflags,
     });
 }
