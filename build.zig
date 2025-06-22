@@ -125,8 +125,7 @@ fn setupNativeBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: bool, w
     zignite.addLibraryPath(b.path("libs/dawn"));
 
     // Try linking the library by name (remove the 'lib' prefix and '.a' suffix)
-    // zignite.linkSystemLibrary("dawn_macos");
-    zignite.linkSystemLibrary("dawn_native_static");
+    zignite.linkSystemLibrary("dawn");
 
     // Add Dawn includes
     zignite.addIncludePath(b.path("libs/dawn/include"));

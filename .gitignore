@@ -16,7 +16,6 @@ zig-out/
 *.dll
 *.dylib
 *.so
-*.a
 
 # Editor and IDE files
 .vscode/*
