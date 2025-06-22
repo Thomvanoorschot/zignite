@@ -56,12 +56,11 @@ pub fn build(b: *Build) void {
                 .name = example_name,
                 .root_module = example_mod,
             });
-            example.linkLibrary(zignite_lib);
-            example.linkLibC();
             example.root_module.addImport("zignite", zignite_dep.module("zignite"));
             b.installArtifact(example);
 
-            b.step(example_name, "Run " ++ example_name).dependOn(b.getInstallStep());
+            const run = b.addRunArtifact(example);
+            b.step(example_name, "Run " ++ example_name).dependOn(&run.step);
         }
     }
 }

@@ -1,4 +1,5 @@
 #include "dawn/native/DawnNative.h"
+#include "dawn/dawn_proc.h"
 #include "webgpu/webgpu.h"
 
 extern "C" {
@@ -30,16 +31,14 @@ WGPUDevice dawnNativeAdapterCreateDevice(void* adapter_ptr, const WGPUDeviceDesc
     return adapter->CreateDevice(descriptor);
 }
 
-// For now, just provide a way to get the proc table
-// You'll need to link against the appropriate Dawn library
-extern const WGPUProcTable* wgpuGetProcTable();
-
-const WGPUProcTable* dawnNativeGetProcs() {
-    return wgpuGetProcTable();
+// Get the Dawn native proc table
+const DawnProcTable* dawnNativeGetProcs() {
+    return &dawn::native::GetProcs();
 }
 
+// Set the proc table for Dawn
 void dawnNativeSetProcTable() {
-    wgpuDeviceSetProcTable(&dawn::native::GetProcs());
+    dawnProcSetProcs(&dawn::native::GetProcs());
 }
 
 } 

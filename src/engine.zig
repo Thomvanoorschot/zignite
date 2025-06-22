@@ -239,7 +239,9 @@ pub const Engine = struct {
 
         self.frame_stats.tick(glfw.glfwGetTime());
 
-        em.emscripten_sleep(1);
+        if (builtin.target.os.tag == .emscripten) {
+            em.emscripten_sleep(1);
+        }
     }
 
     pub fn run(self: *Self, render_fn: *const fn () void) void {

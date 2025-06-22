@@ -179,11 +179,8 @@ pub const WGPURenderPassDescriptor = extern struct {
     timestampWrites: ?*const anyopaque, // WGPURenderPassTimestampWrites
 };
 
-// Function pointer types
-pub const WGPUProcTable = extern struct {
-    createInstance: ?*const fn (?*const WGPUInstanceDescriptor) callconv(.C) WGPUInstance,
-    // ... add other function pointers as needed
-};
+// Dawn-specific proc table (opaque to Zig)
+pub const DawnProcTable = opaque {};
 
 // WebGPU function declarations - NEW SURFACE API
 pub extern fn wgpuCreateInstance(descriptor: ?*const WGPUInstanceDescriptor) WGPUInstance;
@@ -217,8 +214,8 @@ pub extern fn wgpuTextureRelease(texture: WGPUTexture) void;
 pub extern fn wgpuBufferRelease(buffer: WGPUBuffer) void;
 
 // Platform-specific extern functions for Dawn Native (only available on native platforms)
-pub extern fn dawnNativeGetProcs() *const WGPUProcTable;
-pub extern fn wgpuDeviceSetProcTable(procs: *const WGPUProcTable) void;
+pub extern fn dawnNativeGetProcs() *const DawnProcTable;
+pub extern fn dawnNativeSetProcTable() void;
 
 // Conditional imports
 const em_webgpu = if (builtin.target.os.tag == .emscripten) @import("emscripten_webgpu.zig") else struct {};
@@ -283,8 +280,7 @@ pub const Context = struct {
         } else {
             // Native path - simplified for now
             // Set up Dawn proc table first
-            const procs = dawnNativeGetProcs();
-            wgpuDeviceSetProcTable(procs);
+            dawnNativeSetProcTable();
 
             // Create instance
             _ = wgpuCreateInstance(null);
