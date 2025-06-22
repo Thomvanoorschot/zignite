@@ -225,7 +225,9 @@ pub const Engine = struct {
         const command_buffers = [_]webgpu.WGPUCommandBuffer{commands};
         webgpu.wgpuQueueSubmit(self.webgpu_context.queue, 1, &command_buffers);
 
-        self.webgpu_context.present();
+        if (builtin.target.os.tag != .emscripten) {
+            self.webgpu_context.present();
+        }
 
         self.frame_stats.tick(glfw.glfwGetTime());
 

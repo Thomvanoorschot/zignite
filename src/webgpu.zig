@@ -167,10 +167,10 @@ pub const WGPUColor = extern struct {
 };
 
 pub const WGPURenderPassColorAttachment = extern struct {
-    nextInChain: ?*const WGPUChainedStruct,
+    nextInChain: ?*const WGPUChainedStruct = null,
     view: WGPUTextureView,
     depthSlice: u32,
-    resolveTarget: WGPUTextureView,
+    resolveTarget: WGPUTextureView = undefined,
     loadOp: u32,
     storeOp: u32,
     clearValue: WGPUColor,
@@ -181,21 +181,21 @@ pub const WGPURenderPassDepthStencilAttachment = extern struct {
     depthLoadOp: u32,
     depthStoreOp: u32,
     depthClearValue: f32,
-    depthReadOnly: u32, // WGPUBool
-    stencilLoadOp: u32,
-    stencilStoreOp: u32,
-    stencilClearValue: u32,
-    stencilReadOnly: u32, // WGPUBool
+    depthReadOnly: u32 = undefined, // WGPUBool
+    stencilLoadOp: u32 = undefined,
+    stencilStoreOp: u32 = undefined,
+    stencilClearValue: u32 = undefined,
+    stencilReadOnly: u32 = undefined, // WGPUBool
 };
 
 pub const WGPURenderPassDescriptor = extern struct {
-    nextInChain: ?*const WGPUChainedStruct,
-    label: ?[*:0]const u8,
+    nextInChain: ?*const WGPUChainedStruct = null,
+    label: ?[*:0]const u8 = null,
     colorAttachmentCount: usize,
-    colorAttachments: [*]const WGPURenderPassColorAttachment,
-    depthStencilAttachment: ?*const WGPURenderPassDepthStencilAttachment,
-    occlusionQuerySet: WGPUQuerySet,
-    timestampWrites: ?*const anyopaque, // WGPURenderPassTimestampWrites
+    colorAttachments: [*]const WGPURenderPassColorAttachment = undefined,
+    depthStencilAttachment: ?*const WGPURenderPassDepthStencilAttachment = null,
+    occlusionQuerySet: WGPUQuerySet = undefined,
+    timestampWrites: ?*const anyopaque = null, // WGPURenderPassTimestampWrites
 };
 
 // Dawn-specific proc table (opaque to Zig)
@@ -546,10 +546,36 @@ pub fn beginRenderPassSimple(
     encoder: WGPUCommandEncoder,
     load_op: u32,
     color_texv: WGPUTextureView,
-    _: ?WGPUColor,
+    clear_color: ?WGPUColor,
     depth_texv: ?WGPUTextureView,
-    _: ?f32,
+    clear_depth: ?f32,
 ) WGPURenderPassEncoder {
+    if (builtin.target.os.tag == .emscripten) {
+         const color_attachments = [_]WGPURenderPassColorAttachment{.{
+        .depthSlice = WGPU_DEPTH_SLICE_UNDEFINED,
+        .view = color_texv,
+        .loadOp = load_op,
+        .storeOp = WGPUStoreOp_Store,
+        .clearValue = if (clear_color) |cv| cv else .{ .r = 0, .g = 0, .b = 0, .a = 0 },
+    }};
+    if (depth_texv) |dtexv| {
+        const depth_attachment = WGPURenderPassDepthStencilAttachment{
+            .view = dtexv,
+            .depthLoadOp = load_op,
+            .depthStoreOp = WGPUStoreOp_Store,
+            .depthClearValue = if (clear_depth) |cd| cd else 0.0,
+        };
+        return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
+            .colorAttachmentCount = color_attachments.len,
+            .colorAttachments = &color_attachments,
+            .depthStencilAttachment = &depth_attachment,
+        });
+    }
+    return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
+        .colorAttachmentCount = color_attachments.len,
+        .colorAttachments = &color_attachments,
+    });
+    }
     std.log.info("[Zig] beginRenderPassSimple called", .{});
     std.log.info("[Zig] encoder: {?}", .{encoder});
     std.log.info("[Zig] color_texv: {?}", .{color_texv});
