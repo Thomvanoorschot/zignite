@@ -172,8 +172,8 @@ pub const Engine = struct {
         }
         imgui_webgpu.init(
             @ptrCast(self.window),
-            @ptrCast(webgpu_context.device),
-            webgpu_context.swapchain_descriptor.format,
+            @ptrCast(webgpu_context.getDevice()),
+            webgpu_context.getSwapchainDescriptor().format,
             webgpu.WGPUTextureFormat_Undefined,
         );
     }
@@ -185,8 +185,8 @@ pub const Engine = struct {
         glfw.glfwPollEvents();
 
         imgui_webgpu.newFrame(
-            self.webgpu_context.swapchain_descriptor.width,
-            self.webgpu_context.swapchain_descriptor.height,
+            self.webgpu_context.getSwapchainDescriptor().width,
+            self.webgpu_context.getSwapchainDescriptor().height,
         );
         if (self.options.with_docking) {
             _ = imgui.igDockSpaceOverViewport(
@@ -213,7 +213,7 @@ pub const Engine = struct {
         defer webgpu.wgpuTextureViewRelease(surface_texv);
 
         const commands = commands: {
-            const encoder = webgpu.wgpuDeviceCreateCommandEncoder(self.webgpu_context.device, null);
+            const encoder = webgpu.wgpuDeviceCreateCommandEncoder(self.webgpu_context.getDevice(), null);
             defer webgpu.wgpuCommandEncoderRelease(encoder);
 
             {
@@ -235,7 +235,7 @@ pub const Engine = struct {
         defer webgpu.wgpuCommandBufferRelease(commands);
 
         const command_buffers = [_]webgpu.WGPUCommandBuffer{commands};
-        webgpu.wgpuQueueSubmit(self.webgpu_context.queue, 1, &command_buffers);
+        webgpu.wgpuQueueSubmit(self.webgpu_context.getQueue(), 1, &command_buffers);
 
         if (builtin.target.os.tag != .emscripten) {
             self.webgpu_context.present();
