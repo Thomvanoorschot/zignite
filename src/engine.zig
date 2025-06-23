@@ -117,6 +117,9 @@ pub const Engine = struct {
         _ = glfw.glfwInit();
         imgui_glfw.SetNextWindowCanvasSelector("#canvas");
         glfw.glfwWindowHint(glfw.GLFW_CLIENT_API, glfw.GLFW_NO_API);
+
+        glfw.glfwWindowHint(glfw.GLFW_COCOA_RETINA_FRAMEBUFFER, glfw.GLFW_TRUE);
+        glfw.glfwWindowHint(glfw.GLFW_COCOA_GRAPHICS_SWITCHING, glfw.GLFW_TRUE);
         const window = glfw.glfwCreateWindow(@intCast(width), @intCast(height), title.ptr, null, null);
         imgui_glfw.MakeCanvasResizable(@ptrCast(window));
         if (window == null) {
@@ -173,6 +176,7 @@ pub const Engine = struct {
         if (glfw.glfwWindowShouldClose(self.window) == 1) {
             return false;
         }
+        glfw.glfwPollEvents();
 
         imgui_webgpu.newFrame(
             self.webgpu_context.swapchain_descriptor.width,
@@ -198,7 +202,7 @@ pub const Engine = struct {
 
         const surface_texv = self.webgpu_context.getCurrentTextureView() catch |err| {
             self.stdErr.print("Failed to get surface texture view: {}\n", .{err}) catch unreachable;
-            glfw.glfwPollEvents();
+            // glfw.glfwPollEvents();
             return;
         };
         defer webgpu.wgpuTextureViewRelease(surface_texv);
@@ -238,20 +242,7 @@ pub const Engine = struct {
             em.emscripten_sleep(1);
         }
 
-        glfw.glfwPollEvents();
-    }
-
-    pub fn run(self: *Self, render_fn: *const fn () void) void {
-        if (builtin.target.os.tag == .emscripten) {
-            self.user_render_fn = render_fn;
-            global_engine_for_callback = self;
-            em.emscripten_set_main_loop(emscriptenEngineMainLoop, 0, true);
-        } else {
-            while (self.startRender()) {
-                defer self.endRender();
-                render_fn();
-            }
-        }
+        // glfw.glfwPollEvents();
     }
 };
 

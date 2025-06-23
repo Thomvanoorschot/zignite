@@ -450,7 +450,6 @@ pub const Context = struct {
                 if (texture_view == null) {
                     return error.FailedToCreateTextureView;
                 }
-                std.log.info("[Zig] About to return texture view, everything looks good!", .{});
                 return texture_view;
             } else {
                 return error.InvalidSurfaceTextureStatus;
