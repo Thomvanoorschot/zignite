@@ -20,7 +20,11 @@ pub const WGPUTextureUsage_RenderAttachment: u32 = 0x00000010;
 pub const WGPUTextureFormat_BGRA8Unorm: u32 = 23;
 pub const WGPUTextureFormat_RGBA8Unorm: u32 = 18;
 pub const WGPUTextureFormat_Undefined: u32 = 0;
+pub const WGPUPresentMode_Undefined: u32 = 0;
 pub const WGPUPresentMode_Fifo: u32 = 1;
+pub const WGPUPresentMode_FifoRelaxed: u32 = 2;
+pub const WGPUPresentMode_Immediate: u32 = 3;
+pub const WGPUPresentMode_Mailbox: u32 = 4;
 pub const WGPUSType_SurfaceDescriptorFromCanvasHTMLSelector: u32 = 4;
 pub const WGPULoadOp_Undefined: u32 = 0;
 pub const WGPULoadOp_Load: u32 = 1;
@@ -400,7 +404,7 @@ pub const Context = struct {
                 .alphaMode = WGPUCompositeAlphaMode_Opaque,
                 .width = @intCast(framebuffer_size[0]),
                 .height = @intCast(framebuffer_size[1]),
-                .presentMode = WGPUPresentMode_Fifo,
+                .presentMode = WGPUPresentMode_Mailbox,
             };
             wgpuSurfaceConfigure(surface, &surface_config);
 
@@ -411,7 +415,7 @@ pub const Context = struct {
                 .format = WGPUTextureFormat_BGRA8Unorm,
                 .width = @intCast(framebuffer_size[0]),
                 .height = @intCast(framebuffer_size[1]),
-                .presentMode = WGPUPresentMode_Fifo,
+                .presentMode = WGPUPresentMode_Mailbox,
             };
 
             self.* = .{
