@@ -198,39 +198,6 @@ pub const WGPUStringView = extern struct {
     length: usize,
 };
 
-pub const WGPURenderPassColorAttachment = extern struct {
-    nextInChain: ?*const WGPUChainedStruct,
-    view: WGPUTextureView,
-    depthSlice: u32,
-    resolveTarget: WGPUTextureView,
-    loadOp: u32,
-    storeOp: u32,
-    clearValue: WGPUColor,
-};
-
-pub const WGPURenderPassDepthStencilAttachment = extern struct {
-    nextInChain: ?*const WGPUChainedStruct = null,
-    view: WGPUTextureView,
-    depthLoadOp: u32 = WGPULoadOp_Undefined,
-    depthStoreOp: u32 = WGPUStoreOp_Undefined,
-    depthClearValue: f32 = 0.0,
-    depthReadOnly: bool = false,
-    stencilLoadOp: u32 = WGPULoadOp_Undefined,
-    stencilStoreOp: u32 = WGPUStoreOp_Undefined,
-    stencilClearValue: u32 = 0,
-    stencilReadOnly: bool = false,
-};
-
-pub const WGPURenderPassDescriptor = extern struct {
-    nextInChain: ?*const WGPUChainedStruct = null,
-    label: WGPUStringView = .{ .data = null, .length = 0 },
-    colorAttachmentCount: usize,
-    colorAttachments: ?[*]const WGPURenderPassColorAttachment,
-    depthStencilAttachment: ?*const WGPURenderPassDepthStencilAttachment = null,
-    occlusionQuerySet: WGPUQuerySet = null,
-    timestampWrites: ?*const anyopaque = null,
-};
-
 // Swapchain types (older API)
 pub const WGPUSwapChainDescriptor = extern struct {
     nextInChain: ?*const WGPUChainedStruct,
@@ -255,7 +222,6 @@ pub extern fn wgpuSurfacePresent(surface: WGPUSurface) void;
 pub extern fn wgpuSurfaceUnconfigure(surface: WGPUSurface) void;
 pub extern fn wgpuTextureCreateView(texture: WGPUTexture, descriptor: ?*const WGPUTextureViewDescriptor) WGPUTextureView;
 pub extern fn wgpuDeviceCreateCommandEncoder(device: WGPUDevice, descriptor: ?*const WGPUCommandEncoderDescriptor) WGPUCommandEncoder;
-pub extern fn wgpuCommandEncoderBeginRenderPass(encoder: WGPUCommandEncoder, descriptor: *const WGPURenderPassDescriptor) WGPURenderPassEncoder;
 pub extern fn wgpuCommandEncoderFinish(encoder: WGPUCommandEncoder, descriptor: ?*const WGPUCommandBufferDescriptor) WGPUCommandBuffer;
 pub extern fn wgpuQueueSubmit(queue: WGPUQueue, commandCount: usize, commands: [*]const WGPUCommandBuffer) void;
 pub extern fn wgpuRenderPassEncoderEnd(renderPassEncoder: WGPURenderPassEncoder) void;

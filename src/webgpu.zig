@@ -4,8 +4,8 @@ const common = @import("webgpu_common.zig");
 
 pub usingnamespace @import("webgpu_common.zig");
 
-const web_webgpu = if (builtin.target.os.tag == .emscripten) @import("web_webgpu.zig") else struct {};
-const native_webgpu = if (builtin.target.os.tag != .emscripten) @import("native_webgpu.zig") else struct {};
+const web_webgpu = if (builtin.target.os.tag == .emscripten) @import("webgpu_web.zig") else struct {};
+const native_webgpu = if (builtin.target.os.tag != .emscripten) @import("webgpu_native.zig") else struct {};
 
 pub const Context = struct {
     impl: ContextImpl,

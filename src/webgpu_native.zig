@@ -1,7 +1,6 @@
 const std = @import("std");
 const common = @import("webgpu_common.zig");
 
-// Dawn native function declarations
 pub extern fn dawnNativeGetProcs() *const common.DawnProcTable;
 pub extern fn dawnProcSetProcs(procs: *const anyopaque) void;
 pub extern fn dawnNativeInitializeComplete(window: ?*anyopaque, width: u32, height: u32) bool;
@@ -12,8 +11,8 @@ pub extern fn dawnNativeGetSurface() common.WGPUSurface;
 pub extern fn dawnNativeGetQueue() common.WGPUQueue;
 pub extern fn dawnNativeInstanceDestroy(handle: ?*anyopaque) void;
 pub extern fn wgpuGlfwCreateSurfaceForWindow(instance: common.WGPUInstance, window: ?*anyopaque) common.WGPUSurface;
+pub extern fn wgpuCommandEncoderBeginRenderPass(encoder: common.WGPUCommandEncoder, descriptor: *const WGPURenderPassDescriptor) common.WGPURenderPassEncoder;
 
-// Additional Dawn functions (commented out from original)
 pub extern fn simpleDawnCreateInstance() common.WGPUInstance;
 pub extern fn simpleDawnGetFirstAdapterSync() common.WGPUAdapter;
 pub extern fn simpleDawnCleanup() void;
@@ -29,6 +28,40 @@ pub extern fn simpleDawnValidateTextureView(textureView: common.WGPUTextureView)
 pub extern fn dawnNativeTestSurfaceTexture() void;
 pub extern fn dawnNativeDebugSurfaceTextureStruct() void;
 
+
+pub const WGPURenderPassColorAttachment = extern struct {
+    nextInChain: ?*const common.WGPUChainedStruct,
+    view: common.WGPUTextureView,
+    depthSlice: u32,
+    resolveTarget: common.WGPUTextureView,
+    loadOp: u32,
+    storeOp: u32,
+    clearValue: common.WGPUColor,
+};
+
+pub const WGPURenderPassDepthStencilAttachment = extern struct {
+    nextInChain: ?*const common.WGPUChainedStruct = null,
+    view: common.WGPUTextureView,
+    depthLoadOp: u32 = common.WGPULoadOp_Undefined,
+    depthStoreOp: u32 = common.WGPUStoreOp_Undefined,
+    depthClearValue: f32 = 0.0,
+    depthReadOnly: bool = false,
+    stencilLoadOp: u32 = common.WGPULoadOp_Undefined,
+    stencilStoreOp: u32 = common.WGPUStoreOp_Undefined,
+    stencilClearValue: u32 = 0,
+    stencilReadOnly: bool = false,
+};
+
+pub const WGPURenderPassDescriptor = extern struct {
+    nextInChain: ?*const common.WGPUChainedStruct = null,
+    label: common.WGPUStringView = .{ .data = null, .length = 0 },
+    colorAttachmentCount: usize,
+    colorAttachments: ?[*]const WGPURenderPassColorAttachment,
+    depthStencilAttachment: ?*const WGPURenderPassDepthStencilAttachment = null,
+    occlusionQuerySet: common.WGPUQuerySet = null,
+    timestampWrites: ?*const anyopaque = null,
+};
+
 pub const NativeContext = struct {
     instance: common.WGPUInstance,
     device: common.WGPUDevice,
@@ -41,19 +74,14 @@ pub const NativeContext = struct {
     pub fn init(allocator: std.mem.Allocator, framebuffer_size: [2]u32, window: ?*anyopaque) !*Self {
         const self = try allocator.create(Self);
 
-        std.log.info("[Zig] Using Dawn native path...", .{});
-
-        // Set up proc table
         const procs = dawnNativeGetProcs();
         dawnProcSetProcs(@ptrCast(procs));
 
-        // Use the comprehensive initialization function
         const success = dawnNativeInitializeComplete(window, @intCast(framebuffer_size[0]), @intCast(framebuffer_size[1]));
         if (!success) {
             return error.FailedToInitializeDawn;
         }
 
-        // Get all the initialized objects
         const instance = dawnNativeGetInstance();
         const device = dawnNativeGetDevice();
         const queue = dawnNativeGetQueue();
@@ -63,7 +91,6 @@ pub const NativeContext = struct {
             return error.FailedToGetDawnObjects;
         }
 
-        // Configure the surface
         const surface_config = common.WGPUSurfaceConfiguration{
             .nextInChain = null,
             .device = device,
@@ -164,8 +191,7 @@ pub fn beginRenderPassSimple(
     depth_texv: ?common.WGPUTextureView,
     clear_depth: ?f32,
 ) common.WGPURenderPassEncoder {
-    // Use Dawn native structs
-    const color_attachments = [_]common.WGPURenderPassColorAttachment{.{
+    const color_attachments = [_]WGPURenderPassColorAttachment{.{
         .nextInChain = null,
         .view = color_texv,
         .depthSlice = common.WGPU_DEPTH_SLICE_UNDEFINED,
@@ -176,7 +202,7 @@ pub fn beginRenderPassSimple(
     }};
 
     if (depth_texv) |dtexv| {
-        const depth_attachment = common.WGPURenderPassDepthStencilAttachment{
+        const depth_attachment = WGPURenderPassDepthStencilAttachment{
             .nextInChain = null,
             .view = dtexv,
             .depthLoadOp = load_op,
@@ -189,7 +215,7 @@ pub fn beginRenderPassSimple(
             .stencilReadOnly = false,
         };
 
-        return common.wgpuCommandEncoderBeginRenderPass(encoder, &common.WGPURenderPassDescriptor{
+        return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
             .nextInChain = null,
             .label = common.WGPUStringView{ .data = null, .length = 0 },
             .colorAttachmentCount = color_attachments.len,
@@ -199,7 +225,7 @@ pub fn beginRenderPassSimple(
             .timestampWrites = null,
         });
     } else {
-        return common.wgpuCommandEncoderBeginRenderPass(encoder, &common.WGPURenderPassDescriptor{
+        return wgpuCommandEncoderBeginRenderPass(encoder, &WGPURenderPassDescriptor{
             .nextInChain = null,
             .label = common.WGPUStringView{ .data = null, .length = 0 },
             .colorAttachmentCount = color_attachments.len,
