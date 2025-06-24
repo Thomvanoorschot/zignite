@@ -118,13 +118,8 @@ fn setupNativeBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: bool, w
         zignite.linkFramework("IOSurface");
     }
 
-    // Link GLFW
     zignite.linkSystemLibrary("glfw");
-
-    // Instead of addObjectFile, use addLibraryPath + linkSystemLibrary
     zignite.addLibraryPath(b.path("libs/dawn"));
-
-    // Try linking the library by name (remove the 'lib' prefix and '.a' suffix)
     zignite.linkSystemLibrary("dawn");
 
     // Add Dawn includes
@@ -243,32 +238,6 @@ fn setupEmscriptenBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: boo
     }
 }
 
-pub fn nativeAppStep(b: *Build, args: struct {
-    name: []const u8,
-    zignite_dep: *Build.Dependency,
-    lib_main: *Build.Step.Compile,
-}) void {
-    const exe = b.addExecutable(.{
-        .name = args.name,
-        .root_source_file = args.lib_main.root_module.root_source_file.?,
-        .target = args.lib_main.root_module.resolved_target.?,
-        .optimize = args.lib_main.root_module.optimize.?,
-    });
-
-    exe.linkLibrary(args.zignite_dep.artifact("zignite"));
-    exe.root_module.addImport("zignite", args.zignite_dep.module("zignite"));
-
-    const run_cmd = b.addRunArtifact(exe);
-    run_cmd.step.dependOn(b.getInstallStep());
-    if (b.args) |run_args| {
-        run_cmd.addArgs(run_args);
-    }
-
-    const run_step = b.step(args.name, b.fmt("Run the {s} app", .{args.name}));
-    run_step.dependOn(&run_cmd.step);
-
-    b.installArtifact(exe);
-}
 
 fn emSdkSetupStep(b: *Build, emsdk: *Build.Dependency) ?*Build.Step.Run {
     const emsdk_install = createEmsdkStep(b, emsdk);
@@ -307,7 +276,6 @@ pub fn emRunStep(b: *Build, args: struct {
 
     const emrun = b.addSystemCommand(&.{emrun_path});
     emrun.addArgs(&.{ "--browser", defaultBrowser });
-    // (Here you could also pull "defaultBrowser" from a b.option, if desired.)
     emrun.addArg(b.fmt("{s}/web/{s}.html", .{ b.install_path, args.name }));
     emrun.step.dependOn(&link_step.step);
 
