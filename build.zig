@@ -97,10 +97,8 @@ pub fn build(b: *Build) !void {
     zignite.linkLibC();
 
     if (zignite.rootModuleTarget().os.tag == .macos) {
-        // Native build setup
         try setupNativeBuild(b, zignite, with_imgui, with_implot);
     } else {
-        // Emscripten build setup (existing code)
         try setupEmscriptenBuild(b, zignite, with_imgui, with_implot);
     }
 
@@ -108,7 +106,6 @@ pub fn build(b: *Build) !void {
 }
 
 fn setupNativeBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: bool, with_implot: bool) !void {
-    // Add system libraries for macOS
     if (zignite.rootModuleTarget().os.tag == .macos) {
         zignite.linkFramework("Cocoa");
         zignite.linkFramework("IOKit");
@@ -119,10 +116,13 @@ fn setupNativeBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: bool, w
     }
 
     zignite.linkSystemLibrary("glfw");
-    zignite.addLibraryPath(b.path("libs/dawn"));
-    zignite.linkSystemLibrary("dawn");
 
-    // Add Dawn includes
+    if (zignite.rootModuleTarget().os.tag == .macos) {
+        const dawn_darwin = b.lazyDependency("dawn_darwin", .{});
+        if (dawn_darwin) |dep| {
+            zignite.addObjectFile(dep.path("dawn.a"));
+        }
+    }
     zignite.addIncludePath(b.path("libs/dawn/include"));
 
     if (with_imgui) {
@@ -132,7 +132,6 @@ fn setupNativeBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: bool, w
             zignite.root_module.addCMacro(c_define[0], c_define[1]);
         }
 
-        // Add the Dawn backend define for ImGui
         zignite.root_module.addCMacro("IMGUI_IMPL_WEBGPU_BACKEND_DAWN", "1");
 
         zignite.addCSourceFiles(.{
@@ -237,7 +236,6 @@ fn setupEmscriptenBuild(b: *Build, zignite: *Build.Step.Compile, with_imgui: boo
         });
     }
 }
-
 
 fn emSdkSetupStep(b: *Build, emsdk: *Build.Dependency) ?*Build.Step.Run {
     const emsdk_install = createEmsdkStep(b, emsdk);

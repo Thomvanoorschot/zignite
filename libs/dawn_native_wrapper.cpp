@@ -3,7 +3,6 @@
 #include "webgpu/webgpu_glfw.h"
 #include <assert.h>
 #include <vector>
-#include <iostream>
 
 // Global state
 static dawn::native::Instance* g_dawn_instance = nullptr;
@@ -46,8 +45,6 @@ const DawnProcTable* dawnNativeGetProcs(void) {
 
 // Comprehensive initialization function
 bool dawnNativeInitializeComplete(void* window, uint32_t width, uint32_t height) {
-    std::cout << "[DawnWrapper] Starting complete initialization..." << std::endl;
-    
     // Create instance if not exists
     if (!g_dawn_instance) {
         g_dawn_instance = new dawn::native::Instance();
@@ -55,17 +52,14 @@ bool dawnNativeInitializeComplete(void* window, uint32_t width, uint32_t height)
     
     WGPUInstance instance = g_dawn_instance->Get();
     if (!instance) {
-        std::cerr << "[DawnWrapper] Failed to get WebGPU instance" << std::endl;
         return false;
     }
     
     // Create surface
     g_current_surface = wgpuGlfwCreateSurfaceForWindow(instance, (GLFWwindow*)window);
     if (!g_current_surface) {
-        std::cerr << "[DawnWrapper] Failed to create surface" << std::endl;
         return false;
     }
-    std::cout << "[DawnWrapper] Surface created: " << g_current_surface << std::endl;
     
     // Enumerate adapters
     WGPURequestAdapterOptions options = {};
@@ -75,14 +69,11 @@ bool dawnNativeInitializeComplete(void* window, uint32_t width, uint32_t height)
     options.forceFallbackAdapter = false;
     
     g_adapters = g_dawn_instance->EnumerateAdapters(&options);
-    std::cout << "[DawnWrapper] Found " << g_adapters.size() << " adapters" << std::endl;
     if (g_adapters.empty()) {
-        std::cerr << "[DawnWrapper] No adapters found" << std::endl;
         return false;
     }
     
     g_current_adapter = g_adapters[0].Get();
-    std::cout << "[DawnWrapper] Using adapter: " << g_current_adapter << std::endl;
     
     // Create device
     WGPUDeviceDescriptor deviceDesc = {};
@@ -96,10 +87,8 @@ bool dawnNativeInitializeComplete(void* window, uint32_t width, uint32_t height)
     
     g_current_device = g_adapters[0].CreateDevice(&deviceDesc);
     if (!g_current_device) {
-        std::cerr << "[DawnWrapper] Failed to create device" << std::endl;
         return false;
     }
-    std::cout << "[DawnWrapper] Device created: " << g_current_device << std::endl;
     
     // Configure surface
     WGPUSurfaceConfiguration config = {};
@@ -115,15 +104,10 @@ bool dawnNativeInitializeComplete(void* window, uint32_t width, uint32_t height)
     config.presentMode = WGPUPresentMode_Fifo;
     
     wgpuSurfaceConfigure(g_current_surface, &config);
-    std::cout << "[DawnWrapper] Surface configured: " << width << "x" << height << std::endl;
     
     // Test surface texture acquisition immediately
     WGPUSurfaceTexture surfaceTexture = {};
     wgpuSurfaceGetCurrentTexture(g_current_surface, &surfaceTexture);
-    std::cout << "[DawnWrapper] Test surface texture - Status: " << static_cast<int>(surfaceTexture.status) 
-              << ", Texture: " << surfaceTexture.texture << std::endl;
-    
-    std::cout << "[DawnWrapper] Complete initialization successful" << std::endl;
     return true;
 }
 
@@ -151,20 +135,14 @@ WGPUQueue dawnNativeGetQueue(void) {
 // Debug function to test surface texture acquisition
 void dawnNativeTestSurfaceTexture(void) {
     if (!g_current_surface) {
-        std::cout << "[DawnWrapper] No surface available for testing" << std::endl;
         return;
     }
     
     WGPUSurfaceTexture surfaceTexture = {};
     wgpuSurfaceGetCurrentTexture(g_current_surface, &surfaceTexture);
     
-    std::cout << "[DawnWrapper] Surface texture test:" << std::endl;
-    std::cout << "[DawnWrapper]   Status: " << static_cast<int>(surfaceTexture.status) << std::endl;
-    std::cout << "[DawnWrapper]   Texture: " << surfaceTexture.texture << std::endl;
-    
     if (surfaceTexture.texture) {
         WGPUTextureView view = wgpuTextureCreateView(surfaceTexture.texture, nullptr);
-        std::cout << "[DawnWrapper]   Texture view: " << view << std::endl;
         if (view) {
             wgpuTextureViewRelease(view);
         }
@@ -173,19 +151,10 @@ void dawnNativeTestSurfaceTexture(void) {
 
 // Debug function to check struct layout
 void dawnNativeDebugSurfaceTextureStruct(void) {
-    std::cout << "[DawnWrapper] WGPUSurfaceTexture struct layout:" << std::endl;
-    std::cout << "[DawnWrapper]   sizeof(WGPUSurfaceTexture): " << sizeof(WGPUSurfaceTexture) << std::endl;
-    std::cout << "[DawnWrapper]   offsetof(texture): " << offsetof(WGPUSurfaceTexture, texture) << std::endl;
-    std::cout << "[DawnWrapper]   offsetof(status): " << offsetof(WGPUSurfaceTexture, status) << std::endl;
-    std::cout << "[DawnWrapper]   sizeof(texture): " << sizeof(((WGPUSurfaceTexture*)0)->texture) << std::endl;
-    std::cout << "[DawnWrapper]   sizeof(status): " << sizeof(((WGPUSurfaceTexture*)0)->status) << std::endl;
     
     // Test with actual values
     WGPUSurfaceTexture test = {};
     wgpuSurfaceGetCurrentTexture(g_current_surface, &test);
-    std::cout << "[DawnWrapper] Test values:" << std::endl;
-    std::cout << "[DawnWrapper]   texture: " << test.texture << std::endl;
-    std::cout << "[DawnWrapper]   status: " << static_cast<uint32_t>(test.status) << std::endl;
 }
 
 } 
