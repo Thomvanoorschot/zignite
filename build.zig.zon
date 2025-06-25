@@ -8,6 +8,11 @@
             .url = "git+https://github.com/emscripten-core/emsdk#4.0.8",
             .hash = "N-V-__8AAApzDwDREOcPJxcPwmAnrkf5kFhua5jh-4xPPI6_",
         },
+        .dawn_darwin = .{
+            .url = "https://github.com/Thomvanoorschot/dawn_darwin/archive/main.tar.gz",
+            .hash = "dawn_darwin-0.0.1-VSdLSJryRwMNTs8xYv9SrJT2zaBEpJXHSkVlGuMvKStF",
+            .lazy = true,
+        },
     },
     .paths = .{
         "build.zig",
