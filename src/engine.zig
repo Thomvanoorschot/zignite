@@ -89,11 +89,12 @@ pub const Engine = struct {
     }
 
     pub fn deinit(self: *Self) void {
+        // TODO This crashes the program on exit, not sure why yet
+        // if (self.imgui_context) |ctx| {
+        //     imgui.igDestroyContext(ctx);
+        // }
         glfw.glfwDestroyWindow(self.window);
         glfw.glfwTerminate();
-        if (self.options.with_imgui) {
-            imgui.igDestroyContext(self.imgui_context.?);
-        }
     }
 
     fn initWebGPUContext(self: *Self) !*WebGPUContext {
@@ -248,18 +249,3 @@ pub const Engine = struct {
         }
     }
 };
-
-var global_engine_for_callback: ?*Engine = null;
-
-fn emscriptenEngineMainLoop() callconv(.C) void {
-    if (global_engine_for_callback) |e| {
-        if (e.startRender()) {
-            defer e.endRender();
-            if (e.user_render_fn) |render_fn| {
-                render_fn();
-            }
-        } else {
-            em.emscripten_cancel_main_loop();
-        }
-    }
-}
