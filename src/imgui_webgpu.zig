@@ -3,7 +3,7 @@ const imgui_glfw = @import("imgui_glfw.zig");
 const imgui = @import("imgui.zig");
 const zglfw = @import("imgui_glfw.zig");
 pub fn init(
-    window: *zglfw.GLFWwindow, 
+    window: *zglfw.GLFWwindow,
     wgpu_device: *const anyopaque,
     wgpu_swap_chain_format: u32,
     wgpu_depth_format: u32,
@@ -29,7 +29,7 @@ pub fn init(
 
 pub fn deinit() void {
     ImGui_ImplWGPU_Shutdown();
-    imgui_glfw.deinit();
+    imgui_glfw.ImGui_ImplGlfw_Shutdown();
 }
 
 pub fn newFrame(fb_width: u32, fb_height: u32) void {

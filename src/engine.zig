@@ -89,10 +89,6 @@ pub const Engine = struct {
     }
 
     pub fn deinit(self: *Self) void {
-        // TODO This crashes the program on exit, not sure why yet
-        // if (self.imgui_context) |ctx| {
-        //     imgui.igDestroyContext(ctx);
-        // }
         glfw.glfwDestroyWindow(self.window);
         glfw.glfwTerminate();
     }
