@@ -28,7 +28,6 @@ pub extern fn simpleDawnValidateTextureView(textureView: common.WGPUTextureView)
 pub extern fn dawnNativeTestSurfaceTexture() void;
 pub extern fn dawnNativeDebugSurfaceTextureStruct() void;
 
-
 pub const WGPURenderPassColorAttachment = extern struct {
     nextInChain: ?*const common.WGPUChainedStruct,
     view: common.WGPUTextureView,
@@ -98,7 +97,7 @@ pub const NativeContext = struct {
             .usage = common.WGPUTextureUsage_RenderAttachment,
             .viewFormatCount = 0,
             .viewFormats = null,
-            .alphaMode = common.WGPUCompositeAlphaMode_Opaque,
+            .alphaMode = common.WGPUCompositeAlphaMode_Auto,
             .width = @intCast(framebuffer_size[0]),
             .height = @intCast(framebuffer_size[1]),
             .presentMode = common.WGPUPresentMode_Mailbox,
@@ -156,20 +155,18 @@ pub const NativeContext = struct {
         self.swapchain_descriptor.width = @intCast(new_size[0]);
         self.swapchain_descriptor.height = @intCast(new_size[1]);
 
-        const surface_config = common.WGPUSurfaceConfiguration{
+        common.wgpuSurfaceConfigure(self.surface, &common.WGPUSurfaceConfiguration{
             .nextInChain = null,
             .device = self.device,
             .format = common.WGPUTextureFormat_BGRA8Unorm,
             .usage = common.WGPUTextureUsage_RenderAttachment,
             .viewFormatCount = 0,
             .viewFormats = null,
-            .alphaMode = common.WGPUCompositeAlphaMode_Opaque,
+            .alphaMode = common.WGPUCompositeAlphaMode_Auto,
             .width = @intCast(new_size[0]),
             .height = @intCast(new_size[1]),
             .presentMode = common.WGPUPresentMode_Mailbox,
-        };
-
-        common.wgpuSurfaceConfigure(self.surface, &surface_config);
+        });
     }
 
     pub fn deinit(self: *Self, allocator: std.mem.Allocator) void {
