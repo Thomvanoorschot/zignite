@@ -115,14 +115,14 @@ pub const Engine = struct {
         imgui_glfw.SetNextWindowCanvasSelector("#canvas");
         glfw.glfwWindowHint(glfw.GLFW_CLIENT_API, glfw.GLFW_NO_API);
         glfw.glfwWindowHint(glfw.GLFW_RESIZABLE, glfw.GLFW_TRUE);
- 
-        // glfw.glfwWindowHint(glfw.GLFW_COCOA_RETINA_FRAMEBUFFER, glfw.GLFW_TRUE);
-        // glfw.glfwWindowHint(glfw.GLFW_COCOA_GRAPHICS_SWITCHING, glfw.GLFW_TRUE);
-        // glfw.glfwWindowHint(glfw.GLFW_DOUBLEBUFFER, glfw.GLFW_TRUE);
-        // glfw.glfwWindowHint(glfw.GLFW_SRGB_CAPABLE, glfw.GLFW_TRUE);
-        // glfw.glfwWindowHint(glfw.GLFW_TRANSPARENT_FRAMEBUFFER, glfw.GLFW_FALSE);
-        // glfw.glfwWindowHint(glfw.GLFW_FOCUS_ON_SHOW, glfw.GLFW_TRUE);
-        // glfw.glfwWindowHint(glfw.GLFW_SCALE_TO_MONITOR, glfw.GLFW_TRUE);
+
+        glfw.glfwWindowHint(glfw.GLFW_COCOA_RETINA_FRAMEBUFFER, glfw.GLFW_TRUE);
+        glfw.glfwWindowHint(glfw.GLFW_COCOA_GRAPHICS_SWITCHING, glfw.GLFW_TRUE);
+        glfw.glfwWindowHint(glfw.GLFW_DOUBLEBUFFER, glfw.GLFW_TRUE);
+        glfw.glfwWindowHint(glfw.GLFW_SRGB_CAPABLE, glfw.GLFW_TRUE);
+        glfw.glfwWindowHint(glfw.GLFW_TRANSPARENT_FRAMEBUFFER, glfw.GLFW_FALSE);
+        glfw.glfwWindowHint(glfw.GLFW_FOCUS_ON_SHOW, glfw.GLFW_TRUE);
+        glfw.glfwWindowHint(glfw.GLFW_SCALE_TO_MONITOR, glfw.GLFW_TRUE);
 
         const window = glfw.glfwCreateWindow(@intCast(width), @intCast(height), title.ptr, null, null);
         imgui_glfw.MakeCanvasResizable(@ptrCast(window));
@@ -185,17 +185,15 @@ pub const Engine = struct {
         var width: c_int = 0;
         var height: c_int = 0;
         glfw.glfwGetFramebufferSize(self.window, &width, &height);
-        const swapchain_descriptor = self.webgpu_context.getSwapchainDescriptor();
-        if (swapchain_descriptor.width != width or swapchain_descriptor.height != height) {
-            std.log.info("Resizing window to {d}x{d}", .{ width, height });
-            imgui_webgpu.ImGui_ImplWGPU_InvalidateDeviceObjects();
-            self.webgpu_context.resize(.{
-                @intCast(width),
-                @intCast(height),
-            });
-            _ = imgui_webgpu.ImGui_ImplWGPU_CreateDeviceObjects();
+        if (builtin.target.os.tag != .emscripten) {
+            const swapchain_descriptor = self.webgpu_context.getSwapchainDescriptor();
+            if (swapchain_descriptor.width != width or swapchain_descriptor.height != height) {
+                self.webgpu_context.resize(.{
+                    @intCast(width),
+                    @intCast(height),
+                });
+            }
         }
-        
         imgui_webgpu.newFrame(
             @intCast(width),
             @intCast(height),

@@ -33,13 +33,11 @@ pub fn deinit() void {
 }
 
 pub fn newFrame(fb_width: u32, fb_height: u32) void {
-    std.log.info("New frame {d}x{d}", .{ fb_width, fb_height });
     const io = imgui.igGetIO_Nil();
     io.*.DisplaySize = .{ .x = @floatFromInt(fb_width), .y = @floatFromInt(fb_height) };
     io.*.DisplayFramebufferScale = .{ .x = 1.0, .y = 1.0 };
     ImGui_ImplWGPU_NewFrame();
     imgui_glfw.ImGui_ImplGlfw_NewFrame();
-    // gui.io.setDisplayFramebufferScale(1.0, 1.0);
 
     imgui.igNewFrame();
 }
@@ -68,5 +66,3 @@ extern fn ImGui_ImplWGPU_Init(init_info: *ImGui_ImplWGPU_InitInfo) bool;
 extern fn ImGui_ImplWGPU_NewFrame() void;
 extern fn ImGui_ImplWGPU_RenderDrawData(draw_data: *const anyopaque, pass_encoder: *const anyopaque) void;
 extern fn ImGui_ImplWGPU_Shutdown() void;
-pub extern fn ImGui_ImplWGPU_CreateDeviceObjects() bool;
-pub extern fn ImGui_ImplWGPU_InvalidateDeviceObjects() void;

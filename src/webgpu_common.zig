@@ -225,6 +225,8 @@ pub extern fn wgpuDeviceCreateCommandEncoder(device: WGPUDevice, descriptor: ?*c
 pub extern fn wgpuCommandEncoderFinish(encoder: WGPUCommandEncoder, descriptor: ?*const WGPUCommandBufferDescriptor) WGPUCommandBuffer;
 pub extern fn wgpuQueueSubmit(queue: WGPUQueue, commandCount: usize, commands: [*]const WGPUCommandBuffer) void;
 pub extern fn wgpuRenderPassEncoderEnd(renderPassEncoder: WGPURenderPassEncoder) void;
+pub extern fn wgpuTextureGetWidth(texture: WGPUTexture) u32;
+pub extern fn wgpuTextureGetHeight(texture: WGPUTexture) u32;
 
 // Release functions
 pub extern fn wgpuInstanceRelease(instance: WGPUInstance) void;

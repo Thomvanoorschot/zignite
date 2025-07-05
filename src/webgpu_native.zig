@@ -67,6 +67,8 @@ pub const NativeContext = struct {
     queue: common.WGPUQueue,
     surface: common.WGPUSurface,
     swapchain_descriptor: common.WGPUSwapChainDescriptor,
+    window: ?*anyopaque,
+    skip_next_frame: bool = false,
 
     const Self = @This();
 
@@ -97,10 +99,10 @@ pub const NativeContext = struct {
             .usage = common.WGPUTextureUsage_RenderAttachment,
             .viewFormatCount = 0,
             .viewFormats = null,
-            .alphaMode = common.WGPUCompositeAlphaMode_Auto,
+            .alphaMode = common.WGPUCompositeAlphaMode_Opaque,
             .width = @intCast(framebuffer_size[0]),
             .height = @intCast(framebuffer_size[1]),
-            .presentMode = common.WGPUPresentMode_Mailbox,
+            .presentMode = common.WGPUPresentMode_Fifo,
         };
         common.wgpuSurfaceConfigure(surface, &surface_config);
 
@@ -111,7 +113,7 @@ pub const NativeContext = struct {
             .format = common.WGPUTextureFormat_BGRA8Unorm,
             .width = @intCast(framebuffer_size[0]),
             .height = @intCast(framebuffer_size[1]),
-            .presentMode = common.WGPUPresentMode_Mailbox,
+            .presentMode = common.WGPUPresentMode_Fifo,
         };
 
         self.* = .{
@@ -120,6 +122,7 @@ pub const NativeContext = struct {
             .queue = queue,
             .surface = surface,
             .swapchain_descriptor = swapchain_descriptor,
+            .window = window,
         };
 
         return self;
@@ -130,12 +133,25 @@ pub const NativeContext = struct {
         common.wgpuSurfaceGetCurrentTexture(self.surface, &surface_texture);
 
         if (surface_texture.texture == null) {
+            std.log.err("Surface texture is null! Status: {d}", .{surface_texture.status});
             return error.FailedToGetSurfaceTexture;
+        }
+
+        if (surface_texture.texture) |texture| {
+            const actual_width = common.wgpuTextureGetWidth(texture);
+            const actual_height = common.wgpuTextureGetHeight(texture);
+            const expected_width = self.swapchain_descriptor.width;
+            const expected_height = self.swapchain_descriptor.height;
+
+            if (actual_width != expected_width or actual_height != expected_height) {
+                std.log.warn("Texture size mismatch! Surface not properly reconfigured.", .{});
+            }
         }
 
         if (surface_texture.status == common.WGPUSurfaceGetCurrentTextureStatus_SuccessOptimal or
             surface_texture.status == common.WGPUSurfaceGetCurrentTextureStatus_SuccessSuboptimal or
-            surface_texture.status == common.WGPUSurfaceGetCurrentTextureStatus_Timeout)
+            surface_texture.status == common.WGPUSurfaceGetCurrentTextureStatus_Timeout or
+            surface_texture.status == common.WGPUSurfaceGetCurrentTextureStatus_Outdated)
         {
             const texture_view = common.wgpuTextureCreateView(surface_texture.texture, null);
             if (texture_view == null) {
@@ -143,6 +159,7 @@ pub const NativeContext = struct {
             }
             return texture_view;
         } else {
+            std.log.err("Invalid surface texture status: {d}", .{surface_texture.status});
             return error.InvalidSurfaceTextureStatus;
         }
     }
@@ -152,21 +169,21 @@ pub const NativeContext = struct {
     }
 
     pub fn resize(self: *Self, new_size: [2]u32) void {
+        if (new_size[0] == 0 or new_size[1] == 0) {
+            std.log.warn("Skipping resize for zero dimensions", .{});
+            return;
+        }
+
         self.swapchain_descriptor.width = @intCast(new_size[0]);
         self.swapchain_descriptor.height = @intCast(new_size[1]);
 
-        common.wgpuSurfaceConfigure(self.surface, &common.WGPUSurfaceConfiguration{
-            .nextInChain = null,
-            .device = self.device,
-            .format = common.WGPUTextureFormat_BGRA8Unorm,
-            .usage = common.WGPUTextureUsage_RenderAttachment,
-            .viewFormatCount = 0,
-            .viewFormats = null,
-            .alphaMode = common.WGPUCompositeAlphaMode_Auto,
-            .width = @intCast(new_size[0]),
-            .height = @intCast(new_size[1]),
-            .presentMode = common.WGPUPresentMode_Mailbox,
-        });
+        const success = dawnNativeRecreateSurface(self.window, @intCast(new_size[0]), @intCast(new_size[1]));
+        if (!success) {
+            std.log.err("Failed to recreate surface!", .{});
+            return;
+        }
+
+        self.surface = dawnNativeGetSurface();
     }
 
     pub fn deinit(self: *Self, allocator: std.mem.Allocator) void {
@@ -233,3 +250,5 @@ pub fn beginRenderPassSimple(
         });
     }
 }
+
+pub extern fn dawnNativeRecreateSurface(window: ?*anyopaque, width: u32, height: u32) bool;

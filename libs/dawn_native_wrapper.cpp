@@ -4,7 +4,6 @@
 #include <assert.h>
 #include <vector>
 
-// Global state
 static dawn::native::Instance* g_dawn_instance = nullptr;
 static std::vector<dawn::native::Adapter> g_adapters;
 static WGPUAdapter g_current_adapter = nullptr;
@@ -15,7 +14,6 @@ extern "C" {
 
 typedef struct DawnNativeInstanceImpl* DawnNativeInstanceHandle;
 
-// Basic Dawn native instance management
 DawnNativeInstanceHandle dawnNativeInstanceCreate(void) {
     if (!g_dawn_instance) {
         g_dawn_instance = new dawn::native::Instance();
@@ -45,7 +43,6 @@ const DawnProcTable* dawnNativeGetProcs(void) {
 
 // Comprehensive initialization function
 bool dawnNativeInitializeComplete(void* window, uint32_t width, uint32_t height) {
-    // Create instance if not exists
     if (!g_dawn_instance) {
         g_dawn_instance = new dawn::native::Instance();
     }
@@ -55,13 +52,11 @@ bool dawnNativeInitializeComplete(void* window, uint32_t width, uint32_t height)
         return false;
     }
     
-    // Create surface
     g_current_surface = wgpuGlfwCreateSurfaceForWindow(instance, (GLFWwindow*)window);
     if (!g_current_surface) {
         return false;
     }
     
-    // Enumerate adapters
     WGPURequestAdapterOptions options = {};
     options.compatibleSurface = g_current_surface;
     options.powerPreference = WGPUPowerPreference_HighPerformance;
@@ -75,7 +70,6 @@ bool dawnNativeInitializeComplete(void* window, uint32_t width, uint32_t height)
     
     g_current_adapter = g_adapters[0].Get();
     
-    // Create device
     WGPUDeviceDescriptor deviceDesc = {};
     deviceDesc.nextInChain = nullptr;
     deviceDesc.label = {nullptr, 0};
@@ -90,7 +84,6 @@ bool dawnNativeInitializeComplete(void* window, uint32_t width, uint32_t height)
         return false;
     }
     
-    // Configure surface
     WGPUSurfaceConfiguration config = {};
     config.nextInChain = nullptr;
     config.device = g_current_device;
@@ -105,13 +98,11 @@ bool dawnNativeInitializeComplete(void* window, uint32_t width, uint32_t height)
     
     wgpuSurfaceConfigure(g_current_surface, &config);
     
-    // Test surface texture acquisition immediately
     WGPUSurfaceTexture surfaceTexture = {};
     wgpuSurfaceGetCurrentTexture(g_current_surface, &surfaceTexture);
     return true;
 }
 
-// Getter functions
 WGPUInstance dawnNativeGetInstance(void) {
     return g_dawn_instance ? g_dawn_instance->Get() : nullptr;
 }
@@ -132,7 +123,6 @@ WGPUQueue dawnNativeGetQueue(void) {
     return g_current_device ? wgpuDeviceGetQueue(g_current_device) : nullptr;
 }
 
-// Debug function to test surface texture acquisition
 void dawnNativeTestSurfaceTexture(void) {
     if (!g_current_surface) {
         return;
@@ -149,12 +139,44 @@ void dawnNativeTestSurfaceTexture(void) {
     }
 }
 
-// Debug function to check struct layout
 void dawnNativeDebugSurfaceTextureStruct(void) {
     
-    // Test with actual values
     WGPUSurfaceTexture test = {};
     wgpuSurfaceGetCurrentTexture(g_current_surface, &test);
+}
+
+bool dawnNativeRecreateSurface(void* window, uint32_t width, uint32_t height) {
+    if (!g_dawn_instance || !g_current_device) {
+        return false;
+    }
+    
+    if (g_current_surface) {
+        wgpuSurfaceUnconfigure(g_current_surface);
+        wgpuSurfaceRelease(g_current_surface);
+        g_current_surface = nullptr;
+    }
+    
+    WGPUInstance instance = g_dawn_instance->Get();
+    g_current_surface = wgpuGlfwCreateSurfaceForWindow(instance, (GLFWwindow*)window);
+    if (!g_current_surface) {
+        return false;
+    }
+    
+    WGPUSurfaceConfiguration config = {};
+    config.nextInChain = nullptr;
+    config.device = g_current_device;
+    config.format = WGPUTextureFormat_BGRA8Unorm;
+    config.usage = WGPUTextureUsage_RenderAttachment;
+    config.viewFormatCount = 0;
+    config.viewFormats = nullptr;
+    config.alphaMode = WGPUCompositeAlphaMode_Opaque;
+    config.width = width;
+    config.height = height;
+    config.presentMode = WGPUPresentMode_Fifo;
+    
+    wgpuSurfaceConfigure(g_current_surface, &config);
+    
+    return true;
 }
 
 } 
